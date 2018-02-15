@@ -1,3 +1,7 @@
+body {
+    background-color: #e6e6e6;
+}
+
 .left {
     padding: 0;
     -moz-box-shadow: 2px 0px 4px 0px #656565;
@@ -5,16 +9,27 @@
     -o-box-shadow: 2px 0px 4px 0px #656565;
     box-shadow: 2px 0px 4px 0px #656565;
     filter:progid:DXImageTransform.Microsoft.Shadow(color=#656565, Direction=90, Strength=4);
+
+    border-radius: 6px 0px 0px 6px;
+
+    overflow: hidden;
     
 }
 
 .right {
     background: #f9f9f9;
     z-index: -2;
+
+    border-radius: 0px 6px 6px 0px;
+
+    overflow: hidden;
+
+    box-shadow: 1px 0px 1px 0px #656565;
 }
 
 .main-wrapper, .main-wrapper .row {
-    height: 100vh;
+    height: 96vh;
+    padding: 2vh;
     margin: 0;
    /* width: 100%;
     position: absolute;
@@ -39,4 +54,8 @@ h4 {
     right: 0;
     bottom: 0;
     left: 0;
+}
+
+#editor .ace_gutter-cell {
+    color: #b7ada2;;
 }
