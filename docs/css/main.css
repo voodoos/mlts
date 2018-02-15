@@ -59,3 +59,15 @@ h4 {
 #editor .ace_gutter-cell {
     color: #b7ada2;;
 }
+
+
+@media (max-width: 900px) {
+    .right, .left {
+	border-radius: 0px;
+    }
+    .main-wrapper, .main-wrapper .row {
+    height: 100vh;
+    padding: 0vh;
+    margin: 0;
+}
+}
