@@ -1,0 +1,42 @@
+.left {
+    padding: 0;
+    -moz-box-shadow: 2px 0px 4px 0px #656565;
+    -webkit-box-shadow: 2px 0px 4px 0px #656565;
+    -o-box-shadow: 2px 0px 4px 0px #656565;
+    box-shadow: 2px 0px 4px 0px #656565;
+    filter:progid:DXImageTransform.Microsoft.Shadow(color=#656565, Direction=90, Strength=4);
+    
+}
+
+.right {
+    background: #f9f9f9;
+    z-index: -2;
+}
+
+.main-wrapper, .main-wrapper .row {
+    height: 100vh;
+    margin: 0;
+   /* width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;*/
+}
+
+
+h4 {
+  color: white;  
+}
+
+.left nav {
+    z-index: 2;
+    position: static;
+    width: 100%;
+}
+
+#editor { 
+    position: absolute;
+    top: 56px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}

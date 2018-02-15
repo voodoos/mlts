@@ -13,3 +13,4 @@ playerlib/data/*.mod
 playerlib/data/*.sig
 core/depend
 *#
+.DS_Store
