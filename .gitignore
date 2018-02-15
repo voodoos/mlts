@@ -1,0 +1,15 @@
+_build/
+__pycache__/
+*~
+*.native
+*.byte
+export/gen.mod
+*.lp
+*.lpo
+*.cmi
+*.cmo
+playerlib/player.js
+playerlib/data/*.mod
+playerlib/data/*.sig
+core/depend
+*#

@@ -1,4 +1,0 @@
-.PHONY: data
-
-data:
-	python3.6 pack_data.py > data.ml
