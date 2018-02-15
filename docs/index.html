@@ -1,0 +1,54 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>MLTS Client</title>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <script src="js/main.js"></script>
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <h1>Mlts</h1>
+
+    <div class="container">
+      <div class="row">
+	<div class="col-sm">
+	  <textarea class="form-control" id="source" style="width: 100%; height: 300px;">3 + 39;;
+
+(*
+type utm =
+     | App of utm * utm
+     | Abt of utm -> utm
+     ;;
+     
+
+let rec vacp t =
+    match t with
+    | Abt(r) -> new X in
+    let rec aux term =
+    	match term with
+	| X -> false
+	| nab Y in (Y -> true)
+	| App(m, n) -> (aux m) && (aux n)
+	| Abt(r) -> new Y in (aux (r Y))
+    in (aux (r X))
+    ;;	
+	
+vacp (Abt(x\ x));;
+vacp (Abt(x\ App(x, x)));;
+vacp (Abt(x\ Abt(y\ y)));;  *)</textarea>
+	  <button type="button"
+		  onClick="$('#lpl').val(compile($('#source').val()));
+			   var s = run();
+			   $('#answer').append(s.toString());"
+		  class="btn btn-primary" >Magic button</button> 
+	</div>
+	<div class="col-sm">
+	  <textarea class="form-control" id="lpl" style="width: 100%; height: 300px;"></textarea>
+	</div>
+      </div>
+    </div>
+    <h1 id="answer"class="text-center"></h1>
+  </body>
+</html>
