@@ -1,19 +1,19 @@
 
 
-function log(message) {
+function mlog(message) {
     console.log('[Elpi-worker] ' + message);
 }
 
-log("Starting Elpi...");
+mlog("Starting Elpi...");
 importScripts('mlts.js');
-log("Elpi started");
+mlog("Elpi started");
 
 onmessage = function(event) {
     var code = event.data;
-    log("Compiling code");
+    mlog("Compiling code");
     var lplcode = compile(code);
-    log("Querying run_all L.");
+    mlog("Querying run_all L.");
     var raw = run();
-    log("Rerturning answer.");
+    mlog("Rerturning answer.");
     postMessage(JSON.parse(raw));
 }
