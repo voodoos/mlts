@@ -47,7 +47,7 @@ let _ =
   Data.load ();
 
   (* Initialize Elpi *)
-  ignore (Elpi_API.Setup.init ~silent:false [] "");
+  ignore (Elpi_API.Setup.init ~silent:true [] "");
   let parsed =  Elpi_API.Parse.program ["core/run.mod"] in
   kernel := Some(Elpi_API.Compile.program [parsed]);
   
