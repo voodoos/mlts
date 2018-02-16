@@ -1,4 +1,8 @@
-function log(message) console.log('[Elpi-worker] ' + message);
+
+
+function log(message) {
+    console.log('[Elpi-worker] ' + message);
+}
 
 log("Starting Elpi...");
 importScripts('mlts.js');
