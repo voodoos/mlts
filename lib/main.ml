@@ -27,8 +27,7 @@ let query prog =
                                               term;
                                             (Format.flush_str_formatter ()))
                                assignments in
-          (Array.fold_left
-             (fun acc s -> acc ^ s) "" resp)
+          resp.(0)
             
        | _ -> raise Query_failed
 
@@ -52,6 +51,7 @@ let _ =
   print_string (query ("run_all N."));*)
   
   Js.export "compile" (fun jstr -> compile (Js.to_string jstr)) ;
+  Js.export "query"  (fun jstr -> query (Js.to_string jstr)) ;
   Js.export "run" run
 
                                                       

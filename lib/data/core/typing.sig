@@ -14,5 +14,5 @@ type utm               ty.              % untyped lambda terms
 
 type typeof            tm -> ty -> prop.  % Top-level predicate
 
-type typematch         ty -> list rulexxxxx -> ty -> prop.
-type typematchrulexxxxx     ty -> rulexxxxx      -> ty -> prop.
+type typematch         ty -> list rulexxxxxx -> ty -> prop.
+type typematchrulexxxxxx     ty -> rulexxxxxx      -> ty -> prop.

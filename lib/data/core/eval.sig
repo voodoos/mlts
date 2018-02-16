@@ -52,17 +52,17 @@ type ab         (tm -> tm) -> tm.   % value space
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% Staging area to develop a more general pattern matching mechanism
 %%%% with the possibility of using nominal abstractions.
-kind rulexxxxx type.
-type ==>            tm -> tm -> rulexxxxx.
+kind rulexxxxxx type.
+type ==>            tm -> tm -> rulexxxxxx.
 infixr  ==> 5.
-type nab            (tm -> rulexxxxx) -> rulexxxxx.
-type all            (tm  -> rulexxxxx) -> rulexxxxx.               % For pattern variables that are not abstractions.
-type all'           ((tm -> tm) -> rulexxxxx) -> rulexxxxx.        % For pattern variables that are abstractions.
-type all''          ((tm -> tm -> tm) -> rulexxxxx) -> rulexxxxx.  % For pattern variables that are abstractions of two variables.
+type nab            (tm -> rulexxxxxx) -> rulexxxxxx.
+type all            (tm  -> rulexxxxxx) -> rulexxxxxx.               % For pattern variables that are not abstractions.
+type all'           ((tm -> tm) -> rulexxxxxx) -> rulexxxxxx.        % For pattern variables that are abstractions.
+type all''          ((tm -> tm -> tm) -> rulexxxxxx) -> rulexxxxxx.  % For pattern variables that are abstractions of two variables.
 
-type match          tm -> list rulexxxxx -> tm.
-type matching       tm -> list rulexxxxx -> tm -> prop.
-type applymatch    list prop  -> list item -> tm -> rulexxxxx -> tm -> prop.
+type match          tm -> list rulexxxxxx -> tm.
+type matching       tm -> list rulexxxxxx -> tm -> prop.
+type applymatch    list prop  -> list item -> tm -> rulexxxxxx -> tm -> prop.
 
 type not_supported  list tm -> item -> prop.
 type notsup         list tm -> tm -> prop.
@@ -74,5 +74,5 @@ type arity2         (tm -> tm -> tm) -> item.
 type arity3         (tm -> tm -> tm -> tm) -> item.
 
 type copy           tm -> tm -> prop.
-type copyrulexxxxx       rulexxxxx -> rulexxxxx -> prop.
+type copyrulexxxxxx       rulexxxxxx -> rulexxxxxx -> prop.
 type pin            (tm -> prop) -> prop.
