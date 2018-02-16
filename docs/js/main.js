@@ -8,9 +8,9 @@ editor.session.setMode("ace/mode/ocaml");
 $('#run_btn').click(function() {
     $('#lpl').val(compile(editor.getValue()));
     var raw = run();
-    console.log("raw: " + raw);
+    //console.log("raw: " + raw);
     var res = JSON.parse(raw);
-    console.log("stringified: " + JSON.stringify(res));
+    //console.log("stringified: " + JSON.stringify(res));
     show_resultas(res.output);
     //$('#answer').text(.toString());
 });

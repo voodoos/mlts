@@ -19,7 +19,7 @@ type quoted string -> string -> prop.
 
 type escape_aux string -> int -> string -> prop.
 
-escape S S :-
+escape S S' :-
        Size is ((size S) - 1),
        escape_aux S Size S'.
        
@@ -30,8 +30,10 @@ escape_aux S I S' :-
 	   I' is I - 1,
 	   escape_aux S I' S'',
 	   if (Char = "\""; Char = "\\")
-	      (S' is S'' ^ "\\" ^ Char)
-	      (S' is S'' ^ Char).
+	      (S' is (S'' ^ "\\" ^ Char ))
+	      (if ( Char = "\n"; Char = "\t")
+	      	  (S' is S'')
+		  (S' is (S'' ^ Char))).
 
 
 %%%%%%%%%%%%%%%%%%%%
@@ -78,7 +80,7 @@ quoted S S' :- S' is "\"" ^ S ^ "\"".
 json_new (object([])).
 
 json_add_val	K V (object(L)) (object((kv K V)::L)).
-json_add_string K SV (object(L)) (object((kv K (v_string SV))::L)) :-
+json_add_string K SV (object(L)) (object((kv K (v_string SV'))::L)) :-
 		escape SV SV'.
 json_add_int	K IV (object(L)) (object((kv K (v_int IV))::L)).
 

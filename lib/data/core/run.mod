@@ -24,7 +24,7 @@ all_aux P Acc L :-
 
 all_aux _ L L.
 
-run S :- print "running", prog Name Prog, eval Prog V,
+run S :- prog Name Prog, eval Prog V,
             term_to_string Prog SProg,
             term_to_string V SV,
 	    json_new J,
