@@ -66,9 +66,12 @@ h4 {
     .right, .left {
 	border-radius: 0px;
     }
+    .left {
+	height: 90vh;
+    }
     .main-wrapper, .main-wrapper .row {
-    height: 100vh;
-    padding: 0vh;
-    margin: 0;
-}
+	height: auto;
+	padding: 0vh;
+	margin: 0;
+    }
 }
