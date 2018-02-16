@@ -23,7 +23,8 @@
 	  <div class="editor-wrapper">
 	  <div id="editor" class="source">3 + 39;;
 
-	      
+35 + 7;;
+	     (* 
 type utm =
 | App of utm * utm
 | Abt of utm -> utm
@@ -44,12 +45,28 @@ let rec vacp t =
 	      
 vacp (Abt(x\ x));;
 vacp (Abt(x\ App(x, x)));;
-vacp (Abt(x\ Abt(y\ y)));;  
+	    vacp (Abt(x\ Abt(y\ y)));;
+	    *)
 	  </div>
 	  </div>
 	</div>
 	<div class="right col-sm-6">
-	  <span id="answer">Extra step: center stuff here</span>
+	  <table class="table">
+	    <thead class="thead-light">
+	      <tr>
+		<th scope="col">#</th>
+		<th scope="col">Name</th>
+		<th scope="col">Value</th>
+	      </tr>
+	    </thead>
+	    <tbody id="answer">
+	      <tr>
+		<th scope="row"></th>
+		<td>No</td>
+		<td>Results</td>
+	      </tr>
+	    </tbody>
+	  </table>
 	</div>
       </div>
     </div>
