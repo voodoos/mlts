@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-with,initial-scale=1">
     <title>MLTS Client</title>
     <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/open-iconic/css/open-iconic-bootstrap.min.css">
     <link rel="stylesheet" href="vendor/highlightjs/styles/default.css">
     <link rel="stylesheet" href="css/main.css">
   </head>
@@ -17,9 +18,38 @@
 	  <nav class="navbar navbar-dark bg-dark justify-content-between">
 	    <a class="navbar-brand" href="#">MLTSweb</a>
 	    <!-- Navbar content -->
-	    <button class="btn btn-success my-2 my-sm-0"
-		    type="submit"
-		    id="run_btn">Execute</button>
+	    <div class="btn-group" role="group" aria-label="Main commands">
+	    <button class="btn btn-outline-info"
+		    onClick="newdoc();"
+		    data-toggle="tooltip"
+		    data-placement="bottom"
+		    title="New (erase)">
+	      <span class="oi oi-document"></span>
+	    </button>
+	    <button class="btn btn-outline-info"
+		    onClick="restart();"
+		    data-toggle="tooltip"
+		    data-placement="bottom"
+		    title="Restart kernel">
+	      <span class="oi oi-loop-square"></span>
+	    </button>
+	    <button class="btn btn-outline-info"
+		    onClick="save();"
+		    data-toggle="tooltip"
+		    data-placement="bottom"
+		    title="Save file to disk">
+	      <span class="oi oi-data-transfer-download"></span>
+	    </button>
+	    </div>
+	    <button class="btn btn-outline-success my-2 my-sm-0 disabled"
+		    disabled
+		    id="run_btn"
+		    onClick="run();"
+		    data-toggle="tooltip"
+		    data-placement="bottom"
+		    title="Ctrl + b / Cmd + b">
+	      <span class="exec_btn_text">Starting kernel</span>
+	      <span class="oi oi-loop-circular gear"></span></button>
 	  </nav>
 	  <div class="editor-wrapper">
 	  <div id="editor" class="source">3 + 39;;
@@ -73,6 +103,7 @@ vacp (Abt(x\ App(x, x)));;
     </div>
 
     <script src="vendor/jquery/jquery-3.3.1.min.js"></script>
+    <script src="vendor/poppers/poppers.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
     <script src="vendor/highlightjs/highlight.pack.js"></script>
     <script src="vendor/ace/ace.js"></script>

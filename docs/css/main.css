@@ -38,7 +38,6 @@ body {
     left: 0;*/
 }
 
-
 h4 {
   color: white;  
 }
@@ -61,6 +60,20 @@ h4 {
     color: #b7ada2;;
 }
 
+.exec_btn_text {
+    position: relative;
+    top: -1px;
+}
+.gear {
+    animation-name: rotate; 
+    animation-duration: 1s; 
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+@keyframes rotate {
+    from {transform: rotate(0deg);}
+    to {transform: rotate(-360deg);}
+}
 
 @media (max-width: 900px) {
     .right, .left {
