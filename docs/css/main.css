@@ -20,10 +20,11 @@ body {
     background: #f9f9f9;
     z-index: -2;
     padding: 0;
+    height: 100%;
 
     border-radius: 0px 6px 6px 0px;
 
-    overflow: hidden;
+    overflow: auto;
 
     box-shadow: 1px 0px 1px 0px #656565;
 }
@@ -78,9 +79,27 @@ h4 {
 @media (max-width: 900px) {
     .right, .left {
 	border-radius: 0px;
+	height: 100vh;
+    }
+    .left {
+	top: 0px;
+	left: 0px;
+    }
+    .main-wrapper, .main-wrapper .row {
+	height: auto;
+	padding: 0vh;
+	margin: 0;
+    }
+}
+@media (max-width: 576px) {
+    .right, .left {
+	border-radius: 0px;
     }
     .left {
 	height: 75vh;
+    }
+    .right {
+	height: auto;≈Ò
     }
     .main-wrapper, .main-wrapper .row {
 	height: auto;
