@@ -38,7 +38,7 @@ function unlock() {
 	.removeClass('disabled')
 	.removeClass('btn-outline-success')
 	.addClass('btn-success');
-    btn_text.text('Evaluate');
+    btn_text.text('Run');
     btn_gear.hide();
 }
 
@@ -112,7 +112,7 @@ var ping = function() {
 
 // Binding Execute button :
 function run() {
-    lock('Running');
+    lock('Run');
     var mltsCode = editor.getValue();
     elpi.postMessage(mltsCode);
 }

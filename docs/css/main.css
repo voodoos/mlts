@@ -3,6 +3,7 @@ body {
 }
 
 .left {
+    z-index: 1;
     padding: 0;
     -moz-box-shadow: 2px 0px 4px 0px #656565;
     -webkit-box-shadow: 2px 0px 4px 0px #656565;
@@ -18,7 +19,7 @@ body {
 
 .right {
     background: #f9f9f9;
-    z-index: -2;
+    z-index: 0;
     padding: 0;
     height: 100%;
 
