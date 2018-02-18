@@ -17,6 +17,7 @@ body {
     
 }
 
+
 .right {
     background: #f9f9f9;
     z-index: 0;
@@ -28,6 +29,10 @@ body {
     overflow: auto;
 
     box-shadow: 1px 0px 1px 0px #656565;
+}
+
+.right #readme {
+    padding: 1.5em;
 }
 
 .main-wrapper, .main-wrapper .row {

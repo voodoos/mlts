@@ -33,7 +33,7 @@ $(document).ready(function(){
   $.get("readme.html", function(data) {
     $("#readme").html(data);
   });
-}); 
+});
 
 // Button mechanics :
 function unlock() {
@@ -133,6 +133,7 @@ function show_resultas(results) {
 	row.append($('<td></td>').text(res.value));
 	$('#answer').append(row);
     });
+    $('#myTab a[href="#values"]').tab('show');
 
     unlock();
 }
