@@ -28,6 +28,13 @@ $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
 
+// Loading readme :
+$(document).ready(function(){ 
+  $.get("readme.html", function(data) {
+    $("#readme").html(data);
+  });
+}); 
+
 // Button mechanics :
 function unlock() {
     var btn = $('#run_btn');
