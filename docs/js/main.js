@@ -40,6 +40,7 @@ function unlock() {
     var btn = $('#run_btn');
     var btn_text = $('.exec_btn_text');
     var btn_gear = $('.gear');
+    var btn_play = $('.play');
 
     btn.prop('disabled', false)
 	.removeClass('disabled')
@@ -47,12 +48,14 @@ function unlock() {
 	.addClass('btn-success');
     btn_text.text('Run');
     btn_gear.hide();
+    btn_play.show();
 }
 
 function lock(message) {
     var btn = $('#run_btn');
     var btn_text = $('.exec_btn_text');
     var btn_gear = $('.gear');
+    var btn_play = $('.play');
 
     btn.prop('disabled', true)
 	.addClass('disabled')
@@ -60,6 +63,7 @@ function lock(message) {
 	.removeClass('btn-success');
     btn_text.text(message);
     btn_gear.show();
+    btn_play.hide();
 }
 
 function newdoc() {

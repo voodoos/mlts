@@ -19,52 +19,55 @@
 	    <a class="navbar-brand" href="#">MLTSweb</a>
 	    <!-- Navbar content -->
 	    <div class="btn-group" role="group" aria-label="Main commands">
-<div class="btn-group">
-  <button type="button" class="btn btn-outline-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    Load
-  </button>
-  <div class="dropdown-menu">
-    <a class="dropdown-item" href="#">Arithmetic</a>
-    <a class="dropdown-item" href="#">Free vars</a>
-    <a class="dropdown-item" href="#">Vacuous</a>
-    <!--div class="dropdown-divider"></div>
-    <a class="dropdown-item" href="#">Separated link</a-->
-  </div>
-</div>
-	    <button class="btn btn-outline-info"
-		    onClick="newdoc();"
-		    data-toggle="tooltip"
-		    data-placement="bottom"
-		    title="New (erase)">
-	      <span class="oi oi-document"></span>
-	    </button>
-	    <button class="btn btn-outline-info"
-		    onClick="restart();"
-		    data-toggle="tooltip"
-		    data-placement="bottom"
-		    title="Restart kernel">
-	      <span class="oi oi-loop-square"></span>
-	    </button>
-	    <button class="btn btn-outline-info"
-		    onClick="save();"
-		    data-toggle="tooltip"
-		    data-placement="bottom"
-		    title="Save file to disk">
-	      <span class="oi oi-data-transfer-download"></span>
-	    </button>
-	    <button class="btn btn-outline-success my-2 my-sm-0 disabled"
-		    disabled
-		    id="run_btn"
-		    onClick="run();"
-		    data-toggle="tooltip"
-		    data-placement="bottom"
-		    title="Ctrl + b / Cmd + b">
-	      <span class="exec_btn_text">Starting kernel</span>
-	      <span class="oi oi-loop-circular gear"></span></button>
-	    </div>
+	      <!--div class="btn-group">
+		<button type="button" class="btn btn-outline-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		  Load
+		</button>
+		<div class="dropdown-menu">
+		  <a class="dropdown-item" href="#">Arithmetic</a>
+		  <a class="dropdown-item" href="#">Free vars</a>
+		  <a class="dropdown-item" href="#">Vacuous</a>
+		  <!--div class="dropdown-divider"></div>
+		      <a class="dropdown-item" href="#">Separated link</a>
+	      </div>
+</div-->
+		  <button class="btn my-2 my-sm-0 btn-outline-info"
+			  onClick="newdoc();"
+			  data-toggle="tooltip"
+			  data-placement="bottom"
+			  title="New (erase)">
+		    <span class="oi oi-document"></span>
+		  </button>
+		  <button class="btn my-2 my-sm-0 btn-outline-info"
+			  onClick="restart();"
+			  data-toggle="tooltip"
+			  data-placement="bottom"
+			  title="Restart kernel">
+		    <span class="oi oi-loop-square"></span>
+		  </button>
+		  <button class="btn my-2 my-sm-0 btn-outline-info"
+			  onClick="save();"
+			  data-toggle="tooltip"
+			  data-placement="bottom"
+			  title="Save file to disk">
+		    <span class="oi oi-data-transfer-download"></span>
+		  </button>
+		  <button class="btn btn-outline-success my-2 my-sm-0 disabled"
+			  disabled
+			  id="run_btn"
+			  onClick="run();"
+			  data-toggle="tooltip"
+			  data-placement="bottom"
+			  title="Ctrl + b / Cmd + b">
+		    <span class="exec_btn_text">Starting kernel</span>
+		    <span class="oi oi-loop-circular gear"></span>
+		    <span class="oi oi-media-play play"
+			  style="display:none;"></span>
+		  </button>
+		</div>
 	  </nav>
 	  <div class="editor-wrapper">
-	  <div id="editor" class="source">3 + 39;;
+	    <div id="editor" class="source">3 + 39;;
 
 35 + 7;;
 	     

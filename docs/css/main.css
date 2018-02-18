@@ -96,6 +96,9 @@ h4 {
 	padding: 0vh;
 	margin: 0;
     }
+    .exec_btn_text {
+	display: none !important;
+    }
 }
 @media (max-width: 576px) {
     .right, .left {
