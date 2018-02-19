@@ -1,4 +1,5 @@
 sig json.
+accum_sig control.
 accum_sig utils.
 
 % Internal representation of Json documents

@@ -2,17 +2,9 @@ module utils.
 
 first Prop :- Prop, !.
 
-if B Then _ :- B, !, Then.
-if _ _ Else :- Else.
+type all_aux (A -> prop) -> list A -> list A -> prop.
 
-member _ [] :- fail.
-member A (A::TL) :- true, !.
-member A (_::TL) :- member A TL.
-
-
-type all_aux (A -> o) -> list A -> list A -> o.
-
-all P L :-
+alli P L :-
     all_aux P [] L.
 
 all_aux P Acc L :-

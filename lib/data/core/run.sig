@@ -6,6 +6,5 @@ accum_sig typing.
 accum_sig progs_gen.
 accum_sig json.
 
-type all (A -> prop) -> list A -> prop.
-type run string -> prop.
-type run_all  list string -> prop.
+type run_tests json -> prop.
+type run_all  string -> prop.

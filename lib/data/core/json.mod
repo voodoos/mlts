@@ -23,7 +23,7 @@ escape S S' :-
        Size is ((size S) - 1),
        escape_aux S Size S'.
        
-escape_aux S I "" :- I < 0, !.
+escape_aux _ I "" :- I < 0, !.
 escape_aux S I S' :-
 	   I >= 0,
 	   Char is substring S I 1,
@@ -95,7 +95,7 @@ json_array_from_json_list (S::TL) (v_array ((v_object S)::A)) :-
 
 json_test (object((kv "toto" (v_int 3))
 	  	      ::(kv "tata" (v_array ((v_true)
-		      	    	   	    ::v_false
-					    ::[]))))).
+		      	    	   	    ::v_false::[]
+					    )))::[])).
 
  test S :- S is (int_to_string 3).
