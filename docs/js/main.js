@@ -130,7 +130,7 @@ var ping = function() {
 
 // Binding Execute button :
 function run() {
-    lock('Run');
+    lock('Running');
     var mltsCode = editor.getValue();
     elpi.postMessage(mltsCode);
 }

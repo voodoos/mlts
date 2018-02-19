@@ -71,6 +71,10 @@ h4 {
     color: #b7ada2;;
 }
 
+
+#run_btn {
+    width: 150px;
+}
 .exec_btn_text {
     position: relative;
     top: -1px;
@@ -86,7 +90,7 @@ h4 {
     to {transform: rotate(-360deg);}
 }
 
-@media (max-width: 900px) {
+@media (max-width: 991px) {
     .right, .left {
 	border-radius: 0px;
 	height: 100vh;
@@ -105,6 +109,9 @@ h4 {
 	height: auto;
 	padding: 0vh;
 	margin: 0;
+    }
+    #run_btn {
+	width: auto;
     }
     .exec_btn_text {
 /*	display: none !important; */
