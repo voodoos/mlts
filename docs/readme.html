@@ -1,10 +1,14 @@
 <h1 id="mlts-web">MLTS Web</h1>
 <p>A web interface to experiment with new concepts in MLTS. You can access a demo of this interface here.</p>
 <h2 id="build-dependencies">Build dependencies</h2>
-<p>Before attempting to build the project you should make sure that :</p>
+<p>Before attempting to build the project you should make sure that you have the following dependencies installed :</p>
 <ul>
-<li><a href="https://opam.ocaml.org/doc/Install.html">Opam</a> is installed : <code>wget https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh -O - | sh -s /usr/local/bin</code></li>
-<li>OCaml 4.06.0 is installed <code>opam switch install 4.06.0</code></li>
-<li>You have the packages menhir, js_of_ocaml : <code>opam install menhir js_of_ocaml js_of_ocaml-ppx base64</code></li>
-<li>You have the elpi package : <code>https://opam.ocaml.org/doc/Install.html</code></li>
+<li><p><a href="https://opam.ocaml.org/doc/Install.html">Opam</a> :</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">wget</span> https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh -O - <span class="kw">|</span> <span class="fu">sh</span> -s /usr/local/bin</code></pre></div></li>
+<li><p><a href="https://caml.inria.fr/">OCaml</a> 4.06.0 :</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">opam</span> switch install 4.06.0</code></pre></div></li>
+<li><p><a href="http://gallium.inria.fr/~fpottier/menhir/">Menhir</a>, <a href="https://github.com/ocsigen/js_of_ocaml">js_of_ocaml</a>, <a href="https://github.com/mirage/ocaml-base64">base64</a> :</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">opam</span> install menhir js_of_ocaml js_of_ocaml-ppx base64</code></pre></div></li>
+<li><p><a href="https://github.com/LPCIC/elpi">Elpi</a> :</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">opam</span> pin add elpi https://github.com/LPCIC/elpi.git</code></pre></div></li>
 </ul>

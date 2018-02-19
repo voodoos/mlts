@@ -23,7 +23,7 @@ editor.commands.addCommand({
     readOnly: true // false if this command should not apply in readOnly mode
 });
 
-hljs.configure({useBR: true, languages: ['prolog']});
+//hljs.configure({useBR: true, languages: ['prolog', 'bash']});
 
 
 
@@ -35,7 +35,10 @@ $(function () {
 // Loading readme and open file :
 $(document).ready(function(){ 
   $.get("readme.html", function(data) {
-    $("#readme").html(data);
+      $("#readme").html(data);
+      /*$('#readme pre').each(function(i, block) {
+	    hljs.highlightBlock(block);
+	});*/
   });
     
     load(window.location.hash.substring(1));
