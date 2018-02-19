@@ -1,0 +1,47 @@
+
+
+let rec map f l =
+    if (l = [])
+    then []
+    else ((f (List.hd l))::(map f (List.tl l)));;
+
+
+map (fib) (1::5::6::[]);;
+
+let rec memm x l = match l with
+| [] -> false
+| n::tl -> if n = x
+  	   then true
+  	   else memm x tl
+	   ;;
+
+
+memm 3 (3::4::[]);;
+
+memm 5 (3::4::[]);;
+
+let rec appndm l k =
+    match l with
+    | [] -> k
+    | h::tl -> h::(appndm tl k);;
+
+appndm (1::5::[]) (2::[]);;
+
+let rec join l k =
+    match l with
+    | [] -> k
+    | h::tl -> if (memm h k)
+      	       then  (join tl k)
+	       else (h::(join tl k));;
+
+join (2::3::4::[]) (2::3::4::[]);;
+join (2::3::4::[]) (2::4::[]);;
+
+let rec rm x l =
+    match l with
+    | [] -> []
+    | h::tl -> if (h = x)
+      	      then (rm x tl)
+	      else (h::(rm x tl));;
+
+rm 3 (2::3::4::[]);;
