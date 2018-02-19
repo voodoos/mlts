@@ -111,16 +111,19 @@ function restart() {
     elpi.terminate();
     elpi = new Worker('js/elpi-worker.js');
     elpi.onmessage = function (event) {
-    if(event.data.type == 'ready') {
-	unlock();
+	if(event.data.type == 'ready') {
+	    unlock();
+	}
+	else show_resultas(event.data.output);
     }
-    else show_resultas(event.data.output);
-}
 }
 
 elpi.onmessage = function (event) {
     if(event.data.type == 'ready') {
 	unlock();
+    } else if(event.data.type == 'lplcode') {
+	$('#lpl').html('').append(event.data.code.replace(/\./g, '.<br>'));
+	$('#myTab a[href="#lpl"]').tab('show');
     }
     else show_resultas(event.data.output);
 }

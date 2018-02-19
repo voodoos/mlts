@@ -81,7 +81,7 @@ mixeval (lam R) (lam S) :- pi k\ val k => eval (R k) (S k).
 %               (x\   fvar arobase x)).
 
 % Obsolete constructors now that we have the more general
-% match-with-rulexxxxs constructions.  Remove eventually.
+% match-with-rulexxxxxs constructions.  Remove eventually.
 
 % eval (matchl E0 E1 E2) V :- eval E0 U,
 %                             (U = null, eval E1 V ;
@@ -93,7 +93,7 @@ mixeval (lam R) (lam S) :- pi k\ val k => eval (R k) (S k).
 
 
 % Obsolete constructors now that we have the more general
-% match-with-rulexxxxs constructions.  Remove eventually.
+% match-with-rulexxxxxs constructions.  Remove eventually.
 
 % typeof (matchl E0 E1 E2) A :- typeof E0 (lst B), typeof E1 A, 
 %                               pi x\ pi y\ typeof x B =>  typeof y (lst B) => typeof (E2 x y) A.
@@ -107,10 +107,10 @@ mixeval (lam R) (lam S) :- pi k\ val k => eval (R k) (S k).
 %% instead of just tm.  For now, I leave this out since it can the
 %% effect is easily achieved without it.
 
-%type match'        (tm -> tm) -> list rulexxxx -> tm.
-%type matching'     (tm -> tm) -> list rulexxxx -> tm -> o.
-%type applymatch'   list tm -> (tm -> tm) -> rulexxxx -> tm -> o.
-%type ===>          (tm -> tm) -> tm -> rulexxxx.
+%type match'        (tm -> tm) -> list rulexxxxx -> tm.
+%type matching'     (tm -> tm) -> list rulexxxxx -> tm -> o.
+%type applymatch'   list tm -> (tm -> tm) -> rulexxxxx -> tm -> o.
+%type ===>          (tm -> tm) -> tm -> rulexxxxx.
 %infixr  ===> 5.
 
 % eval (match' Exp Rules) V :- eval (abt Exp) (ab U), matching' U Rules V.

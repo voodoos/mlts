@@ -9,7 +9,7 @@ let compile code =
   
   let parsed =  Elpi_API.Parse.program ["core/run.mod";"core/progs_gen.mod"] in
   kernel := Some(Elpi_API.Compile.program [parsed]);
-  lpcode
+  Js.string lpcode
 
 let query prog =
 
