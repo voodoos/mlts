@@ -51,8 +51,12 @@ h4 {
 
 .left nav {
     z-index: 2;
-    position: static;
+    position: relative;
     width: 100%;
+}
+
+.left nav .navbar-brand {
+    margin-right: 0rem;
 }
 
 #editor { 
@@ -91,21 +95,32 @@ h4 {
 	top: 0px;
 	left: 0px;
     }
+    .left nav {
+	padding: 0.4em;
+    }
+    #editor {
+	top:53px;
+    }
     .main-wrapper, .main-wrapper .row {
 	height: auto;
 	padding: 0vh;
 	margin: 0;
     }
     .exec_btn_text {
-	display: none !important;
+/*	display: none !important; */
     }
 }
-@media (max-width: 576px) {
+@media (max-width: 575px) {
     .right, .left {
 	border-radius: 0px;
     }
     .left {
 	height: 75vh;
+    }
+    .left nav {
+	padding: 0;
+	padding-right: 0.5em;
+	padding-left: 0.5em;
     }
     .right {
 	height: auto;≈Ò

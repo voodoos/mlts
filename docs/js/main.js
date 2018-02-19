@@ -70,6 +70,13 @@ function newdoc() {
     editor.setValue("");
 }
 
+function load(name) {
+    //console.log("loading " + name);
+    $.get("examples/" + name + ".mlts", function(data) {
+	editor.setValue(data);
+    });
+}
+
 function save() {
     var uri = 'data:text/octet-stream;charset=utf-8;base64,' +
 	btoa(editor.getValue());
