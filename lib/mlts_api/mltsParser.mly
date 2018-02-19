@@ -103,7 +103,6 @@ expr:
 | expr; infix_op; expr			{ EInfix($1, $2, $3) }
 | e1 = expr; DCOLON; e2 = expr		{ EInfix(e1, ListCons, e2) }
 | i = value_name; BACKSLASH; e = expr	{ EBind(i, e) }
-/*| pattern				{ EPattern($1) }*/
 ;
 
 arityp_expr:
@@ -126,7 +125,11 @@ rule:
 pattern:
 | BEGIN; p = pattern; END;		{ p }
 | value_path				{ PVal($1) }
+| v = value_path;
+    l = nonempty_list(pattern)
+      				        { PApp(v, l) }
 | c = constr_path;			{ PConstr(c, []) }
+| c = constr_path; p = pattern		{ PConstr(c, [p]) }
 | c = constr_path;
     BEGIN;
     l = separated_nonempty_list(COMMA, pattern);

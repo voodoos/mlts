@@ -45,6 +45,7 @@ and rule =
                           
 and pattern =
   | PVal of value_name
+  | PApp of value_name * (pattern list)
   | PConstr of  constr_path * (pattern list)
   | PConstant of constant
   | PListCons of pattern * pattern
@@ -146,6 +147,7 @@ let toString =
                       ^ (List.fold_left (fun acc c -> acc ^ (aux_constrs c)) "" tl)
 
   and aux_constrs = function
+    | Simple(n) -> "\n " ^ n
     | Of(n, (typ, a)) -> "\n| "^ n ^ " of " ^ (aux_typ typ) ^ " [" ^ (string_of_int a) ^ "]"
 
   and aux_typ = function
@@ -161,7 +163,7 @@ let toString =
   and aux_expr = function
     | ELetin(lb, e) -> "let " ^ (aux_lb lb) ^ " in\n\t" ^ (aux_expr e)
     | ELetRecin(lb, e) -> "let rec " ^ (aux_lb lb) ^ " in\n\t" ^ (aux_expr e)
-    | EApp(e, el) -> "(" ^ (aux_expr e) ^ ")" 
+    | EApp(e, el) -> "EApp:(" ^ (aux_expr e) ^ ")" 
                      ^ (List.fold_left (fun acc e -> acc ^ " ("
                                                      ^ (aux_expr e) ^ ")"
                                        ) "" el)
@@ -196,6 +198,9 @@ let toString =
 
   and aux_pattern = function
     | PVal(v) -> v
+    | PApp(v, l) -> "PApp:"^v ^ "(" ^ (List.fold_left
+                                    (fun acc p -> acc ^( aux_pattern p)^",")
+                                    "" l) ^ ")"
     | PConstr(p, l) -> p ^ "(" ^ (List.fold_left
                                     (fun acc p -> acc ^( aux_pattern p)^",")
                                     "" l) ^ ")"

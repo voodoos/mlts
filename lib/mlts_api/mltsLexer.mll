@@ -26,17 +26,29 @@
       try  Hashtbl.find h s
       with Not_found -> IDENT(s)
 
+
+  exception Error of string * Lexing.position
+
+  let lexing_error lexbuf =
+      let invalid_input = String.make 1 (Lexing.lexeme_char lexbuf 0) in
+      raise (Error (invalid_input, lexbuf.Lexing.lex_curr_p))
+
 }
 
 let digit = ['0'-'9']
 let alpha = ['a'-'z' 'A'-'Z']
 let alphadigit = alpha | '_' | '\'' | digit
 
+let blank = [' ' '\t']+
+let newline = ('\r'* '\n')
+
 let lowercaseIdent = ['a'-'z' '_'] alphadigit*
 let uppercaseIdent = ['A'-'Z'] alphadigit*  
 
 rule token = parse
-  | ['\n' ' ' '\t' '\r']+
+  | newline
+      { Lexing.new_line lexbuf; token lexbuf }
+  | blank+
       { token lexbuf }
   | "(*"
       { comment lexbuf; token lexbuf }
@@ -87,7 +99,7 @@ rule token = parse
   | "|"
       { VBAR }
   | _
-      { failwith ("Unknown character : " ^ (lexeme lexbuf)) }
+      { lexing_error lexbuf  }
   | eof
       { EOF }
 

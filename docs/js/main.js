@@ -106,19 +106,7 @@ function saveAs(uri, filename) {
 // We run Elpi in a separate worker
 var elpi = new Worker('js/elpi-worker.js');
 
-function restart() {
-    lock('Restarting');
-    elpi.terminate();
-    elpi = new Worker('js/elpi-worker.js');
-    elpi.onmessage = function (event) {
-	if(event.data.type == 'ready') {
-	    unlock();
-	}
-	else show_resultas(event.data.output);
-    }
-}
-
-elpi.onmessage = function (event) {
+function onMessageCB(event) {
     if(event.data.type == 'ready') {
 	unlock();
     } else if(event.data.type == 'lplcode') {
@@ -127,6 +115,16 @@ elpi.onmessage = function (event) {
     }
     else show_resultas(event.data.output);
 }
+
+function restart() {
+    lock('Restarting');
+    elpi.terminate();
+    elpi = new Worker('js/elpi-worker.js');
+    elpi.onmessage = onMessageCB;
+}
+
+elpi.onmessage = onMessageCB;
+
 var ping = function() {
     elpi.postMessage("ping");
 }

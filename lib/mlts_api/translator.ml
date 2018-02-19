@@ -59,7 +59,7 @@ let prog_string name code freevars =
         end
       else "")
   ^ "." 
-  ^ " % " ^ ( to_separated_list ", " freevars)
+  (*^ " % " ^ ( to_separated_list ", " freevars)*)
   ^ "\n\n" ) else ""
 
 let let_binding_val name args code =
@@ -84,6 +84,7 @@ let letrecin name args code body =
       
 let app head args =
   (specials head)
+  (*^"toto"^(string_of_int (List.length args))*)
   ^ (to_separated_list ~first:true " arobase " args)
       
 let appv head args =
@@ -291,7 +292,11 @@ let toLPString p =
        if (List.mem (Nominal(vn)) env) then vn, []
        else if (Hashtbl.mem constructors vn) then vn, []
        else (String.capitalize_ascii vn), [(vn, 0)]
-
+    | PApp(vn, pls) ->
+       let pl = List.map (aux_pattern env) pls in
+       let vn = String.capitalize_ascii vn in
+       print_endline ("Found " ^ vn ^ " ( " ^ (string_of_int (List.length pls))^ " )");
+       vn ^ (to_separated_list ~first:true " " (firsts pl)) , [vn, List.length pls]
     | PConstr(cp, pls) ->
 		(try
 		   let arities = Hashtbl.find constructors cp in
@@ -302,7 +307,10 @@ let toLPString p =
 		   let pl = List.map (aux_pattern env) pls in
 		   (* TODO CONSTRS IN CONSTRS MAY FAIL *)
 		   let params = firsts (List.flatten (seconds pl)) in
-		   let pararity = List.map2 (fun l1 l2 -> l1, l2) params arities in
+                   let parities = seconds (List.flatten (seconds pl)) in
+		   let marities = List.map2 (fun l1 l2 -> max l1 l2) parities arities in
+                   let pararity = List.map2 (fun l1 l2 -> l1, l2) params marities in
+                   (* let pararity = (List.flatten (seconds pl)) in *)
 		   type_constr name (firsts pl), pararity
 		 with Not_found -> failwith ("Constructor unknown in pattern : "^cp))
     | PConstant(c) -> const_to_lpstring c, []
