@@ -34,6 +34,9 @@ body {
 .right #readme, .right #lpl {
     padding: 1.5em;
 }
+.right #readme {
+    font-family: 'Open Sans', sans-serif;
+}
 .right #lpl, .right #answer {
     font-family: 'Roboto Mono', monospace;
     

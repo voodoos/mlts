@@ -88,7 +88,9 @@ function load(name) {
 function save() {
     var uri = 'data:text/octet-stream;charset=utf-8;base64,' +
 	btoa(editor.getValue());
-    saveAs(uri, "main.mlts");
+    if (window.location.hash.substring(1) != '') 
+	saveAs(uri, window.location.hash.substring(1) + ".mlts");
+    else saveAs(uri, "main.mlts");
 }
 
 function saveAs(uri, filename) {
