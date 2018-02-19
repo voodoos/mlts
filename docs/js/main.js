@@ -23,16 +23,22 @@ editor.commands.addCommand({
     readOnly: true // false if this command should not apply in readOnly mode
 });
 
+hljs.configure({useBR: true, languages: ['prolog']});
+
+
+
 // Initializing tooltips:
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
 
-// Loading readme :
+// Loading readme and open file :
 $(document).ready(function(){ 
   $.get("readme.html", function(data) {
     $("#readme").html(data);
   });
+    
+    load(window.location.hash.substring(1));
 });
 
 // Button mechanics :
@@ -71,10 +77,12 @@ function newdoc() {
 }
 
 function load(name) {
-    //console.log("loading " + name);
-    $.get("examples/" + name + ".mlts", function(data) {
-	editor.setValue(data);
-    });
+    if (name != '') {
+	$.get("examples/" + name + ".mlts", function(data) {
+	    editor.setValue(data);
+	    editor.clearSelection();
+	});
+    }
 }
 
 function save() {
@@ -110,7 +118,10 @@ function onMessageCB(event) {
     if(event.data.type == 'ready') {
 	unlock();
     } else if(event.data.type == 'lplcode') {
-	$('#lpl').html('').append(event.data.code.replace(/\./g, '.<br>'));
+	$('#lpl').html('').append(event.data.code.replace(/arobase/g, '@').replace(/\./g, '.<br>'));
+	$('#lpl').each(function(i, block) {
+	    hljs.highlightBlock(block);
+	});
 	$('#myTab a[href="#lpl"]').tab('show');
     }
     else show_resultas(event.data.output);

@@ -4,15 +4,23 @@ exception No_kernel
 let kernel = ref None
                  
 let compile code =
+  (* First mlts => lprolog *)
   let lpcode = Mlts_API.parse_and_translate code in
+
+  (* updating the pseudo file *)
   Sys_js.update_file "core/progs_gen.mod" lpcode;
-  
-  let parsed =  Elpi_API.Parse.program ["core/run.mod";"core/progs_gen.mod"] in
+
+  (* recompiling lprolog code *)
+  let parsed =
+    Elpi_API.Parse.program
+      ["core/progs_gen.mod";"core/run.mod"] in
   kernel := Some(Elpi_API.Compile.program [parsed]);
+
+  (* We return the lprolog code for reference *)
   Js.string lpcode
 
 let query prog =
-
+  (* First we check that the program have been compiled *)
     match !kernel with
       None -> raise No_kernel
     | Some(k) ->
@@ -20,8 +28,8 @@ let query prog =
        let goalc = Elpi_API.Compile.query k goal in
        match (Elpi_API.Execute.once k goalc) with
          Success(data) ->
-          let assignments = data.assignments in
-          
+          (* Elpi returns answers as a list of terms *)
+          (* We transform it into a list of strings *)
           let resp = Array.map (fun term ->
                          Elpi_API.Pp.term
                            (Format.str_formatter)
@@ -29,7 +37,7 @@ let query prog =
                          let str = Format.flush_str_formatter () in
                          (* LP strings are surrounded by quotes, we remove them *)
                          String.sub str 1 (String.length str - 2))
-                               assignments in
+                               data.assignments in
           (* print_string ("res["^(resp.(0))^"]"); *)
           resp.(0)
             

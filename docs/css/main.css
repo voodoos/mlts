@@ -31,8 +31,17 @@ body {
     box-shadow: 1px 0px 1px 0px #656565;
 }
 
-.right #readme {
+.right #readme, .right #lpl {
     padding: 1.5em;
+}
+.right #lpl, .right #answer {
+    font-family: 'Roboto Mono', monospace;
+    
+}
+.right #lpl br {
+   display: block;
+   margin: 10px 0;
+   content: " ";
 }
 
 .main-wrapper, .main-wrapper .row {

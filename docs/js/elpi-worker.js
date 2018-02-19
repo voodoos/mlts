@@ -1,8 +1,8 @@
 
 
-console.log('[Elpi-worker] ' +"Starting Elpi...");
+console.log('[Elpi-worker] ' + "Starting Elpi...");
 importScripts('mlts.js');
-console.log('[Elpi-worker] ' +"Elpi started");
+console.log('[Elpi-worker] ' + "Elpi started");
 
 var rep = { "type": "ready" };
 postMessage(rep);
