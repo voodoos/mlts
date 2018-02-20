@@ -1,6 +1,6 @@
 type utm =
      | App of utm * utm
-     | Abt of utm -> utm
+     | Abt of utm => utm
 ;;
 
 let rec memm x l = match l with

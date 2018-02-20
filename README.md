@@ -2,6 +2,9 @@
 A web interface to experiment with new concepts in MLTS.
 You can access a demo of this interface here.
 
+## Concrete syntax
+MLTS concrete syntax is based on OCaml. A program written in MLTS not using the new constructs `nab in`, `new in`, `\` and `=>` should compile with the `ocamlc` compiler.
+
 ## Build dependencies
 Before attempting to build the project you should make sure that you have the following dependencies installed :
 
@@ -9,15 +12,15 @@ Before attempting to build the project you should make sure that you have the fo
 ```bash
 wget https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh -O - | sh -s /usr/local/bin
 ```
-- [OCaml](https://caml.inria.fr/) 4.06.0 :  
+- [OCaml](https://caml.inria.fr/) 4.06.0 :
 ```bash
 opam switch install 4.06.0
 ```
-- [Menhir](http://gallium.inria.fr/~fpottier/menhir/), [js_of_ocaml](https://github.com/ocsigen/js_of_ocaml), [base64](https://github.com/mirage/ocaml-base64) :  
+- [Menhir](http://gallium.inria.fr/~fpottier/menhir/), [js_of_ocaml](https://github.com/ocsigen/js_of_ocaml), [base64](https://github.com/mirage/ocaml-base64) :
 ```bash
 opam install menhir js_of_ocaml js_of_ocaml-ppx base64
 ```
-- [Elpi](https://github.com/LPCIC/elpi) :  
+- [Elpi](https://github.com/LPCIC/elpi) :
 ```bash
 opam pin add elpi https://github.com/LPCIC/elpi.git
 ```

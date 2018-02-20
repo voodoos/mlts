@@ -15,7 +15,7 @@
 %token LBRACK RBRACK
 %token IF THEN ELSE
 %token FUN 
-%token MATCH WITH VBAR ARROW
+%token MATCH WITH VBAR ARROW DARROW
 %token DSEMI
 %token DCOLON
 %token DOT BACKSLASH COMMA
@@ -112,14 +112,16 @@ arityp_expr:
    	   	  			  and ty2, a2 = tya2   in
   	       				      Sum(tya1, tya2), max a1 a2 }
 |  tya1 = arityp_expr;
-   ARROW;  tya2 = arityp_expr		{ let ty1, a1 = tya1
+   DARROW;  tya2 = arityp_expr		{ let ty1, a1 = tya1
    	   	  			  and ty2, a2 = tya2   in
    	   	  	 Arrow(tya1, tya2), 1 + (max a1 a2)  }
 ;
 
 rule:
 | VBAR; p = pattern; ARROW; e = expr	{ RSimple(p, e) }
-| VBAR; NA; i = constr_name; IN; BEGIN; p = pattern; ARROW; e = expr; END;	{ RNa(i, p, e) }
+| VBAR; NA; i = nonempty_list(constr_name);
+  IN; BEGIN; p = pattern; ARROW; e = expr; END;
+      	       	 	  	     	{ RNa(i, p, e) }
 ;
 
 pattern:

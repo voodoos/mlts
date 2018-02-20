@@ -2,9 +2,9 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-with,initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>MLTS Client</title>
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto+Mono" rel="stylesheet"> 
+    <!--link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto+Mono" rel="stylesheet"--> 
     <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="vendor/open-iconic/css/open-iconic-bootstrap.min.css">
     <link rel="stylesheet" href="vendor/highlightjs/styles/default.css">
@@ -39,6 +39,8 @@
 		     onClick="load('freevars');">Free vars</a>
 		  <a class="dropdown-item" href="#vacuous"
 		     onClick="load('vacuous');">Vacuous</a>
+		  <a class="dropdown-item" href="#beta"
+		     onClick="load('beta');">Beta-reduction</a>
 		  <!--div class="dropdown-divider"></div>
 		      <a class="dropdown-item" href="#">Separated link</a-->
 		</div>
@@ -92,7 +94,7 @@
 	     
 type utm =
 | App of utm * utm
-| Abt of utm -> utm
+| Abt of utm => utm
 ;;
 	      
 
@@ -116,7 +118,8 @@ let rec vacp t =
 	  </div>
 	</div>
 	<div class="right col-sm-6">
-	  <ul class="nav nav-tabs justify-content-center " id="myTab" role="tablist">
+	  <ul class="nav nav-tabs justify-content-center "
+	      id="myTab" role="tablist">
 	    <li class="nav-item">
 	      <a class="nav-link active" id="readme-tab"
 		 data-toggle="tab" href="#readme" role="tab"

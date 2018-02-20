@@ -1,10 +1,20 @@
 open MltsAst
 
-let to_separated_list ?first:(f = false) s l =
+(* Some tools for list management *)
+
+let print_pairs fts sts =
+  List.iter (fun (a,b) -> print_string ("(" ^ (fts a) ^ ", " ^ (sts b) ^ ");"))
+
+            
+let print_list fts =
+  List.iter (fun a -> print_string ((fts a) ^ ";"))
+
+let to_separated_list ?first:(f = false) ?nop:(nop = false)  s l =
   let rec aux = function
     | [] -> ""
-    | [x] -> "(" ^ x ^ ")"
-    | x::tl -> "(" ^ x ^ ")" ^ s ^ (aux tl)
+    | [x] -> if nop then x else "(" ^ x ^ ")"
+    | x::tl -> if nop then x ^ s ^ (aux tl)
+               else "(" ^ x ^ ")" ^ s ^ (aux tl)
   in
   if f && l != [] then s ^ (aux l) else (aux l)
   
@@ -105,7 +115,7 @@ let list_of_rules rules =
   ^ "]"
 
 
-let matcher_arrow pararities pattern expr =
+let matcher_arrow ?nabs:(lnab = []) pararities pattern expr =
   "("
   ^ (List.fold_left (fun acc (p, a) -> 
 		acc 
@@ -114,13 +124,15 @@ let matcher_arrow pararities pattern expr =
 			| 1 -> "all' "
 			| 2 -> "all'' "
 			| _ -> "ALL? " )
-		^ (String.capitalize_ascii p) ^ "\\ ") "" pararities)
-  ^ " ((" ^ pattern ^ ") ==> (" ^ expr ^ ")))"
+		^ (p) ^ "\\ ") "" pararities)
+  ^ (if (List.length lnab >= 0) then
+      (List.fold_left (fun acc x -> acc ^ "nab " ^ x ^ "\\ ") "" lnab)
+    else "") ^ 
+
+  " ((" ^ pattern ^ ") ==> (" ^ expr ^ ")))"
   
-let matcher_na name pararities pattern expr =
-"(nab "^name^"\\ ("
-^ matcher_arrow pararities pattern expr
-^ "))"
+let matcher_na namel pararities pattern expr =
+  matcher_arrow ~nabs:namel pararities pattern expr
 
 let bind v  e =
   "(" ^ v ^ "\\ (" ^ e ^ "))" 
@@ -208,10 +220,10 @@ let toLPString p =
        let str, freevars = (aux_expr env e) in
        let args = List.map (aux_expr env) el in
 	   let a = arityMP (String.uncapitalize_ascii str) env in
-	  (*  "["^(string_of_env env) ^ 
-       "]["^str ^ " has arity " ^(string_of_int a)^"]" 
+	    (*"["^(string_of_env env) ^ 
+       "]["^str ^ " has arity " ^(string_of_int a)^" "^(string_of_int (List.length args))^"]" 
 	   ^*)
-	   (*"["^str ^ " has arity " ^(string_of_int a)^"]")^*)(if a >= 1 then
+	     (if a >= 1 then
 	   (appv str (List.map (fst) args))
 	   else 
 		(app str (List.map (fst) args))
@@ -242,7 +254,7 @@ let toLPString p =
 	 begin 
 	   let a = arityMP vp env in
 	   if a >= 0
-           then (String.capitalize_ascii vp), []
+           then (String.uncapitalize_ascii vp), []
            else vp, []
 	 end
     | EConstr(n, elist) ->
@@ -276,25 +288,39 @@ let toLPString p =
                              
   and aux_rule env = function
     | RSimple(p, e) ->
-        let pattern, pararity = aux_pattern env p in
+       let pattern, pararity = aux_pattern env p in
+       
+        let pararity =
+          List.map (fun (p, a) -> p, max a (Arity.maxArityInExpr p e))
+                   pararity in
+        
         let expr, freevars = aux_expr (metaparams_to_env env pararity) e in
+        
         matcher_arrow pararity pattern expr, freevars
                                                
-    | RNa(n, p, e) ->
-        add_constr constructors (Simple(n));
+    | RNa(nl, p, e) ->
+       List.iter (fun n -> add_constr constructors (Simple(n))) nl;
         let pattern, pararity = aux_pattern env p in
+        let pararity =
+          List.map (fun (p, a) -> p, max a (Arity.maxArityInExpr p e))
+                   pararity in
+
         let expr, freevars = aux_expr (metaparams_to_env env pararity) e in
-        remove_constr constructors (Simple(n));
-        matcher_na (String.uncapitalize_ascii n) pararity pattern expr, freevars
+
+       List.iter (fun n -> remove_constr constructors (Simple(n))) nl;
+
+       let nl = List.map (String.uncapitalize_ascii) nl in
+        
+        matcher_na nl pararity pattern expr, freevars
                                                 
   and aux_pattern env = function
     | PVal(vn) ->  
        if (List.mem (Nominal(vn)) env) then vn, []
        else if (Hashtbl.mem constructors vn) then vn, []
-       else (String.capitalize_ascii vn), [(vn, 0)]
+       else (String.uncapitalize_ascii vn), [(vn, 0)]
     | PApp(vn, pls) ->
        let pl = List.map (aux_pattern env) pls in
-       let vn = String.capitalize_ascii vn in
+       (*let vn = String.capitalize_ascii vn in*)
        print_endline ("Found " ^ vn ^ " ( " ^ (string_of_int (List.length pls))^ " )");
        vn ^ (to_separated_list ~first:true " " (firsts pl)) , [vn, List.length pls]
     | PConstr(cp, pls) ->
@@ -308,8 +334,10 @@ let toLPString p =
 		   (* TODO CONSTRS IN CONSTRS MAY FAIL *)
 		   let params = firsts (List.flatten (seconds pl)) in
                    let parities = seconds (List.flatten (seconds pl)) in
-		   let marities = List.map2 (fun l1 l2 -> max l1 l2) parities arities in
-                   let pararity = List.map2 (fun l1 l2 -> l1, l2) params marities in
+		   let marities = List.map2 (fun l1 l2 -> max l1 l2)
+                                            parities arities in
+                   let pararity = List.map2 (fun l1 l2 -> l1, l2)
+                                            params marities in
                    (* let pararity = (List.flatten (seconds pl)) in *)
 		   type_constr name (firsts pl), pararity
 		 with Not_found -> failwith ("Constructor unknown in pattern : "^cp))

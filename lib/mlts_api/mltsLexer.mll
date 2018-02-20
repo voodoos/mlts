@@ -78,6 +78,8 @@ rule token = parse
       { BACKSLASH }  
   | "->"
       { ARROW }
+  | "=>"
+      { DARROW }
   | "+"
       { PLUS }
   | "-"

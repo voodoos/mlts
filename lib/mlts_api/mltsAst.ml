@@ -41,7 +41,7 @@ and pattern_matching = rule list
 
 and rule =
   | RSimple of pattern * expr
-  | RNa of value_name * pattern * expr
+  | RNa of (value_name list) * pattern * expr
                           
 and pattern =
   | PVal of value_name
@@ -190,7 +190,7 @@ let toString =
         | RSimple(p, e) -> acc ^ "\n| "
                                       ^ (aux_pattern p)
                                       ^ " -> " ^ (aux_expr e)
-        | RNa(n, p, e) -> acc ^ "\n| nab " ^n^"\\ ("
+        | RNa(n, p, e) -> acc ^ "\n| nab " ^(List.fold_left (fun acc s -> acc ^ " " ^ s) "" n)^"\\ ("
                                       ^ (aux_pattern p)
                                       ^ " -> " ^ (aux_expr e)^ ")")
                    ""
