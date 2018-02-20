@@ -24,11 +24,13 @@ and expr =
   | EInfix of expr * infix_op * expr           
   | EConst of constant
   | EVal of value_path
+  | EPair of expr * expr
   | EConstr of  constr_path * (expr list)
   | EPattern of pattern
   | EBind of value_name * expr
   | EFun of value_name * expr
   | ENew of value_name * expr
+                           
                   
 
 and aritytypexpr = typexpr * int
@@ -45,10 +47,12 @@ and rule =
                           
 and pattern =
   | PVal of value_name
+  | PBind of value_name * pattern
   | PApp of value_name * (pattern list)
   | PConstr of  constr_path * (pattern list)
   | PConstant of constant
   | PListCons of pattern * pattern
+  | PPair of pattern * pattern
 
 and constant =
   | Int of int
@@ -172,7 +176,7 @@ let toString =
                               ^ "\n else (" ^ (aux_expr e3) ^ ") "
     | EMatch(e, pm) -> "match " ^ (aux_expr e)
                        ^ " with " ^ (aux_pm pm)
-
+    | EPair(e1, e2) -> "EPair: (" ^ (aux_expr e1) ^ ", "^ (aux_expr e2) ^") "
     | EInfix(e1, op, e2) -> (aux_expr e1) ^ (infix_to_string op) ^ (aux_expr e2)
     | EConst(c) -> const_to_string c
     | EVal(vp) -> vp
@@ -198,6 +202,7 @@ let toString =
 
   and aux_pattern = function
     | PVal(v) -> v
+    | PBind(v, p) -> v ^ "\\ " ^ (aux_pattern p)
     | PApp(v, l) -> "PApp:"^v ^ "(" ^ (List.fold_left
                                     (fun acc p -> acc ^( aux_pattern p)^",")
                                     "" l) ^ ")"
@@ -206,5 +211,6 @@ let toString =
                                     "" l) ^ ")"
     | PConstant(c) -> const_to_string c
     | PListCons(p1, p2) -> (aux_pattern p1) ^ "::" ^ (aux_pattern p2)
+    | PPair(p1, p2) -> "PPair: (" ^ (aux_pattern p1) ^ "," ^ (aux_pattern p2) ^ ")"
   in aux
  

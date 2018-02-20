@@ -26,3 +26,20 @@ beta (Abt(x\ Abt(y\ (App(x, x))))) (Abt(x\x));;
 beta (Abt(x\ Abt(y\ (App(x, y))))) (Abt(x\x));;
 beta (Abt(x\ Abt(y\ x))) (Abt(x\x));;
 beta (Abt(x\ Abt(y\ y))) (Abt(x\x));;
+
+let rec bred aterm term =
+  match aterm with
+  | Abt(x\ App(m x, n x)) ->
+     App(bred (Abt(m)) term, bred (Abt(n)) term)
+  |  Abt(x\ Abt(r x)) ->
+      Abt(y\ (bred (Abt(x\ (r x y))) term))
+  | Abt(x\ x) -> term
+  | nab Y in (Abt(x\ Y) -> Y)
+;;
+
+bred (Abt(x\ x)) (Abt(x\ x));;
+bred (Abt(x\ (App(x, x)))) (Abt(x\x));;
+bred (Abt(x\ Abt(y\ (App(x, x))))) (Abt(x\x));;
+bred (Abt(x\ Abt(y\ (App(x, y))))) (Abt(x\x));;
+bred (Abt(x\ Abt(y\ x))) (Abt(x\x));;
+bred (Abt(x\ Abt(y\ y))) (Abt(x\x));;

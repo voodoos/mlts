@@ -79,6 +79,8 @@ simple_expr:
 | constant				{ EConst($1) }
 | BEGIN; e = expr; END			{ e }
 | value_path				{ EVal($1) }
+| BEGIN; e1 = expr; COMMA; e2 = expr; END
+					{ EPair(e1, e2) }
 | c = constr_path;			{ EConstr(c, []) }
 | c = constr_path;
     BEGIN;
@@ -126,19 +128,22 @@ rule:
 
 pattern:
 | BEGIN; p = pattern; END;		{ p }
+| constant				{ PConstant($1) }
 | value_path				{ PVal($1) }
+| i = value_name; BACKSLASH; p = pattern
+					{ PBind(i, p) }
 | v = value_path;
     l = nonempty_list(pattern)
       				        { PApp(v, l) }
-| c = constr_path;			{ PConstr(c, []) }
-| c = constr_path; p = pattern		{ PConstr(c, [p]) }
 | c = constr_path;
     BEGIN;
     l = separated_nonempty_list(COMMA, pattern);
     END;
 					{ PConstr(c, l) }
-| constant				{ PConstant($1) }
 | p1 = pattern; DCOLON; p2 = pattern	{ PListCons(p1, p2) }
+| BEGIN; p1 = pattern; COMMA; p2 = pattern; END
+  	      	       	      	   	{ PPair(p1, p2) }
+| c = constr_path;			{ PConstr(c, []) }
 ;
 
 constant:

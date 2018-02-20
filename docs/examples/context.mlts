@@ -1,0 +1,14 @@
+type utm =
+     | App of utm * utm
+     | Abt of utm => utm
+     ;;
+     
+let rec cntx pairs =
+  match pairs with
+  | nab N in ((N, t)::r -> cntx r)
+  | [] -> true
+  | p -> ff
+;;
+
+new X in (cntx ((X, 1)::[]));;
+new X in (cntx ((X, X)::[]));;

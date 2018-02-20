@@ -123,7 +123,9 @@ function onMessageCB(event) {
     if(event.data.type == 'ready') {
 	unlock();
     } else if(event.data.type == 'lplcode') {
-	$('#lpl').html('').append(event.data.code.replace(/arobase/g, '@').replace(/\./g, '.<br>'));
+	$('#lpl').html('').append(event.data.code
+				  .replace(/arobase/g, '@')
+				  .replace(/\./g, '.<br>'));
 	$('#lpl').each(function(i, block) {
 	    hljs.highlightBlock(block);
 	});
@@ -158,7 +160,10 @@ function show_resultas(results) {
 	var row = $('<tr></tr>');
 	row.append($('<th></th>').attr('scope', 'row').text(id));
 	row.append($('<td></td>').text(res.name));
-	row.append($('<td></td>').text(res.value));
+	row.append($('<td></td>').text(res.value
+				       .replace(/i /g, '')
+				       .replace(/tt/g, 'True')
+				       .replace(/ff/g, 'False')));
 	$('#answer').append(row);
     });
     $('#myTab a[href="#values"]').tab('show');

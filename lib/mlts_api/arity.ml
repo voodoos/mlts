@@ -18,7 +18,7 @@ let maxArityInExpr name =
        | EVal(n) when n = name ->
           max (List.length argl) maxa
        | _ -> maxa)
-    | EInfix(e1, _, e2) -> max (aux e1) (aux e2)
+    | EInfix(e1, _, e2) | EPair(e1, e2) -> max (aux e1) (aux e2)
     | EConst(_) | EVal(_) -> 0
     | EConstr(vn, el) ->
        let maxe = fold_max_f (aux) el in
@@ -41,5 +41,7 @@ let maxArityInExpr name =
        if vn = name then
          max (List.length pl) maxp
        else maxp
-    | PListCons(lp, rp) -> max (aux_pattern lp) (aux_pattern rp)
+    | PBind(_, rp) -> aux_pattern rp
+    | PListCons(lp, rp) | PPair(lp, rp) -> max (aux_pattern lp) (aux_pattern rp)
+                               
   in aux

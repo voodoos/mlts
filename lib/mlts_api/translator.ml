@@ -147,6 +147,13 @@ let newc v  e =
 let type_constr name l =
   name ^ " " ^ (to_separated_list " " l)
 
+let cpair p1 p2 =
+  "(pr " ^ p1 ^ " " ^ p2 ^ ")"
+
+                             
+let pair e1 e2 =
+  "(pair arobase (" ^ e1 ^ ") arobase (" ^ e2 ^ "))"
+
                  
 
 (* 	Type constructors handling *)
@@ -257,6 +264,10 @@ let toLPString p =
            then (String.uncapitalize_ascii vp), []
            else vp, []
 	 end
+    | EPair(e1, e2) ->
+       let str1, fv1 = aux_expr env e1
+       and str2, fv2 = aux_expr env e2 in
+       pair str1 str2, fv1 @ fv2
     | EConstr(n, elist) ->
 		(try	
 			let constr = Hashtbl.find constructors n in
@@ -316,12 +327,17 @@ let toLPString p =
   and aux_pattern env = function
     | PVal(vn) ->  
        if (List.mem (Nominal(vn)) env) then vn, []
+       else if (List.mem (Local(vn)) env) then vn, []
        else if (Hashtbl.mem constructors vn) then vn, []
        else (String.uncapitalize_ascii vn), [(vn, 0)]
+    | PBind(vn, p) -> let code, fv = aux_pattern (Local(vn)::env) p in
+                      (*print_string (bind vn code); print_pairs (fun s -> s)
+                                                               (string_of_int) fv;*)
+                      bind vn code, fv
     | PApp(vn, pls) ->
        let pl = List.map (aux_pattern env) pls in
        (*let vn = String.capitalize_ascii vn in*)
-       print_endline ("Found " ^ vn ^ " ( " ^ (string_of_int (List.length pls))^ " )");
+       (*print_endline ("Found " ^ vn ^ " ( " ^ (string_of_int (List.length pls))^ " )");*)
        vn ^ (to_separated_list ~first:true " " (firsts pl)) , [vn, List.length pls]
     | PConstr(cp, pls) ->
 		(try
@@ -333,11 +349,18 @@ let toLPString p =
 		   let pl = List.map (aux_pattern env) pls in
 		   (* TODO CONSTRS IN CONSTRS MAY FAIL *)
 		   let params = firsts (List.flatten (seconds pl)) in
+                   
                    let parities = seconds (List.flatten (seconds pl)) in
-		   let marities = List.map2 (fun l1 l2 -> max l1 l2)
-                                            parities arities in
+
+                   (*
+                   print_string "\n\nParams: "; print_list (fun x -> x) params;
+                   print_string "\nPArities: "; print_list (string_of_int) parities;
+                   print_string "\nArities: "; print_list (string_of_int) arities;
+                   *)
+		   (*let marities = List.map2 (fun l1 l2 -> max l1 l2)
+                                            parities arities in*)
                    let pararity = List.map2 (fun l1 l2 -> l1, l2)
-                                            params marities in
+                                            params parities in
                    (* let pararity = (List.flatten (seconds pl)) in *)
 		   type_constr name (firsts pl), pararity
 		 with Not_found -> failwith ("Constructor unknown in pattern : "^cp))
@@ -346,6 +369,10 @@ let toLPString p =
        let p1, fv1 = aux_pattern env p1
        and p2, fv2 = aux_pattern env p2 in
        "cns (" ^ p1 ^ ") ("  ^ p2 ^ ")", fv1 @ fv2
+    | PPair(p1, p2) -> 
+       let p1, fv1 = aux_pattern env p1
+       and p2, fv2 = aux_pattern env p2 in
+       cpair p1 p2, fv1 @ fv2
 
   in
 
