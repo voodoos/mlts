@@ -4,20 +4,24 @@ exception No_kernel
 let kernel = ref None
                  
 let compile code =
-  (* First mlts => lprolog *)
-  let lpcode = Mlts_API.parse_and_translate code in
+  try
+    (* First mlts => lprolog *)
+    let lpcode = Mlts_API.parse_and_translate code in
 
-  (* updating the pseudo file *)
-  Sys_js.update_file "core/progs_gen.mod" lpcode;
+    (* updating the pseudo file *)
+    Sys_js.update_file "core/progs_gen.mod" lpcode;
 
-  (* recompiling lprolog code *)
-  let parsed =
-    Elpi_API.Parse.program
-      ["core/progs_gen.mod";"core/run.mod"] in
-  kernel := Some(Elpi_API.Compile.program [parsed]);
+    (* recompiling lprolog code *)
+    let parsed =
+      Elpi_API.Parse.program
+        ["core/progs_gen.mod";"core/run.mod"] in
+    kernel := Some(Elpi_API.Compile.program [parsed]);
 
-  (* We return the lprolog code for reference *)
-  Js.string lpcode
+    (* We return the lprolog code for reference *)
+    Js.string lpcode, true
+  with Mlts_API.Error(s, line, char)
+       -> Js.string s, false
+     | _ -> Js.string "Unknown (propbably parsing-related) error.", false
 
 let query prog =
   (* First we check that the program have been compiled *)

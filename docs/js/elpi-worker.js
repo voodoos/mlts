@@ -16,12 +16,23 @@ onmessage = function(event) {
     var code = event.data;
     console.log('[Elpi-worker] ' + "Compiling code");
     var lplcode = compile(code);
-    sendLpl(lplcode);
     
-    console.log('[Elpi-worker] ' + "Querying run_all L.");
-    var raw = run();
-    console.log('[Elpi-worker] ' + "Returning answer.");
-    var json = JSON.parse(raw);
-    json.type = 'values';
-    postMessage(json);
+    sendLpl(lplcode[1]);
+
+    if(lplcode[2] == 1) {
+	console.log('[Elpi-worker] ' + "Querying run_all L.");
+	var raw = run();
+	console.log('[Elpi-worker] ' + "Returning answer.");
+	var json = JSON.parse(raw);
+	json.type = 'values';
+	postMessage(json);
+	
+    }
+
+    else {
+	var res = JSON.parse("{}");
+	res.type = 'error';
+	postMessage(res);
+    }
+	    
 }

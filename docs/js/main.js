@@ -122,6 +122,10 @@ var elpi = new Worker('js/elpi-worker.js');
 function onMessageCB(event) {
     if(event.data.type == 'ready') {
 	unlock();
+    } else if (event.data.type == 'error') {
+	unlock();
+	$('#run_btn').addClass('blinking');
+	setTimeout(function(){ $('#run_btn').removeClass('blinking') }, 1000);
     } else if(event.data.type == 'lplcode') {
 	$('#lpl').html('').append(event.data.code
 				  .replace(/arobase/g, '@')

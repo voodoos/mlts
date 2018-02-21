@@ -2,7 +2,7 @@
 
 PYTHON=python3.6
 
-all: run
+all: demo
 
 lib:
 	$(MAKE) -C lib
