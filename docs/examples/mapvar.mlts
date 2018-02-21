@@ -6,24 +6,24 @@ type utm =
 let rec mapvar f t =
   match t with
   | App(m, n) -> App(mapvar (f) m, mapvar (f) n)
-  | Abt(r) -> Abt(x\ (mapvar (f) (r x)))
-  | nab X in (X -> f x)
+  | Abt(r) -> Abt(x\ mapvar (f) (r x))
+  | nab X in X -> f x
 ;;
 
 let rec lookup sub term =
   match term with
-  | nab X in (X ->
+  | nab X in X ->
               let rec aux s =
                 match s with
                 | [] -> X
                 | (X, t)::tl -> t
                 | p::tl -> aux tl
-             in aux sub)
+             in aux sub
 ;;
 
 let rec substtm sub term =
   mapvar (lookup sub) term;;
 
-new X in (Abt(y\ (substtm ((X, y)::[]) (App(X, Abt(z\ z))))));;
-new X in (new Y in (substtm ((X, Abt(z\ z))::(Y, Abt(w\w))::[])
-                            (App(X, Abt(z\ (App(z, Y)))))));;
+new X in Abt(y\ substtm ((X, y)::[]) (App(X, Abt(z\ z))));;
+new X in new Y in substtm ((X, Abt(z\ z))::(Y, Abt(w\w))::[])
+                           (App(X, Abt(z\ App(z, Y))));;

@@ -9,4 +9,4 @@ cp ../../../code/parser/lpStrings.ml .
 cp ../../../code/parser/astTools.ml .
 cp ../../../code/parser/translator.ml .
 
-sed -i '' 's/\".*(@).*\"/arobase/g' lpStrings.ml
+sed -i '' 's/@/arobase/g' lpStrings.ml

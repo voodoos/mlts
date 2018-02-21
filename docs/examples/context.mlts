@@ -5,7 +5,7 @@ type utm =
      
 let rec cntx pairs =
   match pairs with
-  | nab N in ((N, t)::r -> cntx r)
+  | nab N in (N, t)::r -> cntx r
   | [] -> true
   | p -> ff
 ;;

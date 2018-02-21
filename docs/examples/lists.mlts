@@ -1,12 +1,11 @@
 
 
 let rec map f l =
-    if (l = [])
+    if l = []
     then []
-    else ((f (List.hd l))::(map f (List.tl l)));;
+    else (f (List.hd l))::(map f (List.tl l));;
 
-
-map (fib) (1::5::6::[]);;
+map (fun x -> 2*x) (1::2::3::[]);;
 
 let rec memm x l = match l with
 | [] -> false
@@ -30,9 +29,9 @@ appndm (1::5::[]) (2::[]);;
 let rec join l k =
     match l with
     | [] -> k
-    | h::tl -> if (memm h k)
-      	       then  (join tl k)
-	       else (h::(join tl k));;
+    | h::tl -> if memm h k
+      	       then  join tl k
+	       else h::(join tl k);;
 
 join (2::3::4::[]) (2::3::4::[]);;
 join (2::3::4::[]) (2::4::[]);;
@@ -40,8 +39,8 @@ join (2::3::4::[]) (2::4::[]);;
 let rec rm x l =
     match l with
     | [] -> []
-    | h::tl -> if (h = x)
-      	      then (rm x tl)
-	      else (h::(rm x tl));;
+    | h::tl -> if h = x
+      	      then rm x tl
+	      else h::(rm x tl);;
 
 rm 3 (2::3::4::[]);;

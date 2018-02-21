@@ -5,6 +5,10 @@ You can access a demo of this interface here.
 ## Concrete syntax
 MLTS concrete syntax is based on OCaml. A program written in MLTS not using the new constructs `nab in`, `new in`, `\` and `=>` should compile with the `ocamlc` compiler.
 
+Operator | Description |Associativity
+------------ | ------- | ------
+`\` | Binding : `x\ t` | Right 
+
 ## Build dependencies
 Before attempting to build the project you should make sure that you have the following dependencies installed :
 

@@ -9,10 +9,10 @@ let rec vacp t =
     let rec aux term =
       match term with
       | X -> false
-      | nab Y in (Y -> true)
+      | nab Y in Y -> true
       | App(m, n) -> (aux m) && (aux n)
-      | Abt(r) -> new Y in (aux (r Y))
-    in (aux (r X))
+      | Abt(r) -> new Y in aux (r Y)
+    in aux (r X)
 ;;	
 	    
 vacp (Abt(x\ x));;

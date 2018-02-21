@@ -15,30 +15,28 @@
 %token LBRACK RBRACK
 %token IF THEN ELSE
 %token FUN 
-%token MATCH WITH VBAR ARROW DARROW
+%token MATCH WITH VBAR ARROW
 %token DSEMI
 %token DCOLON
 %token DOT BACKSLASH COMMA
-%token TYPE OF LET REC IN
+%token TYPE OF DARROW
+%token LET REC IN
 %token EOF
 %token NA NEW
 
-%nonassoc IN
-%nonassoc TYPE
-%nonassoc LET
-%nonassoc THEN
 %nonassoc ELSE
-%left VBAR
-%left COMMA
+%right IN
+%right ARROW
+%right DARROW
+%right BACKSLASH
 %right OR
 %right AND
-%right DCOLON
 %left LE LT EQUAL NEQ
+%right DCOLON
 %left PLUS MINUS
 %left STAR
-%left IDENT
-%nonassoc BEGIN END
-%nonassoc DOT BACKSLASH
+%nonassoc IDENT UPIDENT CONST_BOOL CONST_INT
+%nonassoc BEGIN LBRACK
 
 %start main
 %type <MltsAst.prog> main
@@ -90,21 +88,22 @@ simple_expr:
 expr:
 | simple_expr				{ $1 }
 | LET; b = let_binding; IN; e = expr
-					{ ELetin(b, e) }
+	%prec IN			{ ELetin(b, e) }
 | LET; REC; b = let_binding; IN; e = expr
-					{ ELetRecin(b, e) }
+	%prec IN			{ ELetRecin(b, e) }
 | IF; e1 = expr; THEN e2 = expr; ELSE; e3 = expr
       	   	      	   	       	{ EIf(e1, e2, e3) }
 | MATCH; e = expr; WITH; pm = nonempty_list(rule)
-					{ EMatch(e, pm) }
+	%prec MATCH			{ EMatch(e, pm) }
 | FUN; i = value_name; ARROW; e = expr
-					{ EFun(i, e) }
+	%prec ARROW			{ EFun(i, e) }
 | NEW; i = constr_name; IN; e = expr
-					{ ENew(i, e) }
+	%prec IN			{ ENew(i, e) }
 | expr; nonempty_list(argument)		{ EApp($1, $2) }
 | expr; infix_op; expr			{ EInfix($1, $2, $3) }
 | e1 = expr; DCOLON; e2 = expr		{ EInfix(e1, ListCons, e2) }
-| i = value_name; BACKSLASH; e = expr	{ EBind(i, e) }
+| i = value_name; BACKSLASH; e = expr
+      %prec BACKSLASH			{ EBind(i, e) }
 ;
 
 arityp_expr:
@@ -120,11 +119,15 @@ arityp_expr:
 ;
 
 rule:
-| VBAR; p = pattern; ARROW; e = expr	{ RSimple(p, e) }
+| VBAR; pe = pattern_arrow	{ let p, e = pe in RSimple(p, e) }
 | VBAR; NA; i = nonempty_list(constr_name);
-  IN; BEGIN; p = pattern; ARROW; e = expr; END;
-      	       	 	  	     	{ RNa(i, p, e) }
+  	IN; pe = pattern_arrow
+      	       	 	  	     	{  let p, e = pe in RNa(i, p, e) }
 ;
+
+pattern_arrow:
+| BEGIN; p = pattern_arrow; END; { p }
+| p = pattern; ARROW; e = expr; { (p, e) }
 
 pattern:
 | BEGIN; p = pattern; END;		{ p }

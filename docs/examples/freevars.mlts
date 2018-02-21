@@ -13,30 +13,30 @@ let rec memm x l = match l with
 let rec join l k =
     match l with
     | [] -> k
-    | h::tl -> if (memm h k)
-      	       then  (join tl k)
-	       else (h::(join tl k))
+    | h::tl -> if memm h k
+      	       then  join tl k
+	       else h::(join tl k)
 ;;
      
 let rec rm x l =
     match l with
     | [] -> []
-    | h::tl -> if (h = x)
-      	      then (rm x tl)
-	      else (h::(rm x tl))
+    | h::tl -> if h = x
+      	      then rm x tl
+	      else h::(rm x tl)
 ;;
 	      
 let rec maptm fapp fabs fvar term =
 	match term with
 	| App(m, n) -> fapp (maptm fapp fabs fvar m) (maptm fapp fabs fvar n)
-	| Abt(r)	-> fabs (fun x -> (maptm fapp fabs fvar (r x)))
-	| nab X in ( X -> fvar X)
+	| Abt(r)	-> fabs (fun x -> maptm fapp fabs fvar (r x))
+	| nab X in X -> fvar X
 ;;
 
 (*  let fv term  = maptm join (fun r -> na x\ rm x (r x)) (fun x -> [x]) term;; *)
 let rec fv term = 
 	maptm	(fun n -> fun m -> join n m) 
-		(fun r -> new X in  (rm (X) (r X)))
+		(fun r -> new X in  rm (X) (r X))
 		(fun x -> x::[])
 		term
 ;;
@@ -44,4 +44,4 @@ let rec fv term =
 fv (Abt(x\ App(x, x)));;
 fv (Abt(x\ Abt(y\ App(y, App(x, y)))));;
 fv (Abt(x\ App(App(x, x), App(x, x))));;
-(Abt(x\ (fv (App(App(x, x), App(x, x))))));;
+(Abt(x\ fv (App(App(x, x), App(x, x)))));;
