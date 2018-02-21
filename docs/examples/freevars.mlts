@@ -3,19 +3,19 @@ type utm =
      | Abt of utm => utm
 ;;
 
-let rec memm x l = match l with
+let rec mem x l = match l with
 | [] -> false
 | n::tl -> if n = x
   	   then true
-  	   else memm x tl
+  	   else mem x tl
 ;;
 	   
-let rec join l k =
+let rec union l k =
     match l with
     | [] -> k
-    | h::tl -> if memm h k
-      	       then  join tl k
-	       else h::(join tl k)
+    | h::tl -> if mem h k
+      	       then  union tl k
+	       else h::(union tl k)
 ;;
      
 let rec rm x l =
@@ -35,8 +35,8 @@ let rec maptm fapp fabs fvar term =
 
 (*  let fv term  = maptm join (fun r -> na x\ rm x (r x)) (fun x -> [x]) term;; *)
 let rec fv term = 
-	maptm	(fun n -> fun m -> join n m) 
-		(fun r -> new X in  rm (X) (r X))
+	maptm	(fun n -> fun m -> union n m) 
+		(fun r -> new X in  rm X (r X))
 		(fun x -> x::[])
 		term
 ;;

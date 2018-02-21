@@ -180,7 +180,8 @@ function show_resultas(results) {
 				       .replace(/null/g, '[]')
 				       .replace(/ab/g, 'Abt')
 				       .replace(/ap/g, 'App')
-				       .replace(/cns \((.*?)\) (.*?)/g, '$1::$2')
+				       .replace(/cns \((.*?)\) (.*)/g, '$1::$2')
+				       .replace(/cns (.*?) (.*)/g, '$1::$2')
 				      )
 		  );
 	$('#answer').append(row);

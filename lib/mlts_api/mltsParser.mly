@@ -26,6 +26,7 @@
 
 %nonassoc ELSE
 %right IN
+%right VBAR
 %right ARROW
 %right DARROW
 %right BACKSLASH
@@ -80,10 +81,6 @@ simple_expr:
 | BEGIN; e1 = expr; COMMA; e2 = expr; END
 					{ EPair(e1, e2) }
 | c = constr_path;			{ EConstr(c, []) }
-| c = constr_path;
-    BEGIN;
-    l = separated_nonempty_list(COMMA, expr);
-    END;				{ EConstr(c, l) }
 
 expr:
 | simple_expr				{ $1 }
@@ -93,8 +90,9 @@ expr:
 	%prec IN			{ ELetRecin(b, e) }
 | IF; e1 = expr; THEN e2 = expr; ELSE; e3 = expr
       	   	      	   	       	{ EIf(e1, e2, e3) }
-| MATCH; e = expr; WITH; pm = nonempty_list(rule)
-	%prec MATCH			{ EMatch(e, pm) }
+| MATCH; e = expr; WITH; pm = match_arms
+/*separated_nonempty_list(VBAR, rule)*/
+	%prec MATCH		{ EMatch(e, pm) }
 | FUN; i = value_name; ARROW; e = expr
 	%prec ARROW			{ EFun(i, e) }
 | NEW; i = constr_name; IN; e = expr
@@ -104,7 +102,13 @@ expr:
 | e1 = expr; DCOLON; e2 = expr		{ EInfix(e1, ListCons, e2) }
 | i = value_name; BACKSLASH; e = expr
       %prec BACKSLASH			{ EBind(i, e) }
+| c = constr_path;
+    BEGIN;
+    l = separated_nonempty_list(COMMA, expr);
+    END;				{ EConstr(c, l) }
 ;
+
+
 
 arityp_expr:
 | typeconstr_name			{ Cons($1), 0 }
@@ -118,10 +122,15 @@ arityp_expr:
    	   	  	 Arrow(tya1, tya2), 1 + (max a1 a2)  }
 ;
 
+match_arms:
+| VBAR; rule; match_arms { $2::$3 }
+| VBAR; rule { [$2] }
+;
+
 rule:
-| VBAR; pe = pattern_arrow	{ let p, e = pe in RSimple(p, e) }
-| VBAR; NA; i = nonempty_list(constr_name);
-  	IN; pe = pattern_arrow
+| pe = pattern_arrow	{ let p, e = pe in RSimple(p, e) }
+| NA; i = nonempty_list(constr_name);
+  	IN; pe = pattern_arrow 
       	       	 	  	     	{  let p, e = pe in RNa(i, p, e) }
 ;
 
