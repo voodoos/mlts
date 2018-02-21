@@ -21,7 +21,7 @@ let compile code =
     Js.string lpcode, true
   with Mlts_API.Error(s, line, char)
        -> Js.string s, false
-     | _ -> Js.string "Unknown (propbably parsing-related) error.", false
+     | _ -> Js.string "Unknown (probably parsing-related) error.", false
 
 let query prog =
   (* First we check that the program have been compiled *)
