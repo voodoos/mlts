@@ -18,10 +18,10 @@ let compile code =
     kernel := Some(Elpi_API.Compile.program [parsed]);
 
     (* We return the lprolog code for reference *)
-    Js.string lpcode, true
+    Js.string lpcode, 0, 0, true
   with Mlts_API.Error(s, line, char)
-       -> Js.string s, false
-     | _ -> Js.string "Unknown (probably parsing-related) error.", false
+       -> (Js.string s, line, char,  false)
+     | _ -> Js.string "Unknown (probably parsing-related) error.", 0, 0, false
 
 let query prog =
   (* First we check that the program have been compiled *)

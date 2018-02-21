@@ -124,8 +124,15 @@ function onMessageCB(event) {
 	unlock();
     } else if (event.data.type == 'error') {
 	unlock();
+	
 	$('#run_btn').addClass('blinking');
 	setTimeout(function(){ $('#run_btn').removeClass('blinking') }, 1000);
+	
+	if(event.data.line > 0) {
+	    editor.gotoLine(event.data.line);
+	    $('#editor').addClass('red-alert');
+	    setTimeout(function(){ $('#editor').removeClass('red-alert') }, 1000);
+	}
     } else if(event.data.type == 'lplcode') {
 	$('#lpl').html('').append(event.data.code
 				  .replace(/arobase/g, '@')

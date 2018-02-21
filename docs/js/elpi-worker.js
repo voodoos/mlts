@@ -19,7 +19,7 @@ onmessage = function(event) {
     
     sendLpl(lplcode[1]);
 
-    if(lplcode[2] == 1) {
+    if(lplcode[4] == 1) {
 	console.log('[Elpi-worker] ' + "Querying run_all L.");
 	var raw = run();
 	console.log('[Elpi-worker] ' + "Returning answer.");
@@ -32,6 +32,8 @@ onmessage = function(event) {
     else {
 	var res = JSON.parse("{}");
 	res.type = 'error';
+	res.line = lplcode[2];
+	res.col = lplcode[3];
 	postMessage(res);
     }
 	    

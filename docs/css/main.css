@@ -79,6 +79,16 @@ h4 {
     left: 0;
 }
 
+.ace_active-line {
+    transition: background-color 1s;
+}
+.red-alert .ace_active-line {
+     background-color: #dc3545 !important;
+}
+.ace_hidden-cursors .ace_cursor {
+    opacity: 0.8;
+}
+
 #editor .ace_gutter-cell {
     color: #b7ada2;;
 }
@@ -94,6 +104,8 @@ h4 {
   10% { background-color: auto; }
   50% { background-color: #dc3545; }
 }
+
+
 .exec_btn_text {
     position: relative;
     top: -1px;
