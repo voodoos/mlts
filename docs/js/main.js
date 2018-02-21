@@ -171,10 +171,18 @@ function show_resultas(results) {
 	var row = $('<tr></tr>');
 	row.append($('<th></th>').attr('scope', 'row').text(id));
 	row.append($('<td></td>').text(res.name));
+
+	// Some regex-magic-based pretty printing :
 	row.append($('<td></td>').text(res.value
 				       .replace(/i /g, '')
 				       .replace(/tt/g, 'True')
-				       .replace(/ff/g, 'False')));
+				       .replace(/ff/g, 'False')
+				       .replace(/null/g, '[]')
+				       .replace(/ab/g, 'Abt')
+				       .replace(/ap/g, 'App')
+				       .replace(/cns \((.*?)\) (.*?)/g, '$1::$2')
+				      )
+		  );
 	$('#answer').append(row);
     });
     $('#myTab a[href="#values"]').tab('show');
