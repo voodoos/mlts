@@ -20,5 +20,5 @@ let parse_and_translate mlts_prog =
        -> let l, c = ints_of_pos pos in
           raise (Error((string_of_pos l c) ^ "Lexing error : " ^ s, l, c))
      | MltsParser.Error ->
-        let t, c = ints_of_pos (tokens.Lexing.lex_curr_p) in
-        raise (Error("Parsing error .", t, c))
+        let l, c = ints_of_pos (tokens.Lexing.lex_curr_p) in
+        raise (Error((string_of_pos l c) ^ "Parsing error.", l, c))
