@@ -90,8 +90,8 @@ simple_expr_noconstr:
 | BEGIN; e1 = expr; COMMA; e2 = expr; END
 					{ EPair(e1, e2) }
 simple_expr:
-| simple_expr_noconstr { $1 }
-| c = constr_path      { EConstr(c, []) }
+| simple_expr_noconstr			{ $1 }
+| c = constr_path      			{ EConstr(c, []) }
 
 expr:
 | simple_expr	                        { $1 }
@@ -109,7 +109,7 @@ expr:
 	%prec IN			{ ENew(i, e) }
 | simple_expr_noconstr; nonempty_list(argument)
 	                                { EApp($1, $2) }
-| expr; infix_op; expr 	{ EInfix($1, $2, $3) }
+| expr; infix_op; expr 			{ EInfix($1, $2, $3) }
 | e1 = expr; DCOLON;
      e2 = expr				{ EInfix(e1, ListCons, e2) }
 | i = value_name; BACKSLASH; e = expr
