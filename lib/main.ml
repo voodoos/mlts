@@ -42,11 +42,10 @@ let handle_out res iter f (out : Elpi_API.Execute.outcome) =
                     String.sub str 1 (String.length str - 2))
                           data.assignments in
       
-     res := !res ^ (if !iter > 0 then "," else (iter := 1; ""))
-            ^ "{ \"name\": \"" ^ (escape resp.(0)) ^ "\""
+     res :=  "{ \"name\": \"" ^ (escape resp.(0)) ^ "\""
             ^ ", \"value\": \"" ^ (escape resp.(2)) ^ "\""
             ^ ", \"code\": \"" ^ (escape resp.(1)) ^ "\""
-            ^ "}"
+            ^ "}" ^ (if !iter > 0 then "," else (iter := 1; "")) ^ !res
   | _ -> ()
 
 let query prog =
@@ -56,12 +55,12 @@ let query prog =
   | Some(k) ->
      let goal = Elpi_API.Parse.goal prog in
      let goalc = Elpi_API.Compile.query k goal in
-     let res = ref "{ \"output\": [" in
+     let res = ref "] }" in
      let iter = ref 0 in
      Elpi_API.Execute.loop k goalc
                            (fun () -> true)
                            (handle_out res iter);
-     !res ^ ("] }")
+     "{ \"output\": [" ^ !res
                            
 
 let run () = query("run_one Name Prog Value.")
