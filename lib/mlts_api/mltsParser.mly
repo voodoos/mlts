@@ -24,21 +24,30 @@
 %token EOF
 %token NA NEW
 
+/*
+%right BEGIN
+%right LBRACK
+*/
 %nonassoc ELSE
 %right IN
 %right VBAR
+
 %right ARROW
 %right DARROW
 %right BACKSLASH
+/*
 %right OR
 %right AND
 %left LE LT EQUAL NEQ
+*/
 %right DCOLON
+/*
 %left PLUS MINUS
+*/
 %left STAR
+/*
 %nonassoc IDENT UPIDENT CONST_BOOL CONST_INT
-%nonassoc BEGIN LBRACK
-
+*/
 %start main
 %type <MltsAst.prog> main
 
@@ -91,35 +100,38 @@ expr:
 | IF; e1 = expr; THEN e2 = expr; ELSE; e3 = expr
       	   	      	   	       	{ EIf(e1, e2, e3) }
 | MATCH; e = expr; WITH; pm = match_arms
-/*separated_nonempty_list(VBAR, rule)*/
-	%prec MATCH		{ EMatch(e, pm) }
+  	     	   	      		{ EMatch(e, pm) }
 | FUN; i = value_name; ARROW; e = expr
 	%prec ARROW			{ EFun(i, e) }
 | NEW; i = constr_name; IN; e = expr
 	%prec IN			{ ENew(i, e) }
-| expr; nonempty_list(argument)		{ EApp($1, $2) }
-| expr; infix_op; expr			{ EInfix($1, $2, $3) }
-| e1 = expr; DCOLON; e2 = expr		{ EInfix(e1, ListCons, e2) }
+| simple_expr; nonempty_list(argument)	{ EApp($1, $2) }
+| simple_expr; infix_op; simple_expr 	{ EInfix($1, $2, $3) }
+| e1 = expr; DCOLON;
+     e2 = expr				{ EInfix(e1, ListCons, e2) }
 | i = value_name; BACKSLASH; e = expr
       %prec BACKSLASH			{ EBind(i, e) }
 | c = constr_path;
     BEGIN;
-    l = separated_nonempty_list(COMMA, expr);
+    l = expr_list;
     END;				{ EConstr(c, l) }
 ;
 
-
+expr_list:
+| expr	{ [$1] }
+|  expr; COMMA; expr_list { $1::$3 }
 
 arityp_expr:
 | typeconstr_name			{ Cons($1), 0 }
 | tya1 = arityp_expr;
-  STAR; tya2 = arityp_expr			{ let ty1, a1 = tya1
+  STAR; tya2 = arityp_expr		{ let ty1, a1 = tya1
    	   	  			  and ty2, a2 = tya2   in
   	       				      Sum(tya1, tya2), max a1 a2 }
 |  tya1 = arityp_expr;
    DARROW;  tya2 = arityp_expr		{ let ty1, a1 = tya1
    	   	  			  and ty2, a2 = tya2   in
-   	   	  	 Arrow(tya1, tya2), 1 + (max a1 a2)  }
+   	   	  	 		  Arrow(tya1, tya2),
+					  1 + (max a1 a2)  }
 ;
 
 match_arms:
@@ -128,7 +140,7 @@ match_arms:
 ;
 
 rule:
-| pe = pattern_arrow	{ let p, e = pe in RSimple(p, e) }
+| pe = pattern_arrow			{ let p, e = pe in RSimple(p, e) }
 | NA; i = nonempty_list(constr_name);
   	IN; pe = pattern_arrow 
       	       	 	  	     	{  let p, e = pe in RNa(i, p, e) }
@@ -149,6 +161,11 @@ pattern:
 | p1 = pattern; DCOLON; p2 = pattern	{ PListCons(p1, p2) }
 | BEGIN; p1 = pattern; COMMA; p2 = pattern; END
   	      	       	      	   	{ PPair(p1, p2) }
+| c = constr_path;
+    BEGIN;
+    l = separated_nonempty_list(COMMA, pattern);
+    END;
+					{ PConstr(c, l) }
 ;
 
 simple_pattern:
@@ -156,11 +173,6 @@ simple_pattern:
 | c = constr_path;			{ PConstr(c, []) }
 | constant				{ PConstant($1) }
 | value_path				{ PVal($1) }
-| c = constr_path;
-    BEGIN;
-    l = separated_nonempty_list(COMMA, pattern);
-    END;
-					{ PConstr(c, l) }
 
 
 constant:
@@ -176,6 +188,7 @@ argument:
 value_path:
 | value_name				{ $1 }
 | m = module_name; DOT; v = value_name	{ m ^ "." ^ v }
+
 /* TODO, long modulepath */
 module_path:
 | module_name				{ $1 }

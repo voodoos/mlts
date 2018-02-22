@@ -172,17 +172,21 @@ function show_resultas(results) {
 	row.append($('<th></th>').attr('scope', 'row').text(id));
 	row.append($('<td></td>').text(res.name));
 
-	// Some regex-magic-based pretty printing :
-	row.append($('<td></td>').text(res.value
-				       .replace(/i /g, '')
-				       .replace(/tt/g, 'True')
-				       .replace(/ff/g, 'False')
-				       .replace(/null/g, '[]')
-				       .replace(/ab/g, 'Abt')
-				       .replace(/ap/g, 'App')
-				       .replace(/cns \((.*?)\) (.*)/g, '$1::$2')
-				       .replace(/cns (.*?) (.*)/g, '$1::$2')
-				      )
+	// Some ugly-regex-magic-based pretty printing :
+	row.append($('<td></td>')
+		   .text(res.value
+			 .replace(/i /g, '')
+			 .replace(/tt/g, 'True')
+			 .replace(/ff/g, 'False')
+			 .replace(/null/g, '[]')
+			 .replace(/ab/g, 'Abt')
+			 .replace(/ap/g, 'App')
+			 .replace(/cns \((.*?)\) (.*?)/g, '$1::$2')
+			 .replace(/::\((.*::.*)\)/g, '::$1')
+			 .replace(/::\((.*::.*)\)/g, '::$1')
+			 .replace(/::\((.*::.*)\)/g, '::$1')
+			 .replace(/::\((.*::.*)\)/g, '::$1')
+			)
 		  );
 	$('#answer').append(row);
     });
