@@ -1,3 +1,4 @@
+     
 exception Query_failed
 exception No_kernel
 
@@ -23,32 +24,48 @@ let compile code =
        -> (Js.string s, line, char,  false)
      | _ -> Js.string "Unknown error.", 0, 0, false
 
+let escape s =
+  Js.to_string (Js.encodeURI (Js.string s))
+
+let handle_out res iter f (out : Elpi_API.Execute.outcome) =
+  match out with
+  | Success(data) -> 
+     
+     (* Elpi returns answers as a list of terms *)
+     (* We transform it into a list of strings *)
+     let resp = Array.map (fun term ->
+                    Elpi_API.Pp.term
+                      (Format.str_formatter)
+                      term;
+                    let str = Format.flush_str_formatter () in
+                    (* LP strings are surrounded by quotes, we remove them *)
+                    String.sub str 1 (String.length str - 2))
+                          data.assignments in
+      
+     res := !res ^ (if !iter > 0 then "," else (iter := 1; ""))
+            ^ "{ \"name\": \"" ^ (escape resp.(0)) ^ "\""
+            ^ ", \"value\": \"" ^ (escape resp.(2)) ^ "\""
+            ^ ", \"code\": \"" ^ (escape resp.(1)) ^ "\""
+            ^ "}"
+  | _ -> ()
+
 let query prog =
   (* First we check that the program have been compiled *)
-    match !kernel with
-      None -> raise No_kernel
-    | Some(k) ->
-       let goal = Elpi_API.Parse.goal prog in
-       let goalc = Elpi_API.Compile.query k goal in
-       match (Elpi_API.Execute.once k goalc) with
-         Success(data) ->
-          (* Elpi returns answers as a list of terms *)
-          (* We transform it into a list of strings *)
-          let resp = Array.map (fun term ->
-                         Elpi_API.Pp.term
-                           (Format.str_formatter)
-                           term;
-                         let str = Format.flush_str_formatter () in
-                         (* LP strings are surrounded by quotes, we remove them *)
-                         String.sub str 1 (String.length str - 2))
-                               data.assignments in
-          (* print_string ("res["^(resp.(0))^"]"); *)
-          resp.(0)
-            
-       | _ -> raise Query_failed
+  match !kernel with
+    None -> raise No_kernel
+  | Some(k) ->
+     let goal = Elpi_API.Parse.goal prog in
+     let goalc = Elpi_API.Compile.query k goal in
+     let res = ref "{ \"output\": [" in
+     let iter = ref 0 in
+     Elpi_API.Execute.loop k goalc
+                           (fun () -> true)
+                           (handle_out res iter);
+     !res ^ ("] }")
+                           
 
-let run () = query("run_all L")
-                    
+let run () = query("run_one Name Prog Value.")
+                  
 let compile_and_run code =
   let lpcode = compile (Js.to_string code) in
   lpcode, query ("run_all N.")

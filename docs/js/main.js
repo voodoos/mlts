@@ -122,7 +122,8 @@ var elpi = new Worker('js/elpi-worker.js');
 function onMessageCB(event) {
     if(event.data.type == 'ready') {
 	unlock();
-    } else if (event.data.type == 'error') {
+    }
+    else if (event.data.type == 'error') {
 	unlock();
 	
 	$('#run_btn').addClass('blinking');
@@ -133,7 +134,8 @@ function onMessageCB(event) {
 	    $('#editor').addClass('red-alert');
 	    setTimeout(function(){ $('#editor').removeClass('red-alert') }, 1000);
 	}
-    } else if(event.data.type == 'lplcode') {
+    }
+    else if(event.data.type == 'lplcode') {
 	$('#lpl').html('').append(event.data.code
 				  .replace(/arobase/g, '@')
 				  .replace(/\./g, '.<br>'));
@@ -170,11 +172,11 @@ function show_resultas(results) {
     results.reverse().forEach(function(res, id) {
 	var row = $('<tr></tr>');
 	row.append($('<th></th>').attr('scope', 'row').text(id));
-	row.append($('<td></td>').text(res.name));
+	row.append($('<td></td>').text(decodeURI(res.name)));
 
 	// Some ugly-regex-magic-based pretty printing :
 	row.append($('<td></td>')
-		   .text(res.value
+		   .text(decodeURI(res.value)
 			 .replace(/i /g, '')
 			 .replace(/tt/g, 'True')
 			 .replace(/ff/g, 'False')

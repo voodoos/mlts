@@ -33,3 +33,15 @@ run_all Json :-
 	json_add_val "output" Jarray J J',
 	string_of_json J' Json.
 	
+
+run_one Name Prog Value :-
+	prog Name P, 
+	Size is size Name,
+	if (Size > 4) (
+	   Deb is substring Name 0 4,
+	   if (Deb = "test") (
+	      eval P V,
+	      term_to_string P Prog,
+	      term_to_string V Value
+	    ) (fail)
+	    ) (fail).

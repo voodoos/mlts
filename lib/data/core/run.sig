@@ -8,3 +8,4 @@ accum_sig json.
 
 type run_tests json -> prop.
 type run_all  string -> prop.
+type run_one string -> string -> string -> prop.
