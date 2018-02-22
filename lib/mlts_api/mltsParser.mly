@@ -83,16 +83,18 @@ let_binding:
 | v = value_name; p = list(value_name); EQUAL; e = expr	{ LBVal(v, p, e) }
 ;
 
-simple_expr:
+simple_expr_noconstr:
 | constant				{ EConst($1) }
 | BEGIN; e = expr; END			{ e }
 | value_path				{ EVal($1) }
 | BEGIN; e1 = expr; COMMA; e2 = expr; END
 					{ EPair(e1, e2) }
-| c = constr_path;			{ EConstr(c, []) }
+simple_expr:
+| simple_expr_noconstr { $1 }
+| c = constr_path      { EConstr(c, []) }
 
 expr:
-| simple_expr				{ $1 }
+| simple_expr	                        { $1 }
 | LET; b = let_binding; IN; e = expr
 	%prec IN			{ ELetin(b, e) }
 | LET; REC; b = let_binding; IN; e = expr
@@ -105,7 +107,8 @@ expr:
 	%prec ARROW			{ EFun(i, e) }
 | NEW; i = constr_name; IN; e = expr
 	%prec IN			{ ENew(i, e) }
-| simple_expr; nonempty_list(argument)	{ EApp($1, $2) }
+| simple_expr_noconstr; nonempty_list(argument)
+	                                { EApp($1, $2) }
 | simple_expr; infix_op; simple_expr 	{ EInfix($1, $2, $3) }
 | e1 = expr; DCOLON;
      e2 = expr				{ EInfix(e1, ListCons, e2) }
