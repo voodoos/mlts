@@ -1,1 +1,3 @@
 B _build
+PKG ocamlbuild
+PKG menhirLib
