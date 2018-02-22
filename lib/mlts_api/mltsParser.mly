@@ -35,15 +35,15 @@
 %right ARROW
 %right DARROW
 %right BACKSLASH
-/*
+
 %right OR
 %right AND
 %left LE LT EQUAL NEQ
-*/
+
 %right DCOLON
-/*
+
 %left PLUS MINUS
-*/
+
 %left STAR
 /*
 %nonassoc IDENT UPIDENT CONST_BOOL CONST_INT
@@ -109,7 +109,7 @@ expr:
 	%prec IN			{ ENew(i, e) }
 | simple_expr_noconstr; nonempty_list(argument)
 	                                { EApp($1, $2) }
-| simple_expr; infix_op; simple_expr 	{ EInfix($1, $2, $3) }
+| expr; infix_op; expr 	{ EInfix($1, $2, $3) }
 | e1 = expr; DCOLON;
      e2 = expr				{ EInfix(e1, ListCons, e2) }
 | i = value_name; BACKSLASH; e = expr
