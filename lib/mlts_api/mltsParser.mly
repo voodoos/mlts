@@ -139,24 +139,29 @@ pattern_arrow:
 | p = pattern; ARROW; e = expr; { (p, e) }
 
 pattern:
-| BEGIN; p = pattern; END;		{ p }
-| constant				{ PConstant($1) }
-| value_path				{ PVal($1) }
+| sp = simple_pattern			{ sp }
 | i = value_name; BACKSLASH; p = pattern
 					{ PBind(i, p) }
 | v = value_path;
-    l = nonempty_list(pattern)
+    l = nonempty_list(simple_pattern)
       				        { PApp(v, l) }
+					
+| p1 = pattern; DCOLON; p2 = pattern	{ PListCons(p1, p2) }
+| BEGIN; p1 = pattern; COMMA; p2 = pattern; END
+  	      	       	      	   	{ PPair(p1, p2) }
+;
+
+simple_pattern:
+| BEGIN; p = pattern; END		{ p }
+| c = constr_path;			{ PConstr(c, []) }
+| constant				{ PConstant($1) }
+| value_path				{ PVal($1) }
 | c = constr_path;
     BEGIN;
     l = separated_nonempty_list(COMMA, pattern);
     END;
 					{ PConstr(c, l) }
-| p1 = pattern; DCOLON; p2 = pattern	{ PListCons(p1, p2) }
-| BEGIN; p1 = pattern; COMMA; p2 = pattern; END
-  	      	       	      	   	{ PPair(p1, p2) }
-| c = constr_path;			{ PConstr(c, []) }
-;
+
 
 constant:
 | CONST_INT				{ Int($1) }
