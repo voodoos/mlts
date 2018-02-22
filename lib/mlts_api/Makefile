@@ -2,4 +2,4 @@
 .PHONY: 	all 
 
 all:
-	ocamlbuild mlts_API.cma
+	ocamlbuild -use-ocamlfind mlts_API.cma
