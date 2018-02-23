@@ -1,7 +1,10 @@
 <h1 id="mlts-web">MLTS Web</h1>
-<p>A web interface to experiment with new concepts in MLTS. You can access a demo of this interface here.</p>
+<p>A web app designed to try and play with the NabMLTS (to be renamed) programming language. Source is hosted on <a href="https://github.com/voodoos/mlts">GitHub</a> as is the <a href="http://voodoos.github.io/mlts/">demo</a>.</p>
 <h2 id="concrete-syntax">Concrete syntax</h2>
 <p>MLTS concrete syntax is based on OCaml. A program written in MLTS not using the new constructs <code>nab in</code>, <code>new in</code>, <code>\</code> and <code>=&gt;</code> should compile with the <code>ocamlc</code> compiler.</p>
+<h2 id="how-it-works">How it works</h2>
+<p>Our protoype interpreter for MLTS is written in λProlog. When you press the &quot;Run&quot; button the MLTS concrete syntax is transpilled to it's λProlog counterpart and <a href="https://github.com/LPCIC/elpi">Elpi</a>, an embeddable λProlog interpreter written in OCaml, runs it.</p>
+<p>All this happens locally in your browser thanks to the js_of_ocaml <a href="https://github.com/ocsigen/js_of_ocaml">js_of_ocaml</a>.</p>
 <h2 id="build-dependencies">Build dependencies</h2>
 <p>Before attempting to build the project you should make sure that you have the following dependencies installed :</p>
 <ul>

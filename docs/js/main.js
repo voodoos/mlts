@@ -175,7 +175,9 @@ function show_resultas(results) {
 	row.append($('<td></td>').text(decodeURI(res.name)));
 
 	// Some ugly-regex-magic-based pretty printing :
-	row.append($('<td></td>')
+	var color = ((res.value.includes("error")) ? "red"
+		     : "black");
+	row.append($('<td></td>').css('color', color)
 		   .text(decodeURI(res.value)
 			 .replace(/i /g, '')
 			 .replace(/tt/g, 'True')

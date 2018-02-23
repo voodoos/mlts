@@ -60,6 +60,8 @@ let query prog =
      Elpi_API.Execute.loop k goalc
                            (fun () -> true)
                            (handle_out res iter);
+     
+  flush_all ();
      "{ \"output\": [" ^ !res
                            
 
@@ -68,9 +70,17 @@ let run () = query("run_one Name Prog Value.")
 let compile_and_run code =
   let lpcode = compile (Js.to_string code) in
   lpcode, query ("run_all N.")
-    
+
+let console (str : string) =
+  ignore (Js.Unsafe.meth_call
+            (Js.Unsafe.js_expr "console") "log"
+            [|Js.Unsafe.inject str|])
                  
 let _ =
+  (* Redirect output to console *)
+  Sys_js.set_channel_flusher stdout (console);
+  Sys_js.set_channel_flusher stderr (console);
+  
   (* Loading data folder in the pseudo-filesystem *)
   Data.load ();
 
