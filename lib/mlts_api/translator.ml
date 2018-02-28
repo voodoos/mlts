@@ -49,6 +49,9 @@ let toLPString p =
        (prog_string name str freevars ^ strNext), freevars2, datatypes @ datatypes2
 
   and aux_def env = function
+    | DLet(lb) ->
+       let name, params, code, freevars = aux_lb env lb in
+       nofixpoint name params code, freevars, []
     | DLetrec(lb) ->
        let name, params, code, freevars = aux_lb env lb in
        fixpoint name params code, freevars, []

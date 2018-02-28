@@ -68,6 +68,7 @@ module_item:
 ;
 
 definition:
+| LET;	 b = let_binding		{ DLet(b) }
 | LET; REC; b = let_binding		{ DLetrec(b) }
 | TYPE; n = typeconstr_name; EQUAL; ltc = nonempty_list(constr_decl)
 					{ DType(n, ltc) }

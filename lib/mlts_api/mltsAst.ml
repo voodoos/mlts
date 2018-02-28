@@ -5,6 +5,7 @@ and module_item =
   | IExpr of expr
 
 and definition =
+  | DLet of let_binding
   | DLetrec of let_binding
   | DType of typeconstr_name * (constr_decl list)
 
@@ -84,7 +85,7 @@ type var =
 type env = (var * arity) list
 
 let rec getDefName = function
-  | DLetrec(lb) -> getLetBindingName lb
+  | DLetrec(lb) | DLet(lb)-> getLetBindingName lb
   | DType(n, _) -> n
 and getLetBindingName = function
   | LBVal(n, _, _) -> n

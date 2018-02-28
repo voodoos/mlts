@@ -34,7 +34,7 @@ let rec maptm fapp fabs fvar term =
 ;;
 
 (*  let fv term  = maptm join (fun r -> na x\ rm x (r x)) (fun x -> [x]) term;; *)
-let rec fv term = 
+let fv term = 
 	maptm	(fun n -> fun m -> union n m) 
 		(fun r -> new X in  rm X (r X))
 		(fun x -> x::[])

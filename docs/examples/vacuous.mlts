@@ -3,7 +3,7 @@ type utm =
 | Abt of utm => utm
 ;;
 
-let rec vacp t =
+let vacp t =
   match t with
   | Abt(r) -> new X in
     let rec aux term =

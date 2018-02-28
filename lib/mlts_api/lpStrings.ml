@@ -76,19 +76,25 @@ let let_binding_val name args code =
   ^ code
       
       
-let func name args =
-  name ^ "\\"
-  ^  (List.fold_left (fun acc p -> acc ^ "lam " ^ p ^ "\\ ") " " args)
+let lams  args =
+  (List.fold_left (fun acc p -> acc ^ "lam " ^ p ^ "\\ ") " " args)
       
+let funcl name args =
+  name ^ "\\"
+  ^  (lams args)
+       
+let nofixpoint name args code =
+  "(" ^ lams args ^ code ^ ")"
+                                        
 let fixpoint name args code =
-  "(fixpt " ^ func name args ^ code ^ ")"
+  "(fixpt " ^ funcl name args ^ code ^ ")"
 
 let letin name args code body =
-  "(let (" ^ code ^ ") (" ^ func name args ^ " " ^ body ^ "))"
+  "(let (" ^ code ^ ") (" ^ funcl name args ^ " " ^ body ^ "))"
 
                                                             
 let letrecin name args code body =
-  "(let (fixpt " ^ func name args ^ " (" ^ code ^ ")) (" ^ name ^ "\\ (" ^ body ^ ")))"
+  "(let (fixpt " ^ funcl name args ^ " (" ^ code ^ ")) (" ^ name ^ "\\ (" ^ body ^ ")))"
       
 let app head args =
   (specials head)

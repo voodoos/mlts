@@ -39,6 +39,7 @@ let toString =
     | IExpr(e)::tl -> (aux_expr e) ^ ";; \n" ^ (aux tl)
 
   and aux_def = function
+    | DLet(lb) -> "let " ^ (aux_lb lb)
     | DLetrec(lb) -> "let rec " ^ (aux_lb lb)
     | DType(n, tl) -> "type " ^ n ^ " = "
                       ^ (List.fold_left (fun acc c -> acc ^ (aux_constrs c)) "" tl)
