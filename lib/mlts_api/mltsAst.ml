@@ -38,7 +38,7 @@ and aritytypexpr = typexpr * int
 and typexpr =
   | Cons of constr_path
   | Sum of aritytypexpr * aritytypexpr
-  | Arrow of aritytypexpr * aritytypexpr
+  | Bind of aritytypexpr * aritytypexpr
 
 and pattern_matching = rule list
 

@@ -149,10 +149,10 @@ let newc v  e =
 
                                           
 let type_constr name l =
-  name ^ " " ^ (to_separated_list " " l)
+  "(" ^ name ^ " " ^ (to_separated_list " " l) ^ ")"
 
 let cpair p1 p2 =
-  "(pr " ^ p1 ^ " " ^ p2 ^ ")"
+  "(pr (" ^ p1 ^ ") (" ^ p2 ^ "))"
 
                              
 let pair e1 e2 =

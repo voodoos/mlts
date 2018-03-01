@@ -59,6 +59,8 @@
 		     onClick="load('vacuous');">Vacuous</a>
 		  <a class="dropdown-item" href="#beta"
 		     onClick="load('beta');">Beta-reduction</a>
+		  <a class="dropdown-item" href="#beta2"
+		     onClick="load('beta2');">Beta-reduction 2</a>
 		  <a class="dropdown-item" href="#context"
 		     onClick="load('context');">Context</a>
 		  <a class="dropdown-item" href="#mapvar"
@@ -113,29 +115,6 @@
 	    <div id="editor" class="source">3 + 39;;
 
 35 + 7;;
-<!--	     
-type utm =
-| App of utm * utm
-| Abt of utm => utm
-;;
-	      
-
-let rec vacp t =
-  match t with
-  | Abt(r) -> new X in
-    let rec aux term =
-      match term with
-      | X -> false
-      | nab Y in (Y -> true)
-      | App(m, n) -> (aux m) && (aux n)
-      | Abt(r) -> new Y in (aux (r Y))
-    in (aux (r X))
-;;	
-	    
-	    vacp (Abt(x\ x));;
-	    vacp (Abt(x\ App(x, x)));;
-	    vacp (Abt(x\ Abt(y\ y)));;
-	    -->
 	  </div>
 	  </div>
 	</div>

@@ -23,11 +23,8 @@
 %token LET REC IN
 %token EOF
 %token NA NEW
+%token AT
 
-/*
-%right BEGIN
-%right LBRACK
-*/
 %nonassoc ELSE
 %right IN
 %right VBAR
@@ -108,13 +105,18 @@ expr:
 	%prec ARROW			{ EFun(i, e) }
 | NEW; i = constr_name; IN; e = expr
 	%prec IN			{ ENew(i, e) }
-| simple_expr_noconstr; nonempty_list(argument)
-	                                { EApp($1, $2) }
+| se = simple_expr_noconstr;  option(AT);
+  	a = nonempty_list(argument)
+	                                { EApp(se, a) }
 | expr; infix_op; expr 			{ EInfix($1, $2, $3) }
 | e1 = expr; DCOLON;
      e2 = expr				{ EInfix(e1, ListCons, e2) }
 | i = value_name; BACKSLASH; e = expr
       %prec BACKSLASH			{ EBind(i, e) }
+      
+/*| c = constr_path; s = simple_expr
+					{ EConstr(c, [s]) }*/
+    
 | c = constr_path;
     BEGIN;
     l = expr_list;
@@ -134,7 +136,7 @@ arityp_expr:
 |  tya1 = arityp_expr;
    DARROW;  tya2 = arityp_expr		{ let ty1, a1 = tya1
    	   	  			  and ty2, a2 = tya2   in
-   	   	  	 		  Arrow(tya1, tya2),
+   	   	  	 		  Bind(tya1, tya2),
 					  1 + (max a1 a2)  }
 ;
 
@@ -158,13 +160,15 @@ pattern:
 | sp = simple_pattern			{ sp }
 | i = value_name; BACKSLASH; p = pattern
 					{ PBind(i, p) }
-| v = value_path;
+| v = value_path; option(AT);
     l = nonempty_list(simple_pattern)
       				        { PApp(v, l) }
 					
 | p1 = pattern; DCOLON; p2 = pattern	{ PListCons(p1, p2) }
 | BEGIN; p1 = pattern; COMMA; p2 = pattern; END
   	      	       	      	   	{ PPair(p1, p2) }
+/*| c = constr_path; s = simple_pattern
+					{ PConstr(c, [s]) }*/
 | c = constr_path;
     BEGIN;
     l = separated_nonempty_list(COMMA, pattern);

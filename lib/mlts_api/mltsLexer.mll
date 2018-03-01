@@ -15,12 +15,14 @@
 	"of",	    OF;
 	"then",     THEN;
 	"else",     ELSE;
-	"match",     MATCH;
+	"match",    MATCH;
 	"with",     WITH;
 	"type",	    TYPE;
 	"nab",	    NA;
-	"fun",		FUN;
-	"new", 		NEW;
+	"fun",	    FUN;
+	"new", 	    NEW;
+	"begin",    BEGIN;
+	"end", 	    END;
       ] ;
     fun s ->
       try  Hashtbl.find h s
@@ -100,6 +102,8 @@ rule token = parse
       { OR }
   | "|"
       { VBAR }
+  | "@"
+      { AT }
   | _
       { lexing_error lexbuf  }
   | eof

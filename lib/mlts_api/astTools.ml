@@ -51,7 +51,7 @@ let toString =
   and aux_typ = function
     | Cons(n) -> n
     | Sum((t1, a1), (t2, a2)) -> (aux_typ t1) ^ "("^(string_of_int a1)^") * " ^(aux_typ t2) ^ "("^(string_of_int a2)^")"
-    | Arrow((t1, a1), (t2, a2)) -> "(" ^ (aux_typ t1) ^ "("^(string_of_int a2)^")" ^" -> " ^(aux_typ t2) ^ "("^(string_of_int a2)^")" ^ ")"
+    | Bind((t1, a1), (t2, a2)) -> "(" ^ (aux_typ t1) ^ "("^(string_of_int a2)^")" ^" -> " ^(aux_typ t2) ^ "("^(string_of_int a2)^")" ^ ")"
                                           
   and aux_lb = function
     | LBVal(name, pl, expr) -> name

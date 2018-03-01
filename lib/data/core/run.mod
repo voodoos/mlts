@@ -40,8 +40,8 @@ run_one Name Prog Value :-
 	if (typeof P T) (
 	Size is size Name,
 	if (Size > 4) (
-	   Deb is substring Name 0 4,
-	   if (Deb = "test") (
+	   Deb is substring Name 0 3,
+	   if (Deb = "val") (
 	      eval P V,
 	      term_to_string V Value
 	    ) (fail)
