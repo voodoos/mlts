@@ -1,0 +1,33 @@
+type utm =
+  | App of utm * utm
+  | Abt of utm => utm
+;;
+
+let rec subst t x u =
+  match (x, t) with
+  | nab X in (X, X) -> u
+  | nab X Y in (X, Y) -> Y
+  | (x, App(m, n)) -> App(subst m x u, subst n x u)
+  | (x, Abt(r)) -> Abt(y \ subst (r @ y) x u)
+;;
+
+let rec beta t =
+  match t with
+  | App(m, n) ->
+    let m = beta m in
+    let n = beta n in
+    begin 
+        match m with
+        | Abt(r) -> new X in beta (subst (r @ X) X n)
+        | w -> App(m, n)
+    end
+  | Abt(r) -> Abt (y \ beta (r @ y))
+  | nab X in X -> X
+;;
+
+
+new X in Abt(y\ subst (App(X, X)) X (App(y, y)));;
+beta (Abt(x\ x));;
+beta (Abt(x\ Abt(y\ App(x, y))));;
+beta (App(Abt(x\ x), Abt(y\ App(y, y))));;
+(* beta (App(Abt(x\ App(x, x)), Abt(y\ App(y, y))));; *)
