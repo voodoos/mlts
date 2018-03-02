@@ -129,14 +129,15 @@ expr:
 | i = value_name; BACKSLASH; e = expr
       %prec BACKSLASH			{ EBind(i, e) }
       
-| c = constr_path; s = trivial_expr
-					{ EConstr(c, [s]) }
-    
 | c = constr_path;
-    BEGIN;
-    l = expr_list;
-    END;				{ EConstr(c, l) }
+  args = constr_expr_args               { EConstr(c, args) }
 ;
+
+constr_expr_args:
+| s = trivial_expr                      { [s] }
+| BEGIN; l = expr_list; END;		{ l }
+;
+
 
 expr_list:
 | expr	{ [$1] }
@@ -180,26 +181,26 @@ pattern:
       				        { PApp(v, l) }
 					
 | p1 = pattern; DCOLON; p2 = pattern	{ PListCons(p1, p2) }
-| c = constr_path; p = trivial_pattern  { PConstr(c, [p]) }
-| c = constr_path;
-    BEGIN;
-    l = separated_nonempty_list(COMMA, pattern);
-    END;
-					{ PConstr(c, l) }
+| c = constr_path; l = constr_pat_args  { PConstr(c, l) }
+;
+
+constr_pat_args:
+| p = trivial_pattern                   { [p] }
+| BEGIN; l = separated_nonempty_list(COMMA, pattern); END;
+					{ l }
 ;
 
 simple_pattern:
+| trivial_pattern                       { $1 }
 | BEGIN; p = pattern; END		{ p }
 | BEGIN; p1 = pattern; COMMA; p2 = pattern; END
-                                        { PPair(p1, p2) }
-| trivial_pattern                       { $1 }
+;                                        { PPair(p1, p2) }
 
 trivial_pattern:
 | constr_path   			{ PConstr($1, []) }
 | constant				{ PConstant($1) }
 | value_path				{ PVal($1) }
-
-
+;
 
 constant:
 | CONST_INT				{ Int($1) }
