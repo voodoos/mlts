@@ -8,7 +8,7 @@ let rec subst t x u =
   | nab X in (X, X) -> u
   | nab X Y in (X, Y) -> Y
   | (x, App(m, n)) -> App(subst m x u, subst n x u)
-  | (x, Abt(r)) -> Abt(y \ subst (r @ y) x u)
+  | (x, Abt r) -> Abt(y \ subst (r @ y) x u)
 ;;
 
 let rec beta t =
@@ -18,10 +18,10 @@ let rec beta t =
     let n = beta n in
     begin 
         match m with
-        | Abt(r) -> new X in beta (subst (r @ X) X n)
+        | Abt r -> new X in beta (subst (r @ X) X n)
         | w -> App(m, n)
     end
-  | Abt(r) -> Abt (y \ beta (r @ y))
+  | Abt r -> Abt (y \ beta (r @ y))
   | nab X in X -> X
 ;;
 

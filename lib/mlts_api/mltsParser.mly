@@ -165,10 +165,7 @@ pattern:
       				        { PApp(v, l) }
 					
 | p1 = pattern; DCOLON; p2 = pattern	{ PListCons(p1, p2) }
-| BEGIN; p1 = pattern; COMMA; p2 = pattern; END
-  	      	       	      	   	{ PPair(p1, p2) }
-/*| c = constr_path; s = simple_pattern
-					{ PConstr(c, [s]) }*/
+| c = constr_path; p = trivial_pattern  { PConstr(c, [p]) }
 | c = constr_path;
     BEGIN;
     l = separated_nonempty_list(COMMA, pattern);
@@ -178,9 +175,15 @@ pattern:
 
 simple_pattern:
 | BEGIN; p = pattern; END		{ p }
-| c = constr_path;			{ PConstr(c, []) }
+| BEGIN; p1 = pattern; COMMA; p2 = pattern; END
+                                        { PPair(p1, p2) }
+| trivial_pattern                       { $1 }
+
+trivial_pattern:
+| constr_path   			{ PConstr($1, []) }
 | constant				{ PConstant($1) }
 | value_path				{ PVal($1) }
+
 
 
 constant:
