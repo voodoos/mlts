@@ -81,15 +81,30 @@ let_binding:
 | v = value_name; p = list(value_name); EQUAL; e = expr	{ LBVal(v, p, e) }
 ;
 
+constr_expr:
+| c = constr_path                       { EConstr(c, []) }
+;
+
+trivial_expr_noconstr:
+| constant                              { EConst($1) }
+| value_path                            { EVal($1) }
+;
+
 simple_expr_noconstr:
-| constant				{ EConst($1) }
-| BEGIN; e = expr; END			{ e }
-| value_path				{ EVal($1) }
+| trivial_expr_noconstr                 { $1 }
+| BEGIN; e = expr; END                  { e }
 | BEGIN; e1 = expr; COMMA; e2 = expr; END
-					{ EPair(e1, e2) }
+;
+                                        { EPair(e1, e2) }
+trivial_expr:
+| trivial_expr_noconstr                 { $1 }
+| constr_expr                           { $1 }
+;
+
 simple_expr:
-| simple_expr_noconstr			{ $1 }
-| c = constr_path      			{ EConstr(c, []) }
+| simple_expr_noconstr                  { $1 }
+| constr_expr                           { $1 }
+;
 
 expr:
 | simple_expr	                        { $1 }
@@ -114,18 +129,19 @@ expr:
 | i = value_name; BACKSLASH; e = expr
       %prec BACKSLASH			{ EBind(i, e) }
       
-/*| c = constr_path; s = simple_expr
-					{ EConstr(c, [s]) }*/
-    
 | c = constr_path;
-    BEGIN;
-    l = expr_list;
-    END;				{ EConstr(c, l) }
+  args = constr_expr_args               { EConstr(c, args) }
 ;
+
+constr_expr_args:
+| s = trivial_expr                      { [s] }
+| BEGIN; l = expr_list; END;		{ l }
+;
+
 
 expr_list:
 | expr	{ [$1] }
-|  expr; COMMA; expr_list { $1::$3 }
+| expr; COMMA; expr_list { $1::$3 }
 
 arityp_expr:
 | typeconstr_name			{ Cons($1), 0 }
@@ -165,23 +181,26 @@ pattern:
       				        { PApp(v, l) }
 					
 | p1 = pattern; DCOLON; p2 = pattern	{ PListCons(p1, p2) }
-| BEGIN; p1 = pattern; COMMA; p2 = pattern; END
-  	      	       	      	   	{ PPair(p1, p2) }
-/*| c = constr_path; s = simple_pattern
-					{ PConstr(c, [s]) }*/
-| c = constr_path;
-    BEGIN;
-    l = separated_nonempty_list(COMMA, pattern);
-    END;
-					{ PConstr(c, l) }
+| c = constr_path; l = constr_pat_args  { PConstr(c, l) }
+;
+
+constr_pat_args:
+| p = trivial_pattern                   { [p] }
+| BEGIN; l = separated_nonempty_list(COMMA, pattern); END;
+					{ l }
 ;
 
 simple_pattern:
+| trivial_pattern                       { $1 }
 | BEGIN; p = pattern; END		{ p }
-| c = constr_path;			{ PConstr(c, []) }
+| BEGIN; p1 = pattern; COMMA; p2 = pattern; END
+;                                        { PPair(p1, p2) }
+
+trivial_pattern:
+| constr_path   			{ PConstr($1, []) }
 | constant				{ PConstant($1) }
 | value_path				{ PVal($1) }
-
+;
 
 constant:
 | CONST_INT				{ Int($1) }
