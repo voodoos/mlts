@@ -169,8 +169,12 @@ let toLPString p =
        let pattern, pararity = aux_pattern env p in
        
        let pararity =
-         List.map (fun (p, a) -> p, max a (Arity.maxArityInExpr p e))
-                  pararity in
+         List.map
+           (fun (n, a) ->
+             n, max (max a (Arity.maxArityInExpr n e))
+                    (Arity.maxArityInPattern constructors n p)
+           )
+           pararity in
        
        let expr, freevars = aux_expr (metaparams_to_env env pararity) e in
        
@@ -219,11 +223,11 @@ let toLPString p =
           
           let parities = seconds (List.flatten (seconds pl)) in
 
-          (*
+          
                    print_string "\n\nParams: "; print_list (fun x -> x) params;
                    print_string "\nPArities: "; print_list (string_of_int) parities;
                    print_string "\nArities: "; print_list (string_of_int) arities;
-           *)
+           
 	  (*let marities = List.map2 (fun l1 l2 -> max l1 l2)
                                             parities arities in*)
           let pararity = List.map2 (fun l1 l2 -> l1, l2)
@@ -249,8 +253,11 @@ let toLPString p =
   in
 
   let progs, _, types = aux [] p in
+  let evalsig, evalmod, typing
+    = Datatypes_translation.translate_types constructors in
+  
   print_string (string_of_constructors constructors);
-  progs, "", "",  "" (* types, typing, eval*)
+  progs, evalsig, evalmod, typing
 
 
 
@@ -266,16 +273,16 @@ let make_lp_file prog =
   output_string progmod "module progs_gen.\n\n";
   output_string progmod progs;
 
-  (* datatypes.mod 
+  (* datatypes.mod  *)
   output_string dtmod "module datatypes.\n\n";
   output_string dtmod typing;
-  output_string dtmod eval; *)
+  output_string dtmod eval; 
 
 
-  (* datatypes.sig
+  (* datatypes.sig *)
   output_string dtsig "sig datatypes.\naccum_sig eval.
                        accum_sig typing.\n\n";
-  output_string dtsig types; *)
+  output_string dtsig types; 
 
   
   close_out progmod;

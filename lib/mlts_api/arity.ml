@@ -2,7 +2,7 @@ open MltsAst
 
 let fold_max_f f =
   List.fold_left
-    (fun macc n -> max macc (f n)) 0 
+    (fun macc n -> max macc (f n)) (-1) 
        
 let maxArityInExpr name =
   let rec aux = function
@@ -21,6 +21,7 @@ let maxArityInExpr name =
     | EInfix(e1, _, e2) | EPair(e1, e2) -> max (aux e1) (aux e2)
     | EConst(_) | EVal(_) -> 0
     | EConstr(vn, el) ->
+       (* TODO seems wrong, see maxArityInPattern *)
        let maxe = fold_max_f (aux) el in
        if vn = name then
          max (List.length el) maxe
@@ -44,4 +45,42 @@ let maxArityInExpr name =
     | PBind(_, rp) -> aux_pattern rp
     | PListCons(lp, rp) | PPair(lp, rp) -> max (aux_pattern lp) (aux_pattern rp)
                                
+  in aux
+
+let maxArityInPattern constrs name =
+  let rec aux = function
+    | PVal(n) when n = name -> 0
+    | PVal(_) | PConstant(_) -> -1
+    | PBind(n, p) -> aux p
+    | PApp(n, pl) when n = name
+      -> List.length pl
+    | PApp(_, pl) -> fold_max_f aux pl
+    | PConstr(c, pl) ->
+       let expected_arities = Hashtbl.find constrs c in
+       let pl_arities = List.map2 (maxArityUnderConstr)
+                                  expected_arities
+                                  pl in
+       List.fold_left (max) 0 pl_arities
+    | PListCons(p1, p2) | PPair(p1, p2)
+      -> max (aux p1) (aux p2)
+             
+  and maxArityUnderConstr exp pattern =
+    match pattern with
+    | PVal(n) when n = name
+      -> exp
+    | PVal(_) | PConstant(_) -> -1
+    | PBind(_, p) -> aux p
+    | PApp(n, pl) when n = name
+      -> exp - (List.length pl)
+    | PApp(_, pl) -> fold_max_f (aux) pl
+    | PConstr(c, pl)
+      -> 
+       let expected_arities = Hashtbl.find constrs c in
+       let pl_arities = List.map2 (maxArityUnderConstr)
+                                  expected_arities
+                                  pl in
+       List.fold_left (max) 0 pl_arities
+    | PListCons(p1, p2) | PPair(p1, p2)
+      -> max (aux p1) (aux p2)
+             
   in aux

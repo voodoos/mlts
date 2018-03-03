@@ -30,4 +30,5 @@ new X in Abt(y\ subst (App(X, X)) X (App(y, y)));;
 beta (Abt(x\ x));;
 beta (Abt(x\ Abt(y\ App(x, y))));;
 beta (App(Abt(x\ x), Abt(y\ App(y, y))));;
+beta (App(Abt(x\ Abt(y\ App(y, x))), Abt(x\ x)));;
 (* beta (App(Abt(x\ App(x, x)), Abt(y\ App(y, y))));; *)
