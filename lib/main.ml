@@ -30,7 +30,7 @@ let compile code =
                    \n\n" ^ typmod) , 0, 0, true
   with Mlts_API.Error(s, line, char)
        -> (Js.string s, line, char,  false)
-     | _ -> Js.string "Unknown error.", 0, 0, false
+(*  | _ -> Js.string "Unknown error.", 0, 0, false *)
 
 let escape s =
   Js.to_string (Js.encodeURI (Js.string s))

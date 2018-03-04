@@ -25,8 +25,8 @@ let seconds l = List.map (snd) l
 let specials = 
   let h = Hashtbl.create 17 in
   List.iter (fun (s, k) -> Hashtbl.add h s k)
-            [ "List.hd", "car";
-              "List.tl", "cdr";
+            [ "List.v_hd", "car";
+              "List.v_tl", "cdr";
               (*"App", "app";
               "Appv", "ap";
               "Abt", "abt";
