@@ -56,7 +56,7 @@ let maxArityInPattern constrs name =
       -> List.length pl
     | PApp(_, pl) -> fold_max_f aux pl
     | PConstr(c, pl) ->
-       let _, expected_arities =
+       let _, expected_arities, _ =
          Hashtbl.find constrs
                       (String.uncapitalize_ascii c) in
        let pl_arities = List.map2 (maxArityUnderConstr)
@@ -77,7 +77,7 @@ let maxArityInPattern constrs name =
     | PApp(_, pl) -> fold_max_f (aux) pl
     | PConstr(c, pl)
       -> 
-       let _, expected_arities =
+       let _, expected_arities, _ =
          Hashtbl.find constrs
                       (String.uncapitalize_ascii c)in
        let pl_arities = List.map2 (maxArityUnderConstr)

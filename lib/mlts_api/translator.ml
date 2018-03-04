@@ -16,11 +16,11 @@ let add_constr constructors tname = function
      let aritylist = arity_list_of_type_term ate in
      Hashtbl.add constructors
                  (String.uncapitalize_ascii n)
-                 (tname, aritylist)
+                 (tname, aritylist, ate)
   | Simple(n) ->
      Hashtbl.add constructors
                  (String.uncapitalize_ascii n)
-                 (tname, [])
+                 (tname, [], (Cons("empty"), 0))
 
 let remove_constr constructors = function
   | Simple(n) | Of(n, _) ->
@@ -34,7 +34,7 @@ let string_of_constructor n tn al =
 
 let string_of_constructors c =
     Hashtbl.fold
-      (fun n (tn, al) acc ->
+      (fun n (tn, al, _) acc ->
         acc ^ "; " ^ (string_of_constructor n tn al))
       c ""
 
@@ -143,7 +143,7 @@ let toLPString p =
        let fvs = List.flatten (seconds exprs) in
        (try	
 	  let n = String.uncapitalize_ascii n in
-	  let _, constr = Hashtbl.find constructors n in
+	  let _, constr, _ = Hashtbl.find constructors n in
 	  
 	  (*print_string ("\nFound : " ^n^ "\n");
 			List.iter (print_int) constr;*)
@@ -222,7 +222,7 @@ let toLPString p =
     | PConstr(cp, pls) ->
        (try
           let cp = String.uncapitalize_ascii cp in
-	  let _, arities = Hashtbl.find
+	  let _, arities, _ = Hashtbl.find
                              constructors cp
                               in
 	  let name = if arities = []
@@ -268,7 +268,7 @@ let toLPString p =
   let evalsig, evalmod, typing
     = Datatypes_translation.translate_types constructors in
   
-  print_string (string_of_constructors constructors);
+  (* print_string (string_of_constructors constructors);*)
   progs, evalsig, (evalmod ^ typing)
 
 

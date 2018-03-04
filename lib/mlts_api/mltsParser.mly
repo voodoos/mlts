@@ -144,6 +144,7 @@ expr_list:
 | expr; COMMA; expr_list { $1::$3 }
 
 arityp_expr:
+| BEGIN; arityp_expr; END;		{ $2 }
 | typeconstr_name			{ Cons($1), 0 }
 | tya1 = arityp_expr;
   STAR; tya2 = arityp_expr		{ let ty1, a1 = tya1

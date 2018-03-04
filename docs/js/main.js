@@ -186,7 +186,8 @@ function show_resultas(results) {
 			 .replace(/ab/g, 'Abt')
 			 .replace(/ap/g, 'App')
 			 .replace(/c_/g, '')
-			 .replace(/cns \((.*?)\) (.*?)/g, '$1::$2')
+			 .replace(/cns \((.*?)\) (.*?)/g,
+				  '$1::$2')
 			 .replace(/::\((.*::.*)\)/g, '::$1')
 			 .replace(/::\((.*::.*)\)/g, '::$1')
 			 .replace(/::\((.*::.*)\)/g, '::$1')

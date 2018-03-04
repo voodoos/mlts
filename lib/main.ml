@@ -30,7 +30,7 @@ let compile code =
                    \n\n" ^ typmod) , 0, 0, true
   with Mlts_API.Error(s, line, char)
        -> (Js.string s, line, char,  false)
-(*| _ -> Js.string "Unknown error.", 0, 0, false*)
+     | _ -> Js.string "Unknown error.", 0, 0, false
 
 let escape s =
   Js.to_string (Js.encodeURI (Js.string s))
@@ -80,9 +80,7 @@ let compile_and_run code =
   lpcode, query ("run_all N.")
 
 let console (str : string) =
-  ignore (Js.Unsafe.meth_call
-            (Js.Unsafe.js_expr "console") "log"
-            [|Js.Unsafe.inject str|])
+  ignore (Js.Unsafe.eval_string ("console.log(decodeURI('" ^ (escape str) ^"'))"))
                  
 let _ =
   (* Redirect output to console *)
@@ -93,10 +91,9 @@ let _ =
   Data.load ();
 
   (* Initialize Elpi *)
-  ignore (Elpi_API.Setup.init ~silent:true [] "");
+  ignore (Elpi_API.Setup.init ~silent:false [] "");
   let parsed =  Elpi_API.Parse.program ["core/run.mod"] in
   kernel := Some(Elpi_API.Compile.program [parsed]);
-  
   
   (* JS API *)
   Js.export "compile" (fun jstr -> compile (Js.to_string jstr)) ;

@@ -1,3 +1,4 @@
+open MltsAst
 let rec tm_list = function
     0 -> ""
   | i -> "tm -> " ^ (tm_list (i - 1))
@@ -41,7 +42,7 @@ let rec pin_list = function
 
                               
 
-let types_sig name (tn, arities) acc =
+let types_sig name (tn, arities, _) acc =
   let name = String.uncapitalize_ascii name in
   "\ntype " ^tn ^ " ty."
   ^ "\ntype " ^ name ^ " "
@@ -139,7 +140,7 @@ let eval_clauses name arities n =
   else 
     specialp name arities n
               
-let types_mod name (tn, arities) acc =
+let types_mod name (tn, arities, _) acc =
   let na = List.length arities in
   let name = String.uncapitalize_ascii name in
   let copy = copy_clauses name arities na in
@@ -191,12 +192,28 @@ let typing_exp name tn arities n =
   else 
     "\ntypeof " ^ name ^ " ("
     ^ (arrows tn (List.length arities)) ^ ")."
+
+
+let typeof_1 name tn arities n (typ, a) =
+  let rec typing_list2 = function
+      Cons(c) -> "typeof " ^ c ^ " " ^ tn ^ " "
+    | Sum((t1, a1), (t2, a2)) -> (typing_list2 t1) ^ ", " ^ (typing_list2 t2)
+    | Bind((t1, a1), (t2, a2)) ->
+       "pi x\\ (" ^ (typing_list2 t1)
+                                  ^ " => " ^ (typing_list2 t2) ^ ")"
+  in
+  "\ntypeof (" ^ name ^ " " ^ (var_list "X" n) ^ ") " ^ tn ^ " :- "
+  ^ (typing_list2 typ)
+    
+
+                                            
   
-let types_typing name (tn, arities) acc =
+let types_typing name (tn, arities, typ) acc =
   let n = List.length arities in
   let name = String.uncapitalize_ascii name in
   (typing_val (name ^ "v") tn arities n)
   ^ (typing_exp name tn arities n)
+  (*   ^ "\n\nPouet : " ^ (typeof_1 name tn arities n typ) ^"\n\n" *)
   ^ acc
 
 let translate_types constr =
