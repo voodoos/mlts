@@ -26,15 +26,15 @@ typeof (i I) int                        & typeof zerop   (arr int bool).
 typeof greater (arr int (arr int bool)) & typeof minus   (arr int (arr int int)).
 typeof sum     (arr int (arr int int))  & typeof times   (arr int (arr int int)).
 
-typeof app     (arr utm (arr utm utm)).
+%typeof app     (arr utm (arr utm utm)).
 
 %%%% New features to MLTS
 
 % Below, typing of new and nab allows for introducing a new nominal of any type.
 typeof (new R) A     :- pi x\ typeof x B   => typeof (R x) A.
-typeof (abt R) utm   :- pi x\ typeof x utm => typeof (R x) utm.
-typeof (ab  R) utm   :- pi x\ typeof x utm => typeof (R x) utm.
-typeof (ap M N) utm  :- typeof M utm, typeof N utm.
+%typeof (abt R) utm   :- pi x\ typeof x utm => typeof (R x) utm.
+%typeof (ab  R) utm   :- pi x\ typeof x utm => typeof (R x) utm.
+%typeof (ap M N) utm  :- typeof M utm, typeof N utm.
 
 typeof (match Exp Rules) B :- typeof Exp A, typematch A Rules B.
 

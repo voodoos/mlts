@@ -27,10 +27,10 @@ let specials =
   List.iter (fun (s, k) -> Hashtbl.add h s k)
             [ "List.hd", "car";
               "List.tl", "cdr";
-              "App", "app";
+              (*"App", "app";
               "Appv", "ap";
               "Abt", "abt";
-              "Abtv", "ab"] ;
+              "Abtv", "ab"*)] ;
   fun s ->
   try  Hashtbl.find h s
   with Not_found -> s

@@ -12,8 +12,7 @@ let parse_and_translate mlts_prog =
   try
     let p = MltsParser.main MltsLexer.token tokens in
 
-    let prog, _, _, _ = Translator.toLPString p in
-    prog
+    Translator.toLPString p
   with Translator.TranslatorError(s, pos)
        -> raise (Error("Translation error : " ^ s, 0, 0))
      | MltsLexer.Error(s, pos)

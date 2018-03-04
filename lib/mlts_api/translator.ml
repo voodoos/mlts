@@ -11,25 +11,31 @@ let rec arity_list_of_type_term = function
   | (Bind(_,_), a) -> [a]
   | (Sum((_, a1), ate2), _) -> a1::(arity_list_of_type_term ate2)
 
-let add_constr constructors = function
+let add_constr constructors tname = function
   | Of(n, ate) ->
      let aritylist = arity_list_of_type_term ate in
-     Hashtbl.add constructors n aritylist
+     Hashtbl.add constructors
+                 (String.uncapitalize_ascii n)
+                 (tname, aritylist)
   | Simple(n) ->
-     Hashtbl.add constructors n []
+     Hashtbl.add constructors
+                 (String.uncapitalize_ascii n)
+                 (tname, [])
 
 let remove_constr constructors = function
-  | Simple(n) | Of(n, _) -> Hashtbl.remove constructors n
+  | Simple(n) | Of(n, _) ->
+     Hashtbl.remove constructors
+                    (String.uncapitalize_ascii n)
 
-let string_of_constructor n al =
+let string_of_constructor n tn al =
   "(" ^ n ^ ": "
   ^ (to_separated_list ~nop:true ","
-                       (List.map (string_of_int) al)) ^ ")"
+                       (List.map (string_of_int) al)) ^ " -> " ^ tn ^")"
 
 let string_of_constructors c =
     Hashtbl.fold
-      (fun n al acc ->
-        acc ^ "; " ^ (string_of_constructor n al))
+      (fun n (tn, al) acc ->
+        acc ^ "; " ^ (string_of_constructor n tn al))
       c ""
 
 
@@ -69,7 +75,7 @@ let toLPString p =
     | DType(name, clist) -> 
        (* When encountering a type declaration, we add the type constructors to 
 		the constructors Hashtbl with the arguments arities as a list *)
-       List.iter (add_constr constructors) clist;
+       List.iter (add_constr constructors name) clist;
        "", [], []
 
   and aux_lb env = function
@@ -136,8 +142,8 @@ let toLPString p =
        let codes = List.map (fst) exprs in
        let fvs = List.flatten (seconds exprs) in
        (try	
-	  let constr = Hashtbl.find constructors n in
 	  let n = String.uncapitalize_ascii n in
+	  let _, constr = Hashtbl.find constructors n in
 	  
 	  (*print_string ("\nFound : " ^n^ "\n");
 			List.iter (print_int) constr;*)
@@ -159,7 +165,7 @@ let toLPString p =
     | EFun(v, e) -> let code, fv = aux_expr (Local(v)::env) e in
                     func v code,fv 
     | ENew(v, e) ->
-       add_constr constructors (Simple(v));
+       add_constr constructors "" (Simple(v));
        let code, fv =  aux_expr env e in
        remove_constr constructors (Simple(v));
        newc v code,fv 
@@ -181,10 +187,13 @@ let toLPString p =
        matcher_arrow pararity pattern expr, freevars
                                               
     | RNa(nl, p, e) ->
-       List.iter (fun n -> add_constr constructors (Simple(n))) nl;
+       List.iter (fun n -> add_constr constructors "" (Simple(n))) nl;
        let pattern, pararity = aux_pattern env p in
        let pararity =
-         List.map (fun (p, a) -> p, max a (Arity.maxArityInExpr p e))
+         List.map (fun (n, a) ->
+             n, max (max a (Arity.maxArityInExpr n e))
+                    (Arity.maxArityInPattern constructors n p)
+           )
                   pararity in
 
        let expr, freevars = aux_expr (metaparams_to_env env pararity) e in
@@ -212,9 +221,12 @@ let toLPString p =
        vn ^ (to_separated_list ~first:true " " (firsts pl)) , [vn, List.length pls]
     | PConstr(cp, pls) ->
        (try
-	  let arities = Hashtbl.find constructors cp in
+          let cp = String.uncapitalize_ascii cp in
+	  let _, arities = Hashtbl.find
+                             constructors cp
+                              in
 	  let name = if arities = []
-                     then String.uncapitalize_ascii cp
+                     then cp
                      else specials (cp ^ "v")
           in
 	  let pl = List.map (aux_pattern env) pls in
@@ -223,11 +235,11 @@ let toLPString p =
           
           let parities = seconds (List.flatten (seconds pl)) in
 
-          
+(*          
                    print_string "\n\nParams: "; print_list (fun x -> x) params;
                    print_string "\nPArities: "; print_list (string_of_int) parities;
                    print_string "\nArities: "; print_list (string_of_int) arities;
-           
+ *)
 	  (*let marities = List.map2 (fun l1 l2 -> max l1 l2)
                                             parities arities in*)
           let pararity = List.map2 (fun l1 l2 -> l1, l2)
@@ -257,7 +269,7 @@ let toLPString p =
     = Datatypes_translation.translate_types constructors in
   
   print_string (string_of_constructors constructors);
-  progs, evalsig, evalmod, typing
+  progs, evalsig, (evalmod ^ typing)
 
 
 
@@ -267,7 +279,7 @@ let make_lp_file prog =
   let dtmod = open_out "export/datatypes.mod" in
   let dtsig = open_out "export/datatypes.sig" in
   
-  let progs,  types, typing, eval = toLPString prog in
+  let progs,  types, typingeval = toLPString prog in
 
   (* progs_gen.mod *)
   output_string progmod "module progs_gen.\n\n";
@@ -275,13 +287,12 @@ let make_lp_file prog =
 
   (* datatypes.mod  *)
   output_string dtmod "module datatypes.\n\n";
-  output_string dtmod typing;
-  output_string dtmod eval; 
+  output_string dtmod typingeval; 
 
 
   (* datatypes.sig *)
   output_string dtsig "sig datatypes.\naccum_sig eval.
-                       accum_sig typing.\n\n";
+  accum_sig typing.\n\n";
   output_string dtsig types; 
 
   

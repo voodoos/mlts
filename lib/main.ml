@@ -7,22 +7,30 @@ let kernel = ref None
 let compile code =
   try
     (* First mlts => lprolog *)
-    let lpcode = Mlts_API.parse_and_translate code in
+    let lpcode, typsig, typmod =
+      Mlts_API.parse_and_translate code in
 
-    (* updating the pseudo file *)
+    (* updating the pseudo files *)
     Sys_js.update_file "core/progs_gen.mod" lpcode;
+    Sys_js.update_file "core/datatypes.sig" typsig;
+    Sys_js.update_file "core/datatypes.mod" typmod;
 
     (* recompiling lprolog code *)
     let parsed =
       Elpi_API.Parse.program
-        ["core/progs_gen.mod";"core/run.mod"] in
+        ["core/datatypes.mod";
+         "core/progs_gen.mod";
+         "core/run.mod";] in
     kernel := Some(Elpi_API.Compile.program [parsed]);
 
     (* We return the lprolog code for reference *)
-    Js.string lpcode, 0, 0, true
+    Js.string (lpcode ^ "\nDatatypessig :
+                         \n\n" ^ typsig
+               ^  "\nDatatypesmod :
+                   \n\n" ^ typmod) , 0, 0, true
   with Mlts_API.Error(s, line, char)
        -> (Js.string s, line, char,  false)
-     | _ -> Js.string "Unknown error.", 0, 0, false
+(*| _ -> Js.string "Unknown error.", 0, 0, false*)
 
 let escape s =
   Js.to_string (Js.encodeURI (Js.string s))

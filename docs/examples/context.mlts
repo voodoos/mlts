@@ -7,7 +7,7 @@ let rec mapvar f t =
   match t with
   | App(m, n) -> App(mapvar (f) m, mapvar (f) n)
   | Abt(r) -> Abt(x\ mapvar (f) (r x))
-  | nab X in X -> f x
+  | nab X in X -> f X
 ;;
 
 let rec lookup sub term =

@@ -227,7 +227,7 @@ constr_path:
 | constr_name				{ $1 }
 
 value_name:
-| i = IDENT				{ i }
+| i = IDENT				{ "v_"^i }
 ;
 
 module_name:
@@ -235,11 +235,11 @@ module_name:
 ;
 
 constr_name:
-| i = UPIDENT				{ i }
+| i = UPIDENT				{ "c_"^i }
 ;
 
 typeconstr_name:
-| i = IDENT				{ i }
+| i = IDENT				{ "tc_"^i }
 ;
 
 %inline infix_op:

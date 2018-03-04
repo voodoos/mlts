@@ -11,3 +11,4 @@ cp ../../../code/parser/translator.ml .
 cp ../../../code/parser/datatypes_translation.ml .
 
 sed -i '' 's/@/arobase/g' lpStrings.ml
+sed -i '' 's/nil/[]/g' datatypes_translation.ml
