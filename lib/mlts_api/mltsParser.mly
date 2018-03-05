@@ -60,8 +60,8 @@ module_items:
 ;
 
 module_item:
-| definition; DSEMI			{ IDef($1) }
-| expr	; DSEMI				{ IExpr($1) }
+| definition; DSEMI			{ IDef($1, $startpos) }
+| expr	; DSEMI				{ IExpr($1, $startpos) }
 ;
 
 definition:
@@ -217,12 +217,13 @@ value_path:
 | value_name				{ $1 }
 | m = module_name; DOT; v = value_name	{ m ^ "." ^ v }
 
-/* TODO, long modulepath */
+/* TODO, long modulepath 
 module_path:
 | module_name				{ $1 }
 | m = module_name; DOT; mp = module_path
 					{ m ^ "." ^ mp}
 ;
+*/
 
 constr_path:
 | constr_name				{ $1 }

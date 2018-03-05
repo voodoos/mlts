@@ -1,8 +1,8 @@
 type prog = module_item list
 
 and module_item =
-  | IDef of definition
-  | IExpr of expr
+  | IDef of definition * Lexing.position
+  | IExpr of expr * Lexing.position
 
 and definition =
   | DLet of let_binding

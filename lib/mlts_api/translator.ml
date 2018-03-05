@@ -3,6 +3,15 @@ open LpStrings
 
 exception TranslatorError of string * (Lexing.position option)
 
+type def = { mutable name: string; mutable pos: Lexing.position }
+
+let makeException message def pos =
+  TranslatorError("In \"" ^ def.name ^ "\" (line "
+                  ^ (string_of_int def.pos.pos_lnum)
+                  ^ ") : " ^ message,
+                  match pos with
+                    None -> Some(def.pos)
+                   | Some(p) -> pos)
 
 
 (* 	Type constructors handling *)
@@ -43,22 +52,27 @@ let string_of_constructors c =
 let toLPString p =
   let c = ref 0 in
   let constructors = Hashtbl.create 100 in
+  let actualDef = { name = "" ;  pos = Lexing.dummy_pos} in
 
-  
-
+  let setActualDef n pos =
+    actualDef.name <- n;
+    actualDef.pos <- pos
+  in
   
   let rec aux env = function
       [] -> ("", [], [])
     | item::tl ->
        let name, str, freevars, datatypes =
          (match item with
-          | IDef(def) ->
+          | IDef(def, pos) ->
              let name = getDefName def in
+             setActualDef name pos;
              let str, freevars, datatypes = aux_def env def in
              name, str, freevars, datatypes
-          | IExpr(e)  -> 
+          | IExpr(e, pos)  -> 
              let a = c := !c + 1; !c in
              let name = "val_" ^ (string_of_int a) in
+             setActualDef name pos;
              let str, freevars = aux_expr ((Local name)::env) e in
              name, str, freevars, []
          ) in
@@ -154,10 +168,10 @@ let toLPString p =
 	  else
 	    (app n codes) , fvs
 	with Not_found ->
-          raise (TranslatorError(
-                     "Unknown constructor \""
-                     ^ n ^ "\"." 
-                   , None)))
+          raise (makeException ("Unknown constructor \""
+                                ^ (strip_prefix n) ^ "\"." 
+                               ) actualDef None)
+       )
     | EPattern(p) -> let code, pararities = aux_pattern env p in
 		     code, firsts pararities
     | EBind(v, e) -> let code, fv = aux_expr (Local(v)::env) e in
@@ -170,11 +184,11 @@ let toLPString p =
        (* This ocontructor has arity 0, we can check it's well used : *)
        let aexpr = Arity.maxArityInExpr v e in
        if aexpr > 0 then
-         raise (TranslatorError("Constructor "
-                                ^ v
+         raise (makeException ("Constructor "
+                                ^ (strip_prefix v)
                                 ^ " has arity 0, not "
                                 ^ (string_of_int aexpr)
-                                ^ ".", None));
+                                ^ ".") actualDef None);
        
        let code, fv =  aux_expr env e in
        remove_constr constructors (Simple(v));
@@ -257,10 +271,9 @@ let toLPString p =
           (* let pararity = (List.flatten (seconds pl)) in *)
 	  type_constr name (firsts pl), pararity
 	with Not_found -> 
-          raise (TranslatorError(
-                     "Unknown constructor \""
-                     ^ cp ^ "\"  in pattern \"(TODO)\"." 
-                   , None))
+          raise (makeException ("Unknown constructor \""
+                                ^ (strip_prefix cp) ^ "\"." 
+                   ) actualDef None)
        )
     | PConstant(c) -> const_to_lpstring c, []
     | PListCons(p1, p2) -> 

@@ -1,4 +1,7 @@
 open MltsAst
+
+let strip_prefix s = String.sub s 2 (String.length s - 2)
+       
 (* Some tools for list management *)
 
 let print_pairs fts sts =
