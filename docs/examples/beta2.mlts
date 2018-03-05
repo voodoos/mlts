@@ -32,3 +32,7 @@ beta (Abt(x\ Abt(y\ App(x, y))));;
 beta (App(Abt(x\ x), Abt(y\ App(y, y))));;
 beta (App(Abt(x\ Abt(y\ App(y, x))), Abt(x\ x)));;
 (* beta (App(Abt(x\ App(x, x)), Abt(y\ App(y, y))));; *)
+beta (App(App(Abt(x\Abt(y\Abt(z\App(App(x,z),App(y,z))))),
+              Abt(x\Abt(y\x))),
+          Abt(x\Abt(y\x))));;
+new X in beta (App(X));;
