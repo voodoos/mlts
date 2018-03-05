@@ -38,7 +38,7 @@ run_all Json :-
 run_one Name Prog Value :-
 	prog Name P, 
 	term_to_string P Prog,
-	%if (typeof P T) (
+	if (typeof P T) (
 	Size is size Name,
 	if (Size > 4) (
 	   Deb is substring Name 0 3,
@@ -47,6 +47,6 @@ run_one Name Prog Value :-
 	      term_to_string V Value
 	    ) (fail)
 	    ) (fail)
-	    %)
-	    %(Value is "Type error.")
+	    )
+	    (Value is "Type error.")
 	    .
