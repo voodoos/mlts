@@ -81,12 +81,19 @@ h4 {
 
 .ace_active-line {
     transition: background-color 1s;
+    background: rgba(255, 255, 255, 0.13) !important;
 }
 .red-alert .ace_active-line {
      background-color: #dc3545 !important;
 }
 .ace_hidden-cursors .ace_cursor {
     opacity: 0.8;
+}
+
+.ace-ambiance .ace_marker-layer .ace_bracket {
+    border: none !important;
+    background-color: #fa864999;
+    margin: 0px 0px 0 0px !important;
 }
 
 #editor .ace_gutter-cell {
