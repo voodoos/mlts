@@ -156,7 +156,7 @@ let toLPString p =
 	with Not_found ->
           raise (TranslatorError(
                      "Unknown constructor \""
-                     ^ n ^ "\" near \"" ^ n ^ "(TODO)\"." 
+                     ^ n ^ "\"." 
                    , None)))
     | EPattern(p) -> let code, pararities = aux_pattern env p in
 		     code, firsts pararities
@@ -166,6 +166,16 @@ let toLPString p =
                     func v code,fv 
     | ENew(v, e) ->
        add_constr constructors "" (Simple(v));
+
+       (* This ocontructor has arity 0, we can check it's well used : *)
+       let aexpr = Arity.maxArityInExpr v e in
+       if aexpr > 0 then
+         raise (TranslatorError("Constructor "
+                                ^ v
+                                ^ " has arity 0, not "
+                                ^ (string_of_int aexpr)
+                                ^ ".", None));
+       
        let code, fv =  aux_expr env e in
        remove_constr constructors (Simple(v));
        newc v code,fv 
