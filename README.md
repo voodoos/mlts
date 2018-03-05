@@ -32,3 +32,10 @@ opam install menhir js_of_ocaml js_of_ocaml-ppx base64
 opam pin add elpi https://github.com/LPCIC/elpi.git
 ```
 
+## Credits
+The "backend" is powered by OCaml, λProlog, Elpi and js_of_ocaml.
+
+The frontend uses a standard mix of Bootsrap and Jquery but also the Ace code editor, highlight-js for additionnal syntactic coloring and open-iconic for icons.
+
+We thanks Kaustuv Chaudhuri and Gabriel Scherer.
+
