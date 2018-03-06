@@ -81,7 +81,7 @@ let rec base_level_arities (ty, a) =
   | Consl(_) as t-> [t, 0]
   | Arrowl(_, _) as t -> [t, 0]
   | Bindl(_, _) as t -> [t, a]
-  | Suml(l) as t -> [t, 0](*List.flatten
+  | Suml(_) as t -> [t, 0](*List.flatten
                  (List.map
                  (base_level_arities)
                  l)*)

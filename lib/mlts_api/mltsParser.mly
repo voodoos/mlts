@@ -2,6 +2,21 @@
 
   open MltsAst
 
+
+  let lmax =
+      List.fold_left
+	(fun acc (t,a) -> max acc a)
+	0
+
+  let keyword =
+    let h = Hashtbl.create 17 in
+    List.iter (fun (s, k) -> Hashtbl.add h s k)
+      [ "t_int", "int" ] ;
+    fun s ->
+      try  Hashtbl.find h s
+      with Not_found -> s
+
+  
 %}
 
 %token <int> CONST_INT
@@ -72,7 +87,7 @@ definition:
 ;
 
 constr_decl:
-/*| VBAR; nc = constr_name		{ Simple(nc) }*/
+| VBAR; nc = constr_name		{ Simple(nc) }
 | VBAR; nc = constr_name; OF; tya = arityp_expr
 					{ Of(nc, tya) }
 ;
@@ -146,10 +161,14 @@ expr_list:
 arityp_expr:
 | BEGIN; arityp_expr; END;		{ $2 }
 | typeconstr_name			{ Cons($1), 0 }
+/*| separated_nonempty_list(STAR, arityp_expr)
+					{ (Sum($1), lmax $1) }
+					*/
 | tya1 = arityp_expr;
   STAR; tya2 = arityp_expr		{ let ty1, a1 = tya1
    	   	  			  and ty2, a2 = tya2   in
   	       				      Sum(tya1, tya2), max a1 a2 }
+					      
 |  tya1 = arityp_expr;
    DARROW;  tya2 = arityp_expr		{ let ty1, a1 = tya1
    	   	  			  and ty2, a2 = tya2   in
@@ -241,7 +260,7 @@ constr_name:
 ;
 
 typeconstr_name:
-| i = IDENT				{ "tc_"^i }
+| i = IDENT				{ keyword ("t_"^i) }
 ;
 
 %inline infix_op:

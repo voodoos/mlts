@@ -156,7 +156,6 @@ let toLPString p =
        let codes = List.map (fst) exprs in
        let fvs = List.flatten (seconds exprs) in
        (try	
-	  let n = String.uncapitalize_ascii n in
 	  let _, constr, _ = Hashtbl.find constructors n in
 	  
 	  (*print_string ("\nFound : " ^n^ "\n");
@@ -166,7 +165,7 @@ let toLPString p =
 	  if (List.fold_left (+) 0 constr) > 0 then
 	    (appv n codes), fvs
 	  else
-	    (app n codes) , fvs
+	    (appc n codes) , fvs
 	with Not_found ->
           raise (makeException ("Unknown constructor \""
                                 ^ (strip_prefix n) ^ "\"." 
@@ -179,7 +178,7 @@ let toLPString p =
     | EFun(v, e) -> let code, fv = aux_expr (Local(v)::env) e in
                     func v code,fv 
     | ENew(v, e) ->
-       add_constr constructors "" (Simple(v));
+       add_constr constructors "$_nom" (Simple(v));
 
        (* This ocontructor has arity 0, we can check it's well used : *)
        let aexpr = Arity.maxArityInExpr v e in
@@ -211,7 +210,7 @@ let toLPString p =
        matcher_arrow pararity pattern expr, freevars
                                               
     | RNa(nl, p, e) ->
-       List.iter (fun n -> add_constr constructors "" (Simple(n))) nl;
+       List.iter (fun n -> add_constr constructors "$_nom" (Simple(n))) nl;
        let pattern, pararity = aux_pattern env p in
        let pararity =
          List.map (fun (n, a) ->
@@ -246,10 +245,11 @@ let toLPString p =
     | PConstr(cp, pls) ->
        (try
           let cp = String.uncapitalize_ascii cp in
-	  let _, arities, _ = Hashtbl.find
+	  let tname, _, _ = Hashtbl.find
                              constructors cp
-                              in
-	  let name = if arities = []
+          in
+          
+	  let name = if tname = "$_nom"
                      then cp
                      else specials (cp ^ "v")
           in

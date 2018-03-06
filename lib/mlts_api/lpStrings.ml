@@ -99,14 +99,6 @@ let letin name args code body =
 let letrecin name args code body =
   "(let (fixpt " ^ funcl name args ^ " (" ^ code ^ ")) (" ^ name ^ "\\ (" ^ body ^ ")))"
       
-let app head args =
-  (specials head)
-  (*^"toto"^(string_of_int (List.length args))*)
-  ^ (to_separated_list ~first:true " arobase " args)
-      
-let appv head args =
-  (specials head) 
-  ^ (to_separated_list ~first:true " " args)
 
 let if_then_else cond e1 e2 =
   "cond (" ^ cond ^ ") "
@@ -150,13 +142,46 @@ let func v  e =
 let newc v  e =
   "(new " ^ (String.uncapitalize_ascii v) ^ "\\ (" ^ e ^ "))" 
 
-                                          
-let type_constr name l =
-  "(" ^ name ^ " " ^ (to_separated_list " " l) ^ ")"
-
 let cpair p1 p2 =
   "(pr (" ^ p1 ^ ") (" ^ p2 ^ "))"
 
                              
 let pair e1 e2 =
   "(pair arobase (" ^ e1 ^ ") arobase (" ^ e2 ^ "))"
+
+let to_pr =
+  let rec aux = function
+      [] -> ""
+    | [a] -> a
+    | [a;b] -> cpair a b
+    | a::tl -> cpair a (aux tl)
+  in aux
+
+let to_pair =
+  let rec aux = function
+      [] -> ""
+    | [a] -> a
+    | [a;b] -> pair a b
+    | a::tl -> pair a (aux tl)
+  in aux
+                                          
+let type_constr name l =
+  "(" ^ name
+  ^ (if List.length l > 0 then
+       " (" ^ (to_pr l) ^ ")"
+     else "")
+  ^ ")"
+
+let appc head args =
+  (specials head)
+  (*^"toto"^(string_of_int (List.length args))*)
+    ^(if args = [] then "" else " arobase " ^ (to_pair args))
+             
+let app head args =
+  (specials head)
+  (*^"toto"^(string_of_int (List.length args))*)
+  ^ (to_separated_list ~first:true " arobase " args)
+      
+let appv head args =
+  (specials head) 
+  ^ (to_separated_list ~first:true " " args)
