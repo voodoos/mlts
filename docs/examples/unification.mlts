@@ -1,0 +1,4 @@
+type folterm =
+    | A | B 
+    | H of folterm * folterm
+;;
