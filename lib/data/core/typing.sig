@@ -14,5 +14,5 @@ type arr               ty -> ty -> ty.  % Functional arrow type
 
 type typeof            tm -> ty -> prop.  % Top-level predicate
 
-type typematch         ty -> list rulexxxxxxx -> ty -> prop.
-type typematchrulexxxxxxx     ty -> rulexxxxxxx      -> ty -> prop.
+type typematch         ty -> list rulex -> ty -> prop.
+type typematchrulex     ty -> rulex      -> ty -> prop.

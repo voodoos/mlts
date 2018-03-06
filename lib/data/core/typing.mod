@@ -2,7 +2,7 @@ module typing.
 
 % typeof  A B :- announce (typeof A B).
 % typematch  A B C :- announce (typematch A B C).
-% typematchrulexxxxx  A B C :- announce (typematchrulexxxxx A B C).
+% typematchrulex  A B C :- announce (typematchrulex A B C).
 
 typeof (M arobase N) A          :- typeof M (arr B A), typeof N B.
 typeof (cond P Q R) A     :- typeof P bool, typeof Q A, typeof R A.
@@ -38,11 +38,11 @@ typeof (new R) A     :- pi x\ typeof x B   => typeof (R x) A.
 
 typeof (match Exp Rules) B :- typeof Exp A, typematch A Rules B.
 
-typematch A (R::Rs) B :- typematchrulexxxxx A R B, typematch A Rs B.
+typematch A (R::Rs) B :- typematchrulex A R B, typematch A Rs B.
 typematch A []      B.
 
-typematchrulexxxxx A (Exp ==> Result) B :- typeof Exp A, typeof Result B.
-typematchrulexxxxx A (nab   R) B :- pi x\ typeof x C                           => typematchrulexxxxx A (R x) B.
-typematchrulexxxxx A (all   R) B :- pi x\ typeof x C                           => typematchrulexxxxx A (R x) B.
-typematchrulexxxxx A (all'  R) B :- pi x\ (pi u\ typeof (x u) C :- typeof u D) => typematchrulexxxxx A (R x) B.
-typematchrulexxxxx A (all'' R) B :- pi x\ (pi u\ pi v\ typeof (x u v) C :- typeof u D, typeof v E) => typematchrulexxxxx A (R x) B.
+typematchrulex A (Exp ==> Result) B :- typeof Exp A, typeof Result B.
+typematchrulex A (nab   R) B :- pi x\ typeof x C                           => typematchrulex A (R x) B.
+typematchrulex A (all   R) B :- pi x\ typeof x C                           => typematchrulex A (R x) B.
+typematchrulex A (all'  R) B :- pi x\ (pi u\ typeof (x u) C :- typeof u D) => typematchrulex A (R x) B.
+typematchrulex A (all'' R) B :- pi x\ (pi u\ pi v\ typeof (x u v) C :- typeof u D, typeof v E) => typematchrulex A (R x) B.

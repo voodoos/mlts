@@ -5,4 +5,4 @@ accum_sig eval.
 accum_sig typing.
 accum_sig datatypes.
 
-type prog     string -> tm -> prop.
+type prog     string -> tm -> o.

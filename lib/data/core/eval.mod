@@ -14,20 +14,20 @@ copy (X arobase Y)      (U arobase V)      :- copy X U, copy Y V.
 copy (cond X Y Z) (cond U V W) :- copy X U, copy Y V, copy Z W.
 copy (spec X Y Z) (spec X Y W) :- mappred copy Z W.
 
-copy (match X Y) (match U V) :- copy X U, mappred copyrulexxxxx Y V.
+copy (match X Y) (match U V) :- copy X U, mappred copyrulex Y V.
 
 copy (lam R)   (lam S)   :- pi x\ copy x x => copy (R x) (S x).
 copy (fixpt R) (fixpt S) :- pi x\ copy x x => copy (R x) (S x).
 copy (new R)   (new S)   :- pi x\ copy x x => copy (R x) (S x).
 copy (let X R) (let U S) :- copy X U, pi x\ copy x x => copy (R x) (S x).
 
-copyrulexxxxx (X ==> Y) (U ==> V) :- copy X U, copy Y V.
+copyrulex (X ==> Y) (U ==> V) :- copy X U, copy Y V.
 
-copyrulexxxxx (nab R) (nab S) :- pi x\ copy x x => copyrulexxxxx (R x) (S x).
-copyrulexxxxx (all R) (all S) :- pi x\ copy x x => copyrulexxxxx (R x) (S x).
+copyrulex (nab R) (nab S) :- pi x\ copy x x => copyrulex (R x) (S x).
+copyrulex (all R) (all S) :- pi x\ copy x x => copyrulex (R x) (S x).
 
-copyrulexxxxx (all'  R) (all'  S) :- pi x\ (pi X\ pi U\ copy (x X) (x U) :- copy X U) => copyrulexxxxx (R x) (S x).
-copyrulexxxxx (all'' R) (all'' S) :- pi x\ (pi X\ pi Y\ pi U\ pi V\ copy (x X Y) (x U V) :- copy X U, copy Y V) => copyrulexxxxx (R x) (S x).
+copyrulex (all'  R) (all'  S) :- pi x\ (pi X\ pi U\ copy (x X) (x U) :- copy X U) => copyrulex (R x) (S x).
+copyrulex (all'' R) (all'' S) :- pi x\ (pi X\ pi Y\ pi U\ pi V\ copy (x X Y) (x U V) :- copy X U, copy Y V) => copyrulex (R x) (S x).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 pin G :- pi x\ nom x => (G x). % Use this to introduce a nominal
