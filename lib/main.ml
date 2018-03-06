@@ -24,10 +24,9 @@ let compile code =
     kernel := Some(Elpi_API.Compile.program [parsed]);
 
     (* We return the lprolog code for reference *)
-    Js.string (lpcode ^ "\nDatatypessig :
-                         \n\n" ^ typsig
-               ^  "\nDatatypesmod :
-                   \n\n" ^ typmod) , 0, 0, true
+    Js.string (lpcode
+               ^ "%%% Datatypes/sig." ^ typsig
+               ^  "%%% Datatypes/mod." ^ typmod) , 0, 0, true
   with Mlts_API.Error(s, line, char)
        -> (Js.string s, line, char,  false)
 (*  | _ -> Js.string "Unknown error.", 0, 0, false *)
@@ -91,7 +90,12 @@ let _ =
   Data.load ();
 
   (* Initialize Elpi *)
+  Elpi_API.Setup.set_warn console;
+  Elpi_API.Setup.set_error console;
+  Elpi_API.Setup.set_anomaly console;
+  Elpi_API.Setup.set_type_error console;
   ignore (Elpi_API.Setup.init ~silent:false [] "");
+  
   let parsed =  Elpi_API.Parse.program ["core/run.mod"] in
   kernel := Some(Elpi_API.Compile.program [parsed]);
   
