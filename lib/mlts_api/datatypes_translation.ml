@@ -43,17 +43,20 @@ let rec pin_list = function
                               
 
 let types_sig name (tn, arities, _) acc =
+  let n = List.length arities in
   let name = String.uncapitalize_ascii name in
   "\ntype " ^tn ^ " ty."
-  ^ "\ntype " ^ name ^ " "
-  ^ (List.fold_left (fun acc i ->
-         if i = 0 then acc
-         else (
-           acc ^ ("("
-                  ^ (tm_list i)
-                  ^ "tm) -> ")
-       )) "" arities)
-  ^ "tm."
+  ^ (if n > 0 then
+       "\ntype " ^ name ^ " "
+       ^ (List.fold_left (fun acc i ->
+              if i = 0 then acc
+              else (
+                acc ^ ("("
+                       ^ (tm_list i)
+                       ^ "tm) -> ")
+            )) "" arities)
+       ^ "tm."
+     else "")
   ^ "\ntype " ^ name ^ "v "
   ^ (List.fold_left (fun acc i ->
          if i = 0 then 
@@ -93,7 +96,10 @@ let rec copy_list c n m = function
 let copy name ars n =
   "\ncopy (" ^ name ^ " " ^ (var_list "X" n) ^ ")"
   ^ " (" ^ name ^ " " ^ (var_list "Y" n) ^ ")"
-  ^ " :- " ^ (copy_list 1 "X" "Y" ars) ^ "."
+  ^ ( if n > 0 then " :- " ^ (copy_list 1 "X" "Y" ars)
+      else ""
+    )
+  ^ "."
               
 let copy_clauses name arities n =
   (if (List.fold_left (+) 0 arities) > 0 then
@@ -125,7 +131,7 @@ let rec eval_list c n m = function
          
 let specialp name arities n =
   "\nspecial " ^ (string_of_int n) ^ " " ^ name ^ "."
-  ^ "\neval_spec " ^ name ^ " (" ^ (var_listc "X" n) ^ "[]) ("
+  ^ "\neval_spec " ^ name ^ " (" ^ (var_listc "X" n) ^ "nil) ("
   ^ name ^ "v " ^ (var_list "X" n) ^ ")."
 
 let eval_apply name arities n =
@@ -137,8 +143,9 @@ let eval_apply name arities n =
 let eval_clauses name arities n =
   if (List.fold_left (+) 0 arities) > 0 then
     eval_apply name arities n
-  else 
+  else if n > 0 then
     specialp name arities n
+  else ""
               
 let types_mod name (tn, arities, _) acc =
   let na = List.length arities in
@@ -179,9 +186,11 @@ let rec typing_list c n tn = function
      ^ (typing_list (c + 1) n tn tl)
       
 let typing_val name tn arities n =
-  "\ntypeof (" ^ name ^ " " ^  (var_list "X" n) ^ ") "
-  ^ tn ^ " :- " ^ (typing_list 1 "X" tn arities) ^ "."
-
+  if n > 0 then
+    "\ntypeof (" ^ name ^ " " ^  (var_list "X" n) ^ ") "
+    ^ tn ^ " :- " ^ (typing_list 1 "X" tn arities) ^ "."
+  else  "\ntypeof " ^ name ^ " " ^ tn ^ "."
+         
 let rec arrows tn = function
   |  1 -> "arr " ^ tn ^ " " ^ tn 
   | n -> "arr " ^ tn ^ " (" ^ (arrows tn (n - 1)) ^ ")"
@@ -189,11 +198,13 @@ let rec arrows tn = function
 let typing_exp name tn arities n =
   if (List.fold_left (+) 0 arities) > 0 then
     typing_val name tn arities n
+  else if n > 0 then
+    "\ntypeof " ^ name ^ " ("
+    ^ (arrows tn n) ^ ")."
   else 
     "\ntypeof " ^ name ^ " ("
-    ^ (arrows tn (List.length arities)) ^ ")."
-
-
+    ^ tn ^ ")."
+(*
 let typeof_1 name tn arities n (typ, a) =
   let rec typing_list2 = function
       Cons(c) -> "typeof " ^ c ^ " " ^ tn ^ " "
@@ -204,20 +215,39 @@ let typeof_1 name tn arities n (typ, a) =
   in
   "\ntypeof (" ^ name ^ " " ^ (var_list "X" n) ^ ") " ^ tn ^ " :- "
   ^ (typing_list2 typ)
-    
+ *)
 
+             
                                             
   
 let types_typing name (tn, arities, typ) acc =
   let n = List.length arities in
   let name = String.uncapitalize_ascii name in
+  let test = Datatypes.atypl_of_aritytypexpr tn typ in
+  print_string ("\n" ^name^ ": ");
+  print_string (Datatypes.string_of_atypl test);
+  print_string (Datatypes_typeof.gen_typeof_preds name test);
+  print_string (Datatypes_sig.gen_sig name test);
+  print_string (Datatypes_eval.gen_eval_preds name test);
   (typing_val (name ^ "v") tn arities n)
   ^ (typing_exp name tn arities n)
   (*   ^ "\n\nPouet : " ^ (typeof_1 name tn arities n typ) ^"\n\n" *)
   ^ acc
 
+let translate_type name (tn, arities, typ)
+                   (acc_typing, acc_eval, acc_sig) =
+  let cs = Datatypes.atypl_of_aritytypexpr tn typ in
+  let ntyping = Datatypes_typeof.gen_typeof_preds name cs and
+      neval = Datatypes_eval.gen_eval_preds name cs and
+      nsig = Datatypes_sig.gen_sig name cs
+  in
+  ntyping ^ acc_typing, neval ^ acc_eval, nsig ^ acc_sig
+      
 let translate_types constr =
-  let typing = Hashtbl.fold types_typing constr "" in
+  (*
+  let typing =  Hashtbl.fold types_typing constr "" in
   let evalmod = Hashtbl.fold types_mod constr "" in
   let evalsig = Hashtbl.fold types_sig constr "" in
+   *)
+  let typing, evalmod, evalsig =  Hashtbl.fold translate_type constr ("", "", "") in
   evalsig, evalmod, typing
