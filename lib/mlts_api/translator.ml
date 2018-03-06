@@ -18,6 +18,7 @@ let makeException message def pos =
 let rec arity_list_of_type_term = function
   | (Cons(_), a) -> [a]
   | (Bind(_,_), a) -> [a]
+  | (List(_), a) -> [a]
   | (Sum((_, a1), ate2), _) -> a1::(arity_list_of_type_term ate2)
 
 let add_constr constructors tname = function

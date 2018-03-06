@@ -6,7 +6,10 @@ let arity_type_of_atypl =
     | Consl(_) -> "tm"
     | Bindl(at1, at2)
       -> let r1, r2 = aux at1, aux at2 in
-         "(" ^ r1 ^ " -> " ^ r2 ^ ")"
+         "(" ^ r1 ^ " -> " ^ r2 ^ ")"         
+    | Listl(at1)
+      -> let r1 = aux at1 in
+         r1
     | Arrowl(at1, at2)
       -> let r1, r2 = aux at1, aux at2 in
          r1 ^ " -> " ^ r2

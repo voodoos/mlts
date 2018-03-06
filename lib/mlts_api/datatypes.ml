@@ -6,6 +6,7 @@ and typlist =
   | Suml of atypl list
   | Bindl of atypl * atypl
   | Arrowl of atypl * atypl
+  | Listl of atypl
 
 let maxl =
   List.fold_left
@@ -23,11 +24,13 @@ let rec string_of_atypl = function
                        "" l) ^ " a"^(string_of_int i)^")"
   | Bindl(at1, at2), i -> let r1 = string_of_atypl at1 and
                            r2 = string_of_atypl at2 in
-                       "(" ^r1 ^ " => " ^ r2  ^ " a" ^ (string_of_int i) ^ ")"
+                          "(" ^r1 ^ " => " ^ r2  ^ " a" ^ (string_of_int i) ^ ")"
   | Arrowl(at1, at2), i -> let r1 = string_of_atypl at1 and
-                           r2 = string_of_atypl at2 in
-                       "(" ^r1 ^ " -> " ^ r2  ^ " a" ^ (string_of_int i) ^ ")"
-    
+                               r2 = string_of_atypl at2 in
+                           "(" ^r1 ^ " -> " ^ r2  ^ " a" ^ (string_of_int i) ^ ")"
+  | Listl(at1), i -> let r1 = string_of_atypl at1 in
+                           "((" ^r1 ^ ") list a" ^ (string_of_int i) ^ ")"
+                                                                                 
     
 let rec atypl_of_aritytypexpr tname ate =
   let rec aux_suml_of_sum = function
@@ -46,8 +49,11 @@ let rec atypl_of_aritytypexpr tname ate =
     | (Bind(ate1, ate2), i)
       -> Bindl(aux ate1,
                aux ate2), i
+    | (List(ate), i)
+      -> Listl(aux ate), i
     | (Sum(_, _), _) as s
       -> let l = aux_suml_of_sum s in Suml(l), maxl l
+                        
   in
   let aty, i = aux ate in
   match aty with
@@ -64,7 +70,9 @@ let lp_typ_of_atypl =
     | Arrowl(at1, at2)
       -> let r1, r2 = aux at1, aux at2 in
          "(arr " ^ r1 ^ " " ^ r2 ^ ")"
-         
+    | Listl(at)
+      -> let r = aux at in
+         "(lst " ^ r ^ ")"
     | Suml(l) -> aux_list l 
     | Bindl(_, _) -> failwith "Unexpected rank > 1 type."
     and aux_list = function
@@ -80,6 +88,7 @@ let rec base_level_arities (ty, a) =
   match ty with
   | Consl(_) as t-> [t, 0]
   | Arrowl(_, _) as t -> [t, 0]
+  | Listl(_) as t -> [t, 0]
   | Bindl(_, _) as t -> [t, a]
   | Suml(_) as t -> [t, 0](*List.flatten
                  (List.map
@@ -92,6 +101,7 @@ let get_args_typs  =
     ("\ntoto : " ^ (string_of_atypl (typ, a)));*)
     match typ with
     | Consl(_) as t -> [t, a]
+    | Listl(_) as t -> [t, a]
     | Arrowl(_, _) as t -> [t, a]
     | Suml(_) as t -> [t, a]
     | Bindl(ty1, (t2, i)) ->

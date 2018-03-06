@@ -23,6 +23,7 @@
 	"new", 	    NEW;
 	"begin",    BEGIN;
 	"end", 	    END;
+	"list",	    LIST;
       ] ;
     fun s ->
       try  Hashtbl.find h s

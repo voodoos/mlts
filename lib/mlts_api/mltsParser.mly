@@ -11,7 +11,8 @@
   let keyword =
     let h = Hashtbl.create 17 in
     List.iter (fun (s, k) -> Hashtbl.add h s k)
-      [ "t_int", "int" ] ;
+      [ "t_int", "int";
+        "t_bool", "bool" ] ;
     fun s ->
       try  Hashtbl.find h s
       with Not_found -> s
@@ -34,7 +35,7 @@
 %token DSEMI
 %token DCOLON
 %token DOT BACKSLASH COMMA
-%token TYPE OF DARROW
+%token TYPE OF DARROW LIST
 %token LET REC IN
 %token EOF
 %token NA NEW
@@ -43,6 +44,7 @@
 %nonassoc ELSE
 %right IN
 %right VBAR
+
 
 %right ARROW
 %right DARROW
@@ -57,6 +59,7 @@
 %left PLUS MINUS
 
 %left STAR
+%left LIST
 /*
 %nonassoc IDENT UPIDENT CONST_BOOL CONST_INT
 */
@@ -174,6 +177,7 @@ arityp_expr:
    	   	  			  and ty2, a2 = tya2   in
    	   	  	 		  Bind(tya1, tya2),
 					  1 + (max a1 a2)  }
+| tya = arityp_expr; LIST;		{ List(tya), (snd tya)  }
 ;
 
 match_arms:

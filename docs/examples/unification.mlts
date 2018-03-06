@@ -1,4 +1,10 @@
 type folterm =
-    | A | B 
-    | H of folterm * folterm
+  | A | B
+  | H of folterm
+  | G of folterm * folterm
+;;
+
+type unif =
+  | Coerce of (folterm * folterm) list * (folterm * folterm) list
+  | Some of folterm => unif
 ;;
