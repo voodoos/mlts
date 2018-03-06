@@ -138,6 +138,7 @@ function onMessageCB(event) {
     else if(event.data.type == 'lplcode') {
 	$('#lpl').html('').append(event.data.code
 				  .replace(/arobase/g, '@')
+				  .replace(/'/g, '&rsquo;')
 				  .replace(/\./g, '.<br>'));
 	$('#lpl').each(function(i, block) {
 	    hljs.highlightBlock(block);
