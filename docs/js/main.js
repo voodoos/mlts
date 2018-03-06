@@ -188,6 +188,7 @@ function show_resultas(results) {
 			 .replace(/null/g, '[]')
 			 .replace(/ab/g, 'Abt')
 			 .replace(/ap/g, 'App')
+			 .replace(/_[0-9]+/g, '')
 			 .replace(/c_/g, '')
 			 .replace(/cns \((.*?)\) (.*?)/g,
 				  '$1::$2')

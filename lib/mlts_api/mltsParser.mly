@@ -8,15 +8,34 @@
 	(fun acc (t,a) -> max acc a)
 	0
 
-  let keyword =
-    let h = Hashtbl.create 17 in
-    List.iter (fun (s, k) -> Hashtbl.add h s k)
-      [ "t_int", "int";
-        "t_bool", "bool" ] ;
-    fun s ->
-      try  Hashtbl.find h s
-      with Not_found -> s
+  let unik =
+    let c = ref 0 in
+    let known = Hashtbl.create 100 in
 
+    fun s ->
+      try  Hashtbl.find known s
+        with Not_found
+	      -> let newname = c := !c + 1;
+	           s^"_"^(string_of_int !c) in
+	        Hashtbl.add known s newname; newname
+
+  let n_type =
+    let reserved = Hashtbl.create 5 in
+    
+    List.iter (fun (s, k) -> Hashtbl.add reserved s k)
+      [ "int", "int";
+        "bool", "bool" ] ;
+    
+    fun s ->
+      try  Hashtbl.find reserved s
+      with Not_found
+        -> unik ("t_" ^ s)
+	    
+  let n_constr s =
+      unik ("c_" ^ s)
+      
+  let n_val s =
+      ("v_" ^ s)
   
 %}
 
@@ -252,7 +271,7 @@ constr_path:
 | constr_name				{ $1 }
 
 value_name:
-| i = IDENT				{ "v_"^i }
+| i = IDENT				{ n_val i }
 ;
 
 module_name:
@@ -260,11 +279,11 @@ module_name:
 ;
 
 constr_name:
-| i = UPIDENT				{ "c_"^i }
+| i = UPIDENT				{ n_constr i }
 ;
 
 typeconstr_name:
-| i = IDENT				{ keyword ("t_"^i) }
+| i = IDENT				{ n_type i }
 ;
 
 %inline infix_op:
