@@ -39,14 +39,15 @@ run_one Name Prog Value :-
 	prog Name P, 
 	term_to_string P Prog,
 	if (typeof P T) (
-	Size is size Name,
-	if (Size > 4) (
-	   Deb is substring Name 0 3,
-	   if (Deb = "val") (
-	      eval P V,
-	      term_to_string V Value
-	    ) (fail)
-	    ) (fail)
-	    )
-	    (Value is "Type error.")
-	    .
+	  Size is size Name,
+	  if (Size > 4) (
+	     Deb is substring Name 0 3,
+	     if (Deb = "val") (
+	        if (eval P V)
+	          (term_to_string V Value)
+		  (Value is "Evaluation failed.")
+	      ) (fail)
+	   ) (fail)
+	)
+	(Value is "Type error.")
+	.

@@ -178,6 +178,8 @@ function show_resultas(results) {
 	// Some ugly-regex-magic-based pretty printing :
 	var color = ((res.value.includes("error")) ? "red"
 		     : "black");
+	var color = ((res.value.includes("failed")) ? "red"
+		     : "black");
 	row.append($('<td></td>').css('color', color)
 		   .text(decodeURI(res.value)
 			 .replace(/i /g, '')

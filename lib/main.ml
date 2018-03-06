@@ -4,6 +4,12 @@ exception No_kernel
 
 let kernel = ref None
                  
+let escape s =
+  Js.to_string (Js.encodeURI (Js.string s))
+               
+let console (str : string) =
+  ignore (Js.Unsafe.eval_string ("console.log(decodeURI('" ^ (escape str) ^"'))"))
+                 
 let compile code =
   try
     (* First mlts => lprolog *)
@@ -21,7 +27,7 @@ let compile code =
         ["core/datatypes.mod";
          "core/progs_gen.mod";
          "core/run.mod";] in
-    kernel := Some(Elpi_API.Compile.program [parsed]);
+    kernel := Some(Elpi_API.Compile.program  [parsed]);
 
     (* We return the lprolog code for reference *)
     Js.string (lpcode
@@ -31,8 +37,6 @@ let compile code =
        -> (Js.string s, line, char,  false)
 (*  | _ -> Js.string "Unknown error.", 0, 0, false *)
 
-let escape s =
-  Js.to_string (Js.encodeURI (Js.string s))
 
 let handle_out res iter f (out : Elpi_API.Execute.outcome) =
   match out with
@@ -78,9 +82,6 @@ let compile_and_run code =
   let lpcode = compile (Js.to_string code) in
   lpcode, query ("run_all N.")
 
-let console (str : string) =
-  ignore (Js.Unsafe.eval_string ("console.log(decodeURI('" ^ (escape str) ^"'))"))
-                 
 let _ =
   (* Redirect output to console *)
   Sys_js.set_channel_flusher stdout (console);
@@ -90,11 +91,11 @@ let _ =
   Data.load ();
 
   (* Initialize Elpi *)
+  ignore (Elpi_API.Setup.init ~silent:false [] "");
   Elpi_API.Setup.set_warn console;
   Elpi_API.Setup.set_error console;
   Elpi_API.Setup.set_anomaly console;
   Elpi_API.Setup.set_type_error console;
-  ignore (Elpi_API.Setup.init ~silent:false [] "");
   
   let parsed =  Elpi_API.Parse.program ["core/run.mod"] in
   kernel := Some(Elpi_API.Compile.program [parsed]);
