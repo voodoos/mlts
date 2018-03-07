@@ -175,12 +175,14 @@ let type_constr name l =
 let appc head args =
   (specials head)
   (*^"toto"^(string_of_int (List.length args))*)
-    ^(if args = [] then "" else " arobase " ^ (to_pair args))
+    ^(if args = [] then "" else " arobase (" ^ (to_pair args) ^ ")")
              
 let app head args =
   (specials head)
   (*^"toto"^(string_of_int (List.length args))*)
-  ^ (to_separated_list ~first:true " arobase " args)
+  ^(if args = [] then ""
+    else (to_separated_list ~first:true " arobase " args)
+         )
       
 let appv head args =
   (specials head) 

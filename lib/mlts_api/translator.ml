@@ -200,12 +200,8 @@ let toLPString p =
        
        let pararity =
          List.map
-           (* Only constructors can have arity > 0 *)
            (fun (n, a) ->
-             if (String.sub n 0 2) = "v_" then
-               n, a
-             else
-               n, max (max a (Arity.maxArityInExpr n e))
+               n, max (max a a)
                       (Arity.maxArityInPattern constructors n p)
            )
            pararity in
@@ -219,7 +215,7 @@ let toLPString p =
        let pattern, pararity = aux_pattern env p in
        let pararity =
          List.map (fun (n, a) ->
-             n, max (max a (Arity.maxArityInExpr n e))
+             n, max (max a a)
                     (Arity.maxArityInPattern constructors n p)
            )
                   pararity in
