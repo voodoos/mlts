@@ -1,6 +1,6 @@
 type utm =
      | App of utm * utm
-     | Abt of utm => utm
+     | Abs of utm => utm
 ;;
 
 let rec mem x l = match l with
@@ -29,7 +29,7 @@ let rec rm x l =
 let rec maptm fapp fabs fvar term =
 	match term with
 	| App(m, n) -> fapp (maptm fapp fabs fvar m) (maptm fapp fabs fvar n)
-	| Abt(r)	-> fabs (fun x -> maptm fapp fabs fvar (r x))
+	| Abs(r)	-> fabs (fun x -> maptm fapp fabs fvar (r @ x))
 	| nab X in X -> fvar X
 ;;
 
@@ -41,7 +41,7 @@ let fv term =
 		term
 ;;
 	
-fv (Abt(x\ App(x, x)));;
-fv (Abt(x\ Abt(y\ App(y, App(x, y)))));;
-fv (Abt(x\ App(App(x, x), App(x, x))));;
-(Abt(x\ fv (App(App(x, x), App(x, x)))));;
+fv (Abs(x\ App(x, x)));;
+fv (Abs(x\ Abs(y\ App(y, App(x, y)))));;
+fv (Abs(x\ App(App(x, x), App(x, x))));;
+(Abs(x\ fv (App(App(x, x), App(x, x)))));;

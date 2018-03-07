@@ -54,10 +54,12 @@ let toLPString p =
   let c = ref 0 in
   let constructors = Hashtbl.create 100 in
   let actualDef = { name = "" ;  pos = Lexing.dummy_pos} in
+  let allDefs = ref [] in
 
   let setActualDef n pos =
     actualDef.name <- n;
-    actualDef.pos <- pos
+    actualDef.pos <- pos;
+    allDefs := (n, pos.pos_lnum)::!allDefs  
   in
   
   let rec aux env = function
@@ -78,7 +80,9 @@ let toLPString p =
              name, str, freevars, []
          ) in
        let strNext, freevars2, datatypes2 = aux ((Global name)::env) tl in
-       (prog_string name str freevars ^ strNext), freevars2, datatypes @ datatypes2
+       (prog_string name str freevars ^ strNext),
+       freevars2,
+       datatypes @ datatypes2
 
   and aux_def env = function
     | DLet(lb) ->
@@ -107,6 +111,18 @@ let toLPString p =
        let name, params, code, freevars = aux_lb env lb in
        let body, body_fv = aux_expr ((Local name)::env) e in
        letrecin name params code body, freevars @ body_fv
+    | EBApp(e, el) ->
+       let str, freevars = (aux_expr env e) in
+       let args = List.map (aux_expr env) el in
+       let a = arityMP (String.uncapitalize_ascii str) env in
+       (*"["^(string_of_env env) ^ 
+       "]["^str ^ " has arity " ^(string_of_int a)^" "^(string_of_int (List.length args))^"]" 
+	   ^*)
+       (if a >= 1 then
+	  (appv str (List.map (fst) args))
+	else 
+	  (app str (List.map (fst) args))
+       ), List.fold_left (fun acc (_, fv) -> acc@fv) freevars args
     | EApp(e, el) ->
        let str, freevars = (aux_expr env e) in
        let args = List.map (aux_expr env) el in
@@ -201,7 +217,7 @@ let toLPString p =
        let pararity =
          List.map
            (fun (n, a) ->
-               n, max (max a a)
+               n, max (max a  (Arity.maxArityInExpr n e))
                       (Arity.maxArityInPattern constructors n p)
            )
            pararity in
@@ -215,7 +231,7 @@ let toLPString p =
        let pattern, pararity = aux_pattern env p in
        let pararity =
          List.map (fun (n, a) ->
-             n, max (max a a)
+             n, max (max a (Arity.maxArityInExpr n e))
                     (Arity.maxArityInPattern constructors n p)
            )
                   pararity in
@@ -238,6 +254,11 @@ let toLPString p =
                       (*print_string (bind vn code); print_pairs (fun s -> s)
                                                                (string_of_int) fv;*)
                       bind vn code, fv
+    | PBApp(vn, pls) ->
+       let pl = List.map (aux_pattern env) pls in
+       (*let vn = String.capitalize_ascii vn in*)
+       (*print_endline ("Found " ^ vn ^ " ( " ^ (string_of_int (List.length pls))^ " )");*)
+       vn ^ (to_separated_list ~first:true " " (firsts pl)) , [vn, List.length pls]
     | PApp(vn, pls) ->
        let pl = List.map (aux_pattern env) pls in
        (*let vn = String.capitalize_ascii vn in*)
@@ -293,7 +314,7 @@ let toLPString p =
     = Datatypes_translation.translate_types constructors in
   
   (* print_string (string_of_constructors constructors);*)
-  progs, evalsig, (evalmod ^ typing)
+  progs, evalsig, (evalmod ^ typing), !allDefs
 
 
 
@@ -303,7 +324,7 @@ let make_lp_file prog =
   let dtmod = open_out "export/datatypes.mod" in
   let dtsig = open_out "export/datatypes.sig" in
   
-  let progs,  types, typingeval = toLPString prog in
+  let progs,  types, typingeval, defs = toLPString prog in
 
   (* progs_gen.mod *)
   output_string progmod "module progs_gen.\n\n";

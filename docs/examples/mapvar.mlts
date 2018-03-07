@@ -1,12 +1,12 @@
 type utm =
      | App of utm * utm
-     | Abt of utm => utm
+     | Abs of utm => utm
      ;;
 
 let rec mapvar f t =
   match t with
   | App(m, n) -> App(mapvar (f) m, mapvar (f) n)
-  | Abt(r) -> Abt(x\ mapvar (f) (r x))
+  | Abs(r) -> Abs(x\ mapvar (f) (r @ x))
   | nab X in X -> f X
 ;;
 
@@ -24,6 +24,6 @@ let rec lookup sub term =
 let substtm sub term =
   mapvar (lookup sub) term;;
 
-new X in Abt(y\ substtm ((X, y)::[]) (App(X, Abt(z\ z))));;
-new X in new Y in substtm ((X, Abt(z\ z))::(Y, Abt(w\w))::[])
-                           (App(X, Abt(z\ App(z, Y))));;
+new X in Abs(y\ substtm ((X, y)::[]) (App(X, Abs(z\ z))));;
+new X in new Y in substtm ((X, Abs(z\ z))::(Y, Abs(w\w))::[])
+                           (App(X, Abs(z\ App(z, Y))));;

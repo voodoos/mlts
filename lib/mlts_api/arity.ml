@@ -12,11 +12,16 @@ let maxArityInExpr name =
                            (fold_max_f (aux_rule) pm)
     | EIf(e1, e2, e3) ->
        max (aux e1) (max (aux e2) (aux e3))
-    | EApp(e, argl) ->
+    | EBApp(e, argl) ->
        let maxa = fold_max_f (aux) argl in
        (match e with
        | EVal(n) when n = name ->
           max (List.length argl) maxa
+       | _ -> maxa)
+    | EApp(e, argl) ->
+       let maxa = fold_max_f (aux) argl in
+       (match e with
+       | EVal(n) when n = name -> 0
        | _ -> maxa)
     | EInfix(e1, _, e2) | EPair(e1, e2) -> max (aux e1) (aux e2)
     | EConst(_) | EVal(_) -> 0
@@ -37,10 +42,15 @@ let maxArityInExpr name =
        max (aux_pattern p) (aux e)
   and aux_pattern = function
     | PVal(_) | PConstant(_) -> 0
-    | PApp(vn, pl) | PConstr(vn, pl) ->
+    | PBApp(vn, pl) | PConstr(vn, pl) ->
        let maxp = fold_max_f (aux_pattern) pl in
        if vn = name then
          max (List.length pl) maxp
+       else maxp
+    | PApp(vn, pl) ->
+       let maxp = fold_max_f (aux_pattern) pl in
+       if vn = name then
+         0
        else maxp
     | PBind(_, rp) -> aux_pattern rp
     | PListCons(lp, rp) | PPair(lp, rp) -> max (aux_pattern lp) (aux_pattern rp)
@@ -52,8 +62,11 @@ let maxArityInPattern constrs name =
     | PVal(n) when n = name -> 0
     | PVal(_) | PConstant(_) -> -1
     | PBind(n, p) -> aux p
-    | PApp(n, pl) when n = name
+    | PBApp(n, pl) when n = name
       -> List.length pl
+    | PBApp(_, pl) -> fold_max_f aux pl
+    | PApp(n, pl) when n = name
+      -> 0
     | PApp(_, pl) -> fold_max_f aux pl
     | PConstr(c, pl) ->
        let _, expected_arities, _ =
@@ -72,9 +85,11 @@ let maxArityInPattern constrs name =
       -> exp
     | PVal(_) | PConstant(_) -> -1
     | PBind(_, p) -> aux p
-    | PApp(n, pl) when n = name
+    | PBApp(n, pl) when n = name
       -> exp - (List.length pl)
-    | PApp(_, pl) -> fold_max_f (aux) pl
+    | PApp(n, pl) when n = name
+      -> 0
+    | PBApp(_, pl) | PApp(_, pl) -> fold_max_f (aux) pl
     | PConstr(c, pl)
       -> 
        let _, expected_arities, _ =

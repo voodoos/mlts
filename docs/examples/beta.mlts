@@ -1,14 +1,14 @@
 type utm =
      | App of utm * utm
-     | Abt of utm => utm
+     | Abs of utm => utm
      ;;
      
 let rec aux_beta var body term =
   match var::body::[] with
-  | nab X in X::App(m X, n X)::[] ->
-              App(aux_beta (X) (m X) term, aux_beta (X) (n X) term)
-  | nab X in X::(Abt(r X))::[] ->
-              Abt(y\ aux_beta (X) (r X y) term)
+  | nab X in X::App(m @ X, n @ X)::[] ->
+              App(aux_beta (X) (m @ X) term, aux_beta (X) (n @ X) term)
+  | nab X in X::(Abs(r @ X))::[] ->
+              Abs(y\ aux_beta (X) (r @ X y) term)
   | nab X in X::X::[] -> term
   | nab X Y in X::Y::[] -> Y
 
@@ -17,29 +17,29 @@ let rec aux_beta var body term =
  
 let rec beta absterm term =
   match absterm with
-  | Abt(r) -> new X in aux_beta (X) (r X) term
+  | Abs(r) -> new X in aux_beta (X) (r @ X) term
 ;;
 
-beta (Abt(x\x)) (Abt(x\x));;
-beta (Abt(x\ App(x, x))) (Abt(x\x));;
-beta (Abt(x\ Abt(y\ App(x, x)))) (Abt(x\x));;
-beta (Abt(x\ Abt(y\ App(x, y)))) (Abt(x\x));;
-beta (Abt(x\ Abt(y\ x))) (Abt(x\x));;
-beta (Abt(x\ Abt(y\ y))) (Abt(x\x));;
+beta (Abs(x\x)) (Abs(x\x));;
+beta (Abs(x\ App(x, x))) (Abs(x\x));;
+beta (Abs(x\ Abs(y\ App(x, x)))) (Abs(x\x));;
+beta (Abs(x\ Abs(y\ App(x, y)))) (Abs(x\x));;
+beta (Abs(x\ Abs(y\ x))) (Abs(x\x));;
+beta (Abs(x\ Abs(y\ y))) (Abs(x\x));;
 
 let rec bred aterm term =
   match aterm with
-  | Abt(x\ App(m x, n x)) ->
-     App(bred (Abt(m)) term, bred (Abt(n)) term)
-  |  Abt(x\ Abt(r x)) ->
-      Abt(y\ (bred (Abt(x\ r x y)) term))
-  | Abt(x\ x) -> term
-  | nab Y in Abt(x\ Y) -> Y
+  | Abs(x\ App(m @ x, n @ x)) ->
+     App(bred (Abs(m)) term, bred (Abs(n)) term)
+  |  Abs(x\ Abs(r @ x)) ->
+      Abs(y\ (bred (Abs(x\ r @ x y)) term))
+  | Abs(x\ x) -> term
+  | nab Y in Abs(x\ Y) -> Y
 ;;
 
-bred (Abt(x\ x)) (Abt(x\ x));;
-bred (Abt(x\ App(x, x))) (Abt(x\x));;
-bred (Abt(x\ Abt(y\ App(x, x)))) (Abt(x\x));;
-bred (Abt(x\ Abt(y\ App(x, y)))) (Abt(x\x));;
-bred (Abt(x\ Abt(y\ x))) (Abt(x\x));;
-bred (Abt(x\ Abt(y\ y))) (Abt(x\x));; 
+bred (Abs(x\ x)) (Abs(x\ x));;
+bred (Abs(x\ App(x, x))) (Abs(x\x));;
+bred (Abs(x\ Abs(y\ App(x, x)))) (Abs(x\x));;
+bred (Abs(x\ Abs(y\ App(x, y)))) (Abs(x\x));;
+bred (Abs(x\ Abs(y\ x))) (Abs(x\x));;
+bred (Abs(x\ Abs(y\ y))) (Abs(x\x));; 

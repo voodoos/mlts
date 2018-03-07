@@ -1,20 +1,20 @@
 type utm =
 | App of utm * utm
-| Abt of utm => utm
+| Abs of utm => utm
 ;;
 
 let vacp t =
   match t with
-  | Abt(r) -> new X in
+  | Abs(r) -> new X in
     let rec aux term =
       match term with
       | X -> false
       | nab Y in Y -> true
       | App(m, n) -> (aux m) && (aux n)
-      | Abt(r) -> new Y in aux (r Y)
+      | Abs(r) -> new Y in aux (r @ Y)
     in aux (r X)
 ;;	
 	    
-vacp (Abt(x\ x));;
-vacp (Abt(x\ App(x, x)));;
-vacp (Abt(x\ Abt(y\ y)));;	
+vacp (Abs(x\ x));;
+vacp (Abs(x\ App(x, x)));;
+vacp (Abs(x\ Abs(y\ y)));;	

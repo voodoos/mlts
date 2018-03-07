@@ -22,6 +22,7 @@ and expr =
   | EMatch of expr * pattern_matching
   | EIf of expr * expr * expr
   | EApp of expr * (argument list)
+  | EBApp of expr * (argument list)
   | EInfix of expr * infix_op * expr           
   | EConst of constant
   | EVal of value_path
@@ -51,6 +52,7 @@ and pattern =
   | PVal of value_name
   | PBind of value_name * pattern
   | PApp of value_name * (pattern list)
+  | PBApp of value_name * (pattern list)
   | PConstr of  constr_path * (pattern list)
   | PConstant of constant
   | PListCons of pattern * pattern

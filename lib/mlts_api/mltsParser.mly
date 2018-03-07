@@ -157,7 +157,10 @@ expr:
 	%prec ARROW			{ EFun(i, e) }
 | NEW; i = constr_name; IN; e = expr
 	%prec IN			{ ENew(i, e) }
-| se = simple_expr_noconstr;  option(AT);
+| se = simple_expr_noconstr;  AT;
+  	a = nonempty_list(argument)
+	                                { EBApp(se, a) }
+| se = simple_expr_noconstr;
   	a = nonempty_list(argument)
 	                                { EApp(se, a) }
 | expr; infix_op; expr 			{ EInfix($1, $2, $3) }
@@ -219,7 +222,10 @@ pattern:
 | sp = simple_pattern			{ sp }
 | i = value_name; BACKSLASH; p = pattern
 					{ PBind(i, p) }
-| v = value_path; option(AT);
+| v = value_path; AT;
+    l = nonempty_list(simple_pattern)
+      				        { PBApp(v, l) }
+| v = value_path; 
     l = nonempty_list(simple_pattern)
       				        { PApp(v, l) }
 					
