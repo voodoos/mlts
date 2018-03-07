@@ -114,27 +114,15 @@ let toLPString p =
     | EBApp(e, el) ->
        let str, freevars = (aux_expr env e) in
        let args = List.map (aux_expr env) el in
-       let a = arityMP (String.uncapitalize_ascii str) env in
-       (*"["^(string_of_env env) ^ 
-       "]["^str ^ " has arity " ^(string_of_int a)^" "^(string_of_int (List.length args))^"]" 
-	   ^*)
-       (if a >= 1 then
-	  (appv str (List.map (fst) args))
-	else 
-	  (app str (List.map (fst) args))
-       ), List.fold_left (fun acc (_, fv) -> acc@fv) freevars args
+       
+       appv str (List.map (fst) args),
+       List.fold_left (fun acc (_, fv) -> acc@fv) freevars args
     | EApp(e, el) ->
        let str, freevars = (aux_expr env e) in
        let args = List.map (aux_expr env) el in
-       let a = arityMP (String.uncapitalize_ascii str) env in
-       (*"["^(string_of_env env) ^ 
-       "]["^str ^ " has arity " ^(string_of_int a)^" "^(string_of_int (List.length args))^"]" 
-	   ^*)
-       (if a >= 1 then
-	  (appv str (List.map (fst) args))
-	else 
-	  (app str (List.map (fst) args))
-       ), List.fold_left (fun acc (_, fv) -> acc@fv) freevars args
+       
+       app str (List.map (fst) args),
+       List.fold_left (fun acc (_, fv) -> acc@fv) freevars args
     | EIf(e1, e2, e3) ->
        let str1, fv1 = aux_expr env e1
        and str2, fv2 = aux_expr env e2
