@@ -54,10 +54,12 @@ let toLPString p =
   let c = ref 0 in
   let constructors = Hashtbl.create 100 in
   let actualDef = { name = "" ;  pos = Lexing.dummy_pos} in
+  let allDefs = ref [] in
 
   let setActualDef n pos =
     actualDef.name <- n;
-    actualDef.pos <- pos
+    actualDef.pos <- pos;
+    allDefs := (n, pos.pos_lnum)::!allDefs  
   in
   
   let rec aux env = function
@@ -78,7 +80,9 @@ let toLPString p =
              name, str, freevars, []
          ) in
        let strNext, freevars2, datatypes2 = aux ((Global name)::env) tl in
-       (prog_string name str freevars ^ strNext), freevars2, datatypes @ datatypes2
+       (prog_string name str freevars ^ strNext),
+       freevars2,
+       datatypes @ datatypes2
 
   and aux_def env = function
     | DLet(lb) ->
@@ -293,7 +297,7 @@ let toLPString p =
     = Datatypes_translation.translate_types constructors in
   
   (* print_string (string_of_constructors constructors);*)
-  progs, evalsig, (evalmod ^ typing)
+  progs, evalsig, (evalmod ^ typing), !allDefs
 
 
 
@@ -303,7 +307,7 @@ let make_lp_file prog =
   let dtmod = open_out "export/datatypes.mod" in
   let dtsig = open_out "export/datatypes.sig" in
   
-  let progs,  types, typingeval = toLPString prog in
+  let progs,  types, typingeval, defs = toLPString prog in
 
   (* progs_gen.mod *)
   output_string progmod "module progs_gen.\n\n";

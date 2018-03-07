@@ -13,7 +13,7 @@ let console (str : string) =
 let compile code =
   try
     (* First mlts => lprolog *)
-    let lpcode, typsig, typmod =
+    let lpcode, typsig, typmod, defs =
       Mlts_API.parse_and_translate code in
 
     (* updating the pseudo files *)
@@ -32,9 +32,11 @@ let compile code =
     (* We return the lprolog code for reference *)
     Js.string (lpcode
                ^ "%%% Datatypes/sig." ^ typsig
-               ^  "%%% Datatypes/mod." ^ typmod) , 0, 0, true
+               ^  "%%% Datatypes/mod." ^ typmod),
+    (Array.of_list defs) , 0, 0, true
+                                   
   with Mlts_API.Error(s, line, char)
-       -> (Js.string s, line, char,  false)
+       -> (Js.string s, [||], line, char,  false)
 (*  | _ -> Js.string "Unknown error.", 0, 0, false *)
 
 
@@ -96,7 +98,7 @@ let _ =
   Data.load ();
 
   (* Initialize Elpi *)
-  ignore (Elpi_API.Setup.init ~silent:false [] "");
+  ignore (Elpi_API.Setup.init ~silent:true [] "");
   Elpi_API.Setup.set_warn console;
   Elpi_API.Setup.set_error console;
   Elpi_API.Setup.set_anomaly console;
