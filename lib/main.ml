@@ -82,10 +82,15 @@ let compile_and_run code =
   let lpcode = compile (Js.to_string code) in
   lpcode, query ("run_all N.")
 
+let version = "0.1.0"
+
 let _ =
   (* Redirect output to console *)
   Sys_js.set_channel_flusher stdout (console);
   Sys_js.set_channel_flusher stderr (console);
+  
+  ignore (Js.Unsafe.eval_string ("sendVersion('" ^ (version) ^"')"));
+  
   
   (* Loading data folder in the pseudo-filesystem *)
   Data.load ();
@@ -99,7 +104,7 @@ let _ =
   
   let parsed =  Elpi_API.Parse.program ["core/run.mod"] in
   kernel := Some(Elpi_API.Compile.program [parsed]);
-  
+
   (* JS API *)
   Js.export "compile" (fun jstr -> compile (Js.to_string jstr)) ;
   Js.export "query"  (fun jstr -> query (Js.to_string jstr)) ;

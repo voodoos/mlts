@@ -12,6 +12,11 @@ function sendLpl(code) {
     postMessage(rep);
 }
 
+function sendVersion(str) {
+    var rep = { "type": "version", "n": str };
+    postMessage(rep);
+}
+
 onmessage = function(event) {
     var code = event.data;
     console.log('[Elpi-worker] ' + "Compiling code");

@@ -100,6 +100,16 @@ h4 {
     color: #b7ada2;;
 }
 
+#version {
+    position:absolute;
+    bottom:0;
+    right:0;
+    z-index:10;
+    background-color: #ffffff1a;
+    color: #ffffffb3;
+    padding-right: 0.5em;
+    padding-left: 0.4em;
+}
 
 #run_btn {
     width: 150px;

@@ -145,6 +145,9 @@ function onMessageCB(event) {
 	});
 	$('#myTab a[href="#lpl"]').tab('show');
     }
+    else if(event.data.type == 'version') {
+	$('#version').html('').append("v"+event.data.n);
+    }
     else show_resultas(event.data.output);
 }
 
