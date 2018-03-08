@@ -32,7 +32,7 @@ body {
 }
 
 .right #lpl, .right #values {
-    font-size: 0.9rem;
+    font-size: 0.75rem;
 }
 
 .right #readme, .right #lpl {
@@ -54,6 +54,10 @@ tr.clickable {
 }
 tr.clickable:hover{
     background-color: #d5d5d5 !important;
+}
+
+#values td {
+    padding: 5px;
 }
 
 .right #lpl br {

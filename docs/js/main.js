@@ -177,14 +177,13 @@ function show_resultas(results) {
     $('#answer').html('');
     results.reverse().forEach(function(res, id) {
 	var row = $('<tr></tr>').addClass("clickable").click(function(e) { goto_def(decodeURI(res.name)) });
-	row.append($('<th></th>').attr('scope', 'row').text(id));
 	row.append($('<td></td>').text(decodeURI(res.name)));
 
 	// Some ugly-regex-magic-based pretty printing :
 	var color = ((res.value.includes("error")
 		      || (res.value.includes("failed"))) ? "red"
 		     : "black");
-	row.append($('<td></td>').css('color', color)
+	row.append($('<td></td>').addClass("reslpl").css('color', color)
 		   .text(decodeURI(res.value)
 			 .replace(/i /g, '')
 			 .replace(/tt/g, 'True')
@@ -203,7 +202,9 @@ function show_resultas(results) {
 			)
 		  );
 	$('#answer').append(row);
+	
     });
+    
     $('#myTab a[href="#values"]').tab('show');
 
     unlock();
