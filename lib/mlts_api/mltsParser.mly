@@ -166,7 +166,7 @@ expr:
 | expr; infix_op; expr 			{ EInfix($1, $2, $3) }
 | e1 = expr; DCOLON;
      e2 = expr				{ EInfix(e1, ListCons, e2) }
-| i = value_name; BACKSLASH; e = expr
+| i = constr_name; BACKSLASH; e = expr
       %prec BACKSLASH			{ EBind(i, e) }
       
 | c = constr_path;
@@ -222,7 +222,7 @@ pattern_arrow:
 
 pattern:
 | sp = simple_pattern			{ sp }
-| i = value_name; BACKSLASH; p = pattern
+| i = constr_name; BACKSLASH; p = pattern
 					{ PBind(i, p) }
 | v = value_path; AT;
     l = nonempty_list(simple_pattern)

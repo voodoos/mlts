@@ -1,7 +1,6 @@
 open MltsAst
 
 let strip_prefix s = String.sub s 2 (String.length s - 2)
-       
 (* Some tools for list management *)
 
 let print_pairs fts sts =
@@ -22,6 +21,45 @@ let to_separated_list ?first:(f = false) ?nop:(nop = false)  s l =
   
 let firsts l = List.map (fst) l
 let seconds l = List.map (snd) l
+
+                         
+(* 	Type constructors handling *)
+let rec arity_list_of_type_term = function
+  | (Cons(_), a) -> [a]
+  | (Bind(_,_), a) -> [a]
+  | (Arrow(_,_), a) -> [a]
+  | (List(_), a) -> [a]
+  | (Sum((_, a1), ate2), _) -> a1::(arity_list_of_type_term ate2)
+
+let add_constr constructors tname = function
+  | Of(n, ate) ->
+     let aritylist = arity_list_of_type_term ate in
+     Hashtbl.add constructors
+                 (String.uncapitalize_ascii n)
+                 (tname, aritylist, ate)
+  | Simple(n) ->
+     Hashtbl.add constructors
+                 (String.uncapitalize_ascii n)
+                 (tname, [], (Cons("empty"), 0))
+
+let remove_constr constructors = function
+  | Simple(n) | Of(n, _) ->
+     Hashtbl.remove constructors
+                    (String.uncapitalize_ascii n)
+
+let string_of_constructor n tn al =
+  "(" ^ n ^ ": "
+  ^ (to_separated_list ~nop:true ","
+                       (List.map (string_of_int) al)) ^ " -> " ^ tn ^")"
+
+let string_of_constructors c =
+    Hashtbl.fold
+      (fun n (tn, al, _) acc ->
+        acc ^ "; " ^ (string_of_constructor n tn al))
+      c ""
+
+       
+
 
 (* Utilities to construct strings of LP *)
 

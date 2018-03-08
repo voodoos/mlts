@@ -14,40 +14,6 @@ let makeException message def pos =
                    | Some(p) -> pos)
 
 
-(* 	Type constructors handling *)
-let rec arity_list_of_type_term = function
-  | (Cons(_), a) -> [a]
-  | (Bind(_,_), a) -> [a]
-  | (Arrow(_,_), a) -> [a]
-  | (List(_), a) -> [a]
-  | (Sum((_, a1), ate2), _) -> a1::(arity_list_of_type_term ate2)
-
-let add_constr constructors tname = function
-  | Of(n, ate) ->
-     let aritylist = arity_list_of_type_term ate in
-     Hashtbl.add constructors
-                 (String.uncapitalize_ascii n)
-                 (tname, aritylist, ate)
-  | Simple(n) ->
-     Hashtbl.add constructors
-                 (String.uncapitalize_ascii n)
-                 (tname, [], (Cons("empty"), 0))
-
-let remove_constr constructors = function
-  | Simple(n) | Of(n, _) ->
-     Hashtbl.remove constructors
-                    (String.uncapitalize_ascii n)
-
-let string_of_constructor n tn al =
-  "(" ^ n ^ ": "
-  ^ (to_separated_list ~nop:true ","
-                       (List.map (string_of_int) al)) ^ " -> " ^ tn ^")"
-
-let string_of_constructors c =
-    Hashtbl.fold
-      (fun n (tn, al, _) acc ->
-        acc ^ "; " ^ (string_of_constructor n tn al))
-      c ""
 
 
 (* PROGRAM TRANSLATION *)
@@ -179,8 +145,11 @@ let toLPString p =
        )
     | EPattern(p) -> let code, pararities = aux_pattern env p in
 		     code, firsts pararities
-    | EBind(v, e) -> let code, fv = aux_expr (Local(v)::env) e in
-                     bind v code,fv 
+    | EBind(v, e)
+      -> add_constr constructors "$_nom" (Simple(v));
+         let code, fv = aux_expr (env) e in
+         remove_constr constructors (Simple(v));
+         bind v code,fv 
     | EFun(v, e) -> let code, fv = aux_expr (Local(v)::env) e in
                     func v code,fv 
     | ENew(v, e) ->
@@ -239,10 +208,13 @@ let toLPString p =
        else if (List.mem (Local(vn)) env) then vn, []
        else if (Hashtbl.mem constructors vn) then vn, []
        else (String.uncapitalize_ascii vn), [(vn, 0)]
-    | PBind(vn, p) -> let code, fv = aux_pattern (Local(vn)::env) p in
+    | PBind(vn, p) ->
+       add_constr constructors "$_nom" (Simple(vn));
+       let code, fv = aux_pattern (env) p in
+       remove_constr constructors (Simple(vn));
                       (*print_string (bind vn code); print_pairs (fun s -> s)
                                                                (string_of_int) fv;*)
-                      bind vn code, fv
+       bind vn code, fv
     | PBApp(vn, pls) ->
        let pl = List.map (aux_pattern env) pls in
        (*let vn = String.capitalize_ascii vn in*)

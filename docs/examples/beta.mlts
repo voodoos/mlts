@@ -8,7 +8,7 @@ let rec aux_beta var body term =
   | nab X in X::App(m @ X, n @ X)::[] ->
               App(aux_beta (X) (m @ X) term, aux_beta (X) (n @ X) term)
   | nab X in X::(Abt(r @ X))::[] ->
-              Abt(y\ aux_beta (X) (r @ X y) term)
+              Abt(Y\ aux_beta (X) (r @ X Y) term)
   | nab X in X::X::[] -> term
   | nab X Y in X::Y::[] -> Y
 
@@ -20,26 +20,26 @@ let rec beta absterm term =
   | Abt(r) -> new X in aux_beta (X) (r @ X) term
 ;;
 
-beta (Abt(x\x)) (Abt(x\x));;
-beta (Abt(x\ App(x, x))) (Abt(x\x));;
-beta (Abt(x\ Abt(y\ App(x, x)))) (Abt(x\x));;
-beta (Abt(x\ Abt(y\ App(x, y)))) (Abt(x\x));;
-beta (Abt(x\ Abt(y\ x))) (Abt(x\x));;
-beta (Abt(x\ Abt(y\ y))) (Abt(x\x));;
+beta (Abt(X\X)) (Abt(X\X));;
+beta (Abt(X\ App(X, X))) (Abt(X\X));;
+beta (Abt(X\ Abt(Y\ App(X, X)))) (Abt(X\X));;
+beta (Abt(X\ Abt(Y\ App(X, Y)))) (Abt(X\X));;
+beta (Abt(X\ Abt(Y\ X))) (Abt(X\X));;
+beta (Abt(X\ Abt(Y\ Y))) (Abt(X\X));;
 
 let rec bred aterm term =
   match aterm with
-  | Abt(x\ App(m @ x, n @ x)) ->
+  | Abt(X\ App(m @ X, n @ X)) ->
      App(bred (Abt(m)) term, bred (Abt(n)) term)
-  |  Abt(x\ Abt(r @ x)) ->
-      Abt(y\ (bred (Abt(x\ r @ x y)) term))
-  | Abt(x\ x) -> term
-  | nab Y in Abt(x\ Y) -> Y
+  |  Abt(X\ Abt(r @ X)) ->
+      Abt(Y\ (bred (Abt(X\ r @ X Y)) term))
+  | Abt(X\ X) -> term
+  | nab Y in Abt(X\ Y) -> Y
 ;;
 
-bred (Abt(x\ x)) (Abt(x\ x));;
-bred (Abt(x\ App(x, x))) (Abt(x\x));;
-bred (Abt(x\ Abt(y\ App(x, x)))) (Abt(x\x));;
-bred (Abt(x\ Abt(y\ App(x, y)))) (Abt(x\x));;
-bred (Abt(x\ Abt(y\ x))) (Abt(x\x));;
-bred (Abt(x\ Abt(y\ y))) (Abt(x\x));; 
+bred (Abt(X\X)) (Abt(X\X));;
+bred (Abt(X\ App(X, X))) (Abt(X\X));;
+bred (Abt(X\ Abt(Y\ App(X, X)))) (Abt(X\X));;
+bred (Abt(X\ Abt(Y\ App(X, Y)))) (Abt(X\X));;
+bred (Abt(X\ Abt(Y\ X))) (Abt(X\X));;
+bred (Abt(X\ Abt(Y\ Y))) (Abt(X\X));;

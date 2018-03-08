@@ -1,5 +1,7 @@
 open MltsAst
 
+exception Error of string * (Lexing.position option)
+                                        
 let fold_max_f f =
   List.fold_left
     (fun macc n -> max macc (f n)) (-1) 
@@ -61,7 +63,11 @@ let maxArityInPattern constrs name =
   let rec aux = function
     | PVal(n) when n = name -> 0
     | PVal(_) | PConstant(_) -> -1
-    | PBind(n, p) -> aux p
+    | PBind(vn, p) -> 
+       LpStrings.add_constr constrs "$_nom" (Simple(vn));
+       let res = aux p in
+       LpStrings.remove_constr constrs (Simple(vn));
+       res
     | PBApp(n, pl) when n = name
       -> List.length pl
     | PBApp(_, pl) -> fold_max_f aux pl
@@ -69,13 +75,18 @@ let maxArityInPattern constrs name =
       -> 0
     | PApp(_, pl) -> fold_max_f aux pl
     | PConstr(c, pl) ->
-       let _, expected_arities, _ =
-         Hashtbl.find constrs
-                      (String.uncapitalize_ascii c) in
-       let pl_arities = List.map2 (maxArityUnderConstr)
-                                  expected_arities
-                                  pl in
-       List.fold_left (max) 0 pl_arities
+       (try 
+         let _, expected_arities, _ =
+           Hashtbl.find constrs
+                        (String.uncapitalize_ascii c) in
+         let pl_arities = List.map2 (maxArityUnderConstr)
+                                    expected_arities
+                                    pl in
+         List.fold_left (max) 0 pl_arities
+       with Not_found -> 
+          raise  (Error("Unknown constructor \""
+                                 ^ (LpStrings.strip_prefix c) ^ "\".", None))
+       )
     | PListCons(p1, p2) | PPair(p1, p2)
       -> max (aux p1) (aux p2)
              
@@ -84,7 +95,11 @@ let maxArityInPattern constrs name =
     | PVal(n) when n = name
       -> exp
     | PVal(_) | PConstant(_) -> -1
-    | PBind(_, p) -> aux p
+    | PBind(vn, p) ->
+       LpStrings.add_constr constrs "$_nom" (Simple(vn));
+       let res = aux p in
+       LpStrings.remove_constr constrs (Simple(vn));
+       res
     | PBApp(n, pl) when n = name
       -> exp - (List.length pl)
     | PApp(n, pl) when n = name

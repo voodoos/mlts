@@ -15,6 +15,6 @@ let vacp t =
     in aux (r @ X)
 ;;	
 	    
-vacp (Abs(x\ x));;
-vacp (Abs(x\ App(x, x)));;
-vacp (Abs(x\ Abs(y\ y)));;	
+vacp (Abs(X\ X));;
+vacp (Abs(X\ App(X, X)));;
+vacp (Abs(X\ Abs(Y\ Y)));;	

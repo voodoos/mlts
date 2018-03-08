@@ -41,7 +41,7 @@ let fv term =
 		term
 ;;
 	
-fv (Abt(x\ App(x, x)));;
-fv (Abt(x\ Abt(y\ App(y, App(x, y)))));;
-fv (Abt(x\ App(App(x, x), App(x, x))));;
-(Abt(x\ fv (App(App(x, x), App(x, x)))));;
+fv (Abt(X\ App(X, X)));;
+fv (Abt(X\ Abt(Y\ App(Y, App(X, Y)))));;
+fv (Abt(X\ App(App(X, X), App(X, X))));;
+(Abt(X\ fv (App(App(X, X), App(X, X)))));;

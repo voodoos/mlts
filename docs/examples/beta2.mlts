@@ -8,7 +8,7 @@ let rec subst t x u =
   | nab X in (X, X) -> u
   | nab X Y in (X, Y) -> Y
   | (x, App(m, n)) -> App(subst m x u, subst n x u)
-  | (x, Abs r) -> Abs(y \ subst (r @ y) x u)
+  | (x, Abs r) -> Abs(Y\ subst (r @ Y) x u)
 ;;
 
 let rec beta t =
@@ -21,18 +21,18 @@ let rec beta t =
         | Abs r -> new X in beta (subst (r @ X) X n)
         | w -> App(m, n)
     end
-  | Abs r -> Abs (y \ beta (r @ y))
+  | Abs r -> Abs (Y \ beta (r @ Y))
   | nab X in X -> X
 ;;
 
 
-new X in Abs(y\ subst (App(X, X)) X (App(y, y)));;
-beta (Abs(x\ x));;
-beta (Abs(x\ Abs(y\ App(x, y))));;
-beta (App(Abs(x\ x), Abs(y\ App(y, y))));;
-beta (App(Abs(x\ Abs(y\ App(y, x))), Abs(x\ x)));;
-(* beta (App(Abs(x\ App(x, x)), Abs(y\ App(y, y))));; *)
-beta (App(App(Abs(x\Abs(y\Abs(z\App(App(x,z),App(y,z))))),
-              Abs(x\Abs(y\x))),
-          Abs(x\Abs(y\x))));;
+new X in Abs(Y\ subst (App(X, X)) X (App(Y, Y)));;
+beta (Abs(X\ X));;
+beta (Abs(X\ Abs(Y\ App(X, Y))));;
+beta (App(Abs(X\ X), Abs(Y\ App(Y, Y))));;
+beta (App(Abs(X\ Abs(Y\ App(Y, X))), Abs(X\ X)));;
+(* beta (App(Abs(X\ App(X, X)), Abs(Y\ App(Y, Y))));; *)
+beta (App(App(Abs(X\Abs(Y\Abs(Z\App(App(X,Z),App(Y,Z))))),
+              Abs(X\Abs(Y\X))),
+          Abs(X\Abs(Y\X))));;
 new X in beta (App(X));;
