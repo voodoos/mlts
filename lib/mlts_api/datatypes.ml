@@ -46,6 +46,8 @@ let rec atypl_of_aritytypexpr tname ate =
     | _ -> failwith "Arg, not a sum"
   and aux = function
     | (Cons(c), i) -> Consl(c), i
+    | (Arrow(ate1, ate2), i)
+      -> Arrowl(aux ate1, aux ate2), i
     | (Bind(ate1, ate2), i)
       -> Bindl(aux ate1,
                aux ate2), i

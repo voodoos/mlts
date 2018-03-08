@@ -186,13 +186,15 @@ expr_list:
 arityp_expr:
 | BEGIN; arityp_expr; END;		{ $2 }
 | typeconstr_name			{ Cons($1), 0 }
-/*| separated_nonempty_list(STAR, arityp_expr)
-					{ (Sum($1), lmax $1) }
-					*/
 | tya1 = arityp_expr;
   STAR; tya2 = arityp_expr		{ let ty1, a1 = tya1
    	   	  			  and ty2, a2 = tya2   in
   	       				      Sum(tya1, tya2), max a1 a2 }
+					      
+| tya1 = arityp_expr;
+  ARROW; tya2 = arityp_expr		{ let ty1, a1 = tya1
+   	   	  			  and ty2, a2 = tya2   in
+  	       				      Arrow(tya1, tya2), max a1 a2 }
 					      
 |  tya1 = arityp_expr;
    DARROW;  tya2 = arityp_expr		{ let ty1, a1 = tya1
