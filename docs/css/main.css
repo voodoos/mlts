@@ -31,6 +31,10 @@ body {
     box-shadow: 1px 0px 1px 0px #656565;
 }
 
+.right #lpl, .right #values {
+    font-size: 0.9rem;
+}
+
 .right #readme, .right #lpl {
     padding: 1.5em;
 }
