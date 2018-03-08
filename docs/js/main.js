@@ -118,6 +118,7 @@ function saveAs(uri, filename) {
 
 // We run Elpi in a separate worker
 var elpi = new Worker('js/elpi-worker.js');
+var defs;
 
 function onMessageCB(event) {
     if(event.data.type == 'ready') {
@@ -136,6 +137,7 @@ function onMessageCB(event) {
 	}
     }
     else if(event.data.type == 'lplcode') {
+	defs = event.data.defs;
 	$('#lpl').html('').append(event.data.code
 				  .replace(/arobase/g, '@')
 				  .replace(/'/g, '&rsquo;')
@@ -174,7 +176,7 @@ function run() {
 function show_resultas(results) {
     $('#answer').html('');
     results.reverse().forEach(function(res, id) {
-	var row = $('<tr></tr>');
+	var row = $('<tr></tr>').addClass("clickable").click(function(e) { goto_def(decodeURI(res.name)) });
 	row.append($('<th></th>').attr('scope', 'row').text(id));
 	row.append($('<td></td>').text(decodeURI(res.name)));
 
@@ -205,4 +207,18 @@ function show_resultas(results) {
     $('#myTab a[href="#values"]').tab('show');
 
     unlock();
+}
+
+function get_def_line(name) {
+    return ((defs.find(function(element) {
+	if (element.length > 2)
+	    return (element[1].c) == name;
+	else return false
+    }))[2])
+}
+
+function goto_def(name) {
+    editor.gotoLine(get_def_line(name));
+    $('#editor').addClass('white-alert');
+    setTimeout(function(){ $('#editor').removeClass('white-alert') }, 1000);
 }

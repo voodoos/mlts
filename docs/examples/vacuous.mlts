@@ -12,7 +12,7 @@ let vacp t =
       | nab Y in Y -> true
       | App(m, n) -> (aux m) && (aux n)
       | Abs(r) -> new Y in aux (r @ Y)
-    in aux (r X)
+    in aux (r @ X)
 ;;	
 	    
 vacp (Abs(x\ x));;

@@ -45,6 +45,17 @@ body {
     font-family: 'Roboto Mono', monospace;
     
 }
+.clickable {
+    cursor: pointer;
+}
+
+tr.clickable {
+    transition: background-color 0.2s;
+}
+tr.clickable:hover{
+    background-color: #d5d5d5 !important;
+}
+
 .right #lpl br {
    display: block;
    margin: 10px 0;
@@ -89,6 +100,9 @@ h4 {
 }
 .red-alert .ace_active-line {
      background-color: #dc3545 !important;
+}
+.white-alert .ace_active-line {
+     background-color: white !important;
 }
 .ace_hidden-cursors .ace_cursor {
     opacity: 0.8;

@@ -7,8 +7,8 @@ console.log('[Elpi-worker] ' + "Elpi started");
 var rep = { "type": "ready" };
 postMessage(rep);
 
-function sendLpl(code) {
-    var rep = { "type": "lplcode", "code": code };
+function sendLpl(code, defs) {
+    var rep = { "type": "lplcode", "code": code, "defs": defs};
     postMessage(rep);
 }
 
@@ -22,8 +22,7 @@ onmessage = function(event) {
     console.log('[Elpi-worker] ' + "Compiling code");
     var lplcode = compile(code);
     
-    sendLpl(lplcode[1]);
-    console.log(lplcode[2]);
+    sendLpl(lplcode[1], lplcode[2]);
 
     if(lplcode[5] == 1) {
 	console.log('[Elpi-worker] ' + "Querying run_all L.");
