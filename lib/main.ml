@@ -83,7 +83,7 @@ let compile_and_run code =
   let lpcode = compile (Js.to_string code) in
   lpcode, query ("run_all N.")
 
-let version = "0.1.3"
+let version = "0.1.4"
 
 let _ =
   (* Redirect output to console *)
