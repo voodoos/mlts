@@ -1,5 +1,11 @@
 <h1 id="mlts-web">MLTS Web</h1>
 <p>A web app designed to try and play with the NabMLTS (to be renamed) programming language. Source is hosted on <a href="https://github.com/voodoos/mlts">GitHub</a> as is the <a href="http://voodoos.github.io/mlts/">demo</a>.</p>
+<h2 id="known-issues-and-missing-features">Known issues and missing features</h2>
+<p>This work is highly experimental and you should expect bugs to appear. If so please report them on the <a href="https://github.com/voodoos/mlts/issues">issue tracker</a>.</p>
+<ul>
+<li>There is no syntactic sugar for non-empty lists. Use <code>a::b::c::[]</code> instead of <code>[a;b;c]</code>.</li>
+<li>Error messages are not always meaningfull of even shown.</li>
+</ul>
 <h2 id="concrete-syntax">Concrete syntax</h2>
 <p>MLTS concrete syntax is based on OCaml. A program written in MLTS not using the new constructs <code>nab in</code>, <code>new in</code>, <code>\</code> and <code>=&gt;</code> should compile with the <code>ocamlc</code> compiler.</p>
 <h2 id="how-it-works">How it works</h2>

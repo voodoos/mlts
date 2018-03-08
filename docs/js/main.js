@@ -1,3 +1,6 @@
+// Some vars
+var flashTimeWhite = 100;
+
 
 // Initializing editor
 var editor = ace.edit("editor");
@@ -224,5 +227,5 @@ function get_def_line(name) {
 function goto_def(name) {
     editor.gotoLine(get_def_line(name));
     $('#editor').addClass('white-alert');
-    setTimeout(function(){ $('#editor').removeClass('white-alert') }, 1000);
+    setTimeout(function(){ $('#editor').removeClass('white-alert') }, flashTimeWhite);
 }

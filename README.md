@@ -2,6 +2,11 @@
 A web app designed to try and play with the  NabMLTS (to be renamed) programming language.
 Source is hosted on [GitHub](https://github.com/voodoos/mlts) as is the [demo](http://voodoos.github.io/mlts/).
 
+## Known issues and missing features
+This work is highly experimental and you should expect bugs to appear. If so please report them on the [issue tracker](https://github.com/voodoos/mlts/issues).
+
+- There is no syntactic sugar for non-empty lists. Use `a::b::c::[]` instead of `[a;b;c]`.
+- Error messages are not always meaningfull of even shown.
 
 
 ## Concrete syntax
