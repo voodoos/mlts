@@ -31,7 +31,7 @@ body {
     box-shadow: 1px 0px 1px 0px #656565;
 }
 
-.right #lpl, .right #values {
+.right #lpl, .right #values, .right #log {
     font-size: 0.75rem;
 }
 
@@ -41,7 +41,7 @@ body {
 .right #readme {
     font-family: 'Open Sans', sans-serif;
 }
-.right #lpl, .right #answer {
+.right #lpl, .right #answer, .right #log {
     font-family: 'Roboto Mono', monospace;
     
 }

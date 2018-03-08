@@ -124,6 +124,9 @@ function onMessageCB(event) {
     if(event.data.type == 'ready') {
 	unlock();
     }
+    else if(event.data.type == 'log') {
+	$('#log').prepend('<br/>').prepend(event.data.text);
+    }
     else if (event.data.type == 'error') {
 	unlock();
 	

@@ -7,6 +7,12 @@ console.log('[Elpi-worker] ' + "Elpi started");
 var rep = { "type": "ready" };
 postMessage(rep);
 
+
+function sendLog(str) {
+    var rep = { "type": "log", "text": str};
+    postMessage(rep);
+}
+
 function sendLpl(code, defs) {
     var rep = { "type": "lplcode", "code": code, "defs": defs};
     postMessage(rep);

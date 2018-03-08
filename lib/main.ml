@@ -7,8 +7,9 @@ let kernel = ref None
 let escape s =
   Js.to_string (Js.encodeURI (Js.string s))
                
-let console (str : string) =
-  ignore (Js.Unsafe.eval_string ("console.log(decodeURI('" ^ (escape str) ^"'))"))
+let console ?pref:(p = "") (str : string) =
+  ignore (Js.Unsafe.eval_string ("sendLog(decodeURI('" ^ (escape (p ^ str)) ^"'))"))
+  (* ignore (Js.Unsafe.eval_string ("console.log(decodeURI('" ^ (escape str) ^"'))")) *)
                  
 let compile code =
   try
@@ -97,11 +98,11 @@ let _ =
   Data.load ();
 
   (* Initialize Elpi *)
-  ignore (Elpi_API.Setup.init ~silent:true [] "");
-  Elpi_API.Setup.set_warn console;
-  Elpi_API.Setup.set_error console;
-  Elpi_API.Setup.set_anomaly console;
-  Elpi_API.Setup.set_type_error console;
+  ignore (Elpi_API.Setup.init ~silent:false [] "");
+  Elpi_API.Setup.set_warn (console ~pref:"[elpi]");
+  Elpi_API.Setup.set_error (console ~pref:"[elpi]");
+  Elpi_API.Setup.set_anomaly (console ~pref:"[elpi]");
+  Elpi_API.Setup.set_type_error (console ~pref:"[elpi]");
   
   let parsed =  Elpi_API.Parse.program ["core/run.mod"] in
   kernel := Some(Elpi_API.Compile.program [parsed]);
