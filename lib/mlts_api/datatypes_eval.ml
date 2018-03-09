@@ -135,9 +135,7 @@ let gen_eval_preds cname atypl =
       (make_copy_clause cname args_x args_y clauses)
     in
     (copy (cname ^ "v"))
-    ^ (if i > 0 then
-    (copy cname)
-    else "")
+    ^ (copy cname)
   in
   let gen_eval () =
     if i > 0 then
