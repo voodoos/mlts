@@ -3,6 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 
+							'unsafe-inline'
+							'unsafe-eval'">
     <title>MLTS Client</title>
 
 
@@ -22,7 +25,6 @@
 
 
     
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto+Mono" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="vendor/open-iconic/css/open-iconic-bootstrap.min.css">
     <link rel="stylesheet" href="vendor/highlightjs/styles/default.css">
@@ -172,7 +174,9 @@
 	</div>
       </div>
     </div>
+<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
 
+<!-- normal script imports etc  -->
     <script src="vendor/jquery/jquery-3.3.1.min.js"></script>
     <script src="vendor/poppers/poppers.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
@@ -180,5 +184,8 @@
     <script src="vendor/ace/ace.js"></script>
     <!-- script src="js/mlts.js"></script -->
     <script src="js/main.js"></script>
+
+<!-- Insert this line after script imports -->
+<script>if (window.module) module = window.module;</script>
   </body>
 </html>
