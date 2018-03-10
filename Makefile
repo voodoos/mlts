@@ -1,4 +1,4 @@
-.PHONY: lib demo
+.PHONY: lib demo release release-mac release-win release-linux
 
 PYTHON=python3.6
 
@@ -13,3 +13,21 @@ demo:
 
 run: 
 	(cd docs && $(PYTHON) -m http.server)
+
+release: release-all
+	(cd app/release-builds/ && zip -qr mlts-darwin-x64.zip mlts-darwin-x64 \
+			&& zip -qr mlts-linux-x64.zip mlts-linux-x64 \
+			&& zip -qr mlts-win32-ia32.zip mlts-win32-ia32)
+
+release-all: release-mac release-win release-linux
+
+release-mac: lib
+	(cd app && npm run package-mac )
+
+
+release-win: lib
+	(cd app && npm run package-win)
+
+
+release-linux: lib
+	(cd app && npm run package-linux)
