@@ -22,6 +22,20 @@ body {
     font-family: 'Open Sans', sans-serif;
 }
 
+.electron  .main-wrapper, .electron .main-wrapper .row {
+    height: auto !important;
+    padding: 0vh !important;
+    margin: 0 !important;
+}
+.electron .right, .electron .left {
+	border-radius: 0px !important;
+	height: 100vh !important;
+    }
+.electron .left {
+    top: 0px !important;
+    left: 0px !important;
+}
+
 .left {
     z-index: 1;
     padding: 0;
@@ -153,6 +167,16 @@ h4 {
     padding-left: 0.4em;
 }
 
+.droptitle {
+text-align: center;
+
+cursor: default;
+
+text-transform: capitalize;
+
+font-weight: bold;
+}
+
 #run_btn {
     width: 150px;
 }
@@ -163,6 +187,7 @@ h4 {
   10% { background-color: auto; }
   50% { background-color: #dc3545; }
 }
+
 
 
 .exec_btn_text {

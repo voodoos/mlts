@@ -30,14 +30,14 @@
     <link rel="stylesheet" href="vendor/highlightjs/styles/default.css">
     <link rel="stylesheet" href="css/main.css">
   </head>
-  <body>
+  <body id="bodid">
 
     
     <div class="main-wrapper">
       <div class="row">
 	<div class="left col-sm-6">
 	  <nav class="navbar navbar-dark bg-dark justify-content-between">
-	    <a class="navbar-brand" href="#">TryNABMLTS</a>
+	    <a class="navbar-brand" href="#">TryMLTS</a>
 	    <!-- Navbar content -->
 	    <div class="btn-group" role="group" aria-label="Main commands">
 	      <div class="btn-group">
@@ -65,8 +65,14 @@
 		     onClick="load('beta2');">Beta-reduction 2</a>
 		  <a class="dropdown-item" href="#mapvar"
 		     onClick="load('mapvar');">Substitution</a>
-		  <!--div class="dropdown-divider"></div>
-		      <a class="dropdown-item" href="#">Separated link</a-->
+		  <div class="dropdown-divider"></div>
+		  <a class="dropdown-item disabled droptitle" disabled>Talk examples</a>
+		  <a class="dropdown-item" href="#t_subst"
+		     onClick="load('t_subst');">Subst</a>
+		  <a class="dropdown-item" href="#t_beta"
+		     onClick="load('t_beta');">Beta</a>
+		  <a class="dropdown-item" href="#t_vac"
+		     onClick="load('t_vac');">Vacuous</a>
 		</div>
 	      </div>
 	      <!--button class="btn my-2 my-sm-0 btn-outline-info"
@@ -174,7 +180,13 @@
 	</div>
       </div>
     </div>
-<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <script>
+      if (typeof module === 'object') {
+      window.module = module;
+      module = undefined;
+      document.getElementById("bodid").classList.add('electron');
+      }
+    </script>
 
 <!-- normal script imports etc  -->
     <script src="vendor/jquery/jquery-3.3.1.min.js"></script>
