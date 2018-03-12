@@ -234,7 +234,7 @@ let toLPString p =
           
 	  let name = if tname = "$_nom"
                      then cp
-                     else specials (cp ^ "v")
+                     else specials (cp ^ "_v")
           in
 	  let pl = List.map (aux_pattern env) pls in
 	  (* TODO CONSTRS IN CONSTRS MAY FAIL *)

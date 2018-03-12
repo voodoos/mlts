@@ -88,7 +88,7 @@ let make_eval_of_list =
 let make_eval_clause cname argsx argsy evals =
   "\neval ("^ cname
   ^ (LpStrings.to_separated_list ~first:true ~nop:true " " argsx)
-  ^ ") ("^ cname ^ "v"
+  ^ ") ("^ cname ^ "_v"
   ^ (LpStrings.to_separated_list ~first:true ~nop:true " " argsy)
   ^ ")"
   ^ (if (List.length evals > 0) then
@@ -107,8 +107,8 @@ let make_special cname n =
     ^ "\neval_spec " ^ cname ^ " ("
     ^ (LpStrings.to_separated_list ~nop:true "::" largs)
     ^ "::[]) ("
-    ^ cname ^ "v " ^ (LpStrings.to_separated_list ~nop:true " " args) ^ ")."
-  else "\neval " ^ cname ^ " " ^ cname ^ "v."
+    ^ cname ^ "_v " ^ (LpStrings.to_separated_list ~nop:true " " args) ^ ")."
+  else "\neval " ^ cname ^ " " ^ cname ^ "_v."
 
 
 
@@ -122,7 +122,7 @@ let gen_eval_preds cname atypl =
   
   let gen_val () =
     let n = List.length bla in
-    "\nval (" ^ cname ^ "v"
+    "\nval (" ^ cname ^ "_v"
     ^ (if n > 0 then (" " ^ (dashes n)) else "")
     ^ ")."
   in
@@ -134,7 +134,7 @@ let gen_eval_preds cname atypl =
       let clauses = make_copy_of_list bla in
       (make_copy_clause cname args_x args_y clauses)
     in
-    (copy (cname ^ "v"))
+    (copy (cname ^ "_v"))
     ^ (copy cname)
   in
   let gen_eval () =

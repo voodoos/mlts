@@ -189,6 +189,7 @@ function show_resultas(results) {
 		   .text(decodeURI(res.type)
 			 .replace(/_[0-9]+/g, '')
 			 .replace(/arr (.*?) ((.*?))/g, '$1 -> $2')
+			 .replace(/c_/g, '')
 			 .replace(/t_/g, '')));
 
 
@@ -212,6 +213,7 @@ function show_resultas(results) {
 		  .replace(/ap/g, 'App')
 		  .replace(/_[0-9]+/g, '')
 		  .replace(/c_/g, '')
+		  .replace(/_v/g, '')
 		  .replace(/cns \((.*?)\) (.*?)/g,
 			   '$1::$2')
 		  .replace(/::\((.*::.*)\)/g, '::$1')

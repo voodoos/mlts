@@ -59,4 +59,4 @@ let gen_typeof_preds cname atypl =
     (typeof_val cname tname arg_list right_typeof_list)
   in
   (aux_expr atypl)
-  ^ (aux_val (cname ^ "v") atypl) ^ "\n"
+  ^ (aux_val (cname ^ "_v") atypl) ^ "\n"

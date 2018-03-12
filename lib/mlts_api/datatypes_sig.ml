@@ -38,4 +38,4 @@ let gen_sig cname atypl =
   
   "\ntype " ^ tname ^ " ty."
   ^ (aux_expr atypl)
-  ^ (aux_val (cname ^ "v"))     
+  ^ (aux_val (cname ^ "_v"))     
