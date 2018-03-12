@@ -182,8 +182,9 @@ function run() {
 function show_resultas(results) {
     $('#answer').html('');
     results.reverse().forEach(function(res, id) {
+	var name = decodeURI(res.name);
 	var row = $('<tr></tr>').addClass("clickable").click(function(e) { goto_def(decodeURI(res.name)) });
-	row.append($('<td></td>').text(decodeURI(res.name)));
+	row.append($('<td></td>').text(name));
 	row.append($('<td></td>')
 		   .text(decodeURI(res.type)
 			 .replace(/_[0-9]+/g, '')
@@ -191,28 +192,44 @@ function show_resultas(results) {
 			 .replace(/t_/g, '')));
 
 
-	// Some ugly-regex-magic-based pretty printing :
+	// Some ugly-regex-magic-based pretty printing:
 	var color = ((res.value.includes("error")
 		      || (res.value.includes("failed"))) ? "red"
 		     : "black");
-	row.append($('<td></td>').addClass("reslpl").css('color', color)
-		   .text(decodeURI(res.value)
-			 .replace(/i /g, '')
-			 .replace(/tt/g, 'True')
-			 .replace(/ff/g, 'False')
-			 .replace(/null/g, '[]')
-			 .replace(/ab/g, 'Abt')
-			 .replace(/ap/g, 'App')
-			 .replace(/_[0-9]+/g, '')
-			 .replace(/c_/g, '')
-			 .replace(/cns \((.*?)\) (.*?)/g,
-				  '$1::$2')
-			 .replace(/::\((.*::.*)\)/g, '::$1')
-			 .replace(/::\((.*::.*)\)/g, '::$1')
-			 .replace(/::\((.*::.*)\)/g, '::$1')
-			 .replace(/::\((.*::.*)\)/g, '::$1')
-			)
-		  );
+
+	// If value is too long we hide it by default:
+	var td = $('<td></td>');
+	var p = $('<p></p>')
+	    .attr("id", "txt_" + name)
+	    .addClass("reslpl")
+	    .css('color', color)
+	    .text(decodeURI(res.value)
+		  .replace(/i /g, '')
+		  .replace(/tt/g, 'True')
+		  .replace(/ff/g, 'False')
+		  .replace(/null/g, '[]')
+		  .replace(/ab/g, 'Abt')
+		  .replace(/ap/g, 'App')
+		  .replace(/_[0-9]+/g, '')
+		  .replace(/c_/g, '')
+		  .replace(/cns \((.*?)\) (.*?)/g,
+			   '$1::$2')
+		  .replace(/::\((.*::.*)\)/g, '::$1')
+		  .replace(/::\((.*::.*)\)/g, '::$1')
+		  .replace(/::\((.*::.*)\)/g, '::$1')
+		  .replace(/::\((.*::.*)\)/g, '::$1')
+		 )
+	
+	if(decodeURI(res.value).length > 80) {
+	    td.click(function(e) {$("#txt_" + name).show();
+				 $("#txtb_" + name).hide()});
+	    td.append($('<p></p>').attr("id", "txtb_" + name)
+		      .text('Click to show long value'));
+	    p.hide();
+	}
+	
+	
+	row.append(td.append(p));
 	$('#answer').append(row);
 	
     });
