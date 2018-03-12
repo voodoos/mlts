@@ -57,6 +57,7 @@ let handle_out res iter f (out : Elpi_API.Execute.outcome) =
       
      res :=  "{ \"name\": \"" ^ (escape resp.(0)) ^ "\""
             ^ ", \"value\": \"" ^ (escape resp.(2)) ^ "\""
+            ^ ", \"type\": \"" ^ (escape resp.(3)) ^ "\""
             ^ ", \"code\": \"" ^ (escape resp.(1)) ^ "\""
             ^ "}" ^ (if !iter > 0 then "," else (iter := 1; "")) ^ !res
   | _ -> ()
@@ -78,13 +79,13 @@ let query prog =
      "{ \"output\": [" ^ !res
                            
 
-let run () = query("run_one Name Prog Value.")
+let run () = query("run_one Name Prog Value Type.")
                   
 let compile_and_run code =
   let lpcode = compile (Js.to_string code) in
   lpcode, query ("run_all N.")
 
-let version = "0.1.6" 
+let version = "0.1.7" 
 
 let _ =
   (* Redirect output to console *)

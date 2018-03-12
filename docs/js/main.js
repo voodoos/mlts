@@ -184,6 +184,12 @@ function show_resultas(results) {
     results.reverse().forEach(function(res, id) {
 	var row = $('<tr></tr>').addClass("clickable").click(function(e) { goto_def(decodeURI(res.name)) });
 	row.append($('<td></td>').text(decodeURI(res.name)));
+	row.append($('<td></td>')
+		   .text(decodeURI(res.type)
+			 .replace(/_[0-9]+/g, '')
+			 .replace(/arr (.*?) ((.*?))/g, '$1 -> $2')
+			 .replace(/t_/g, '')));
+
 
 	// Some ugly-regex-magic-based pretty printing :
 	var color = ((res.value.includes("error")
