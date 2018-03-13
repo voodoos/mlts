@@ -42,23 +42,27 @@ let rec reify ctx s =
 ;;
 
 reify [] (L (fun v -> v 0));;
+reify [] (L (fun v -> L (fun v -> v 0)));;
 Abs(X\ new Y in reify ((Y, X)::[]) 
                       (N (A (Y, L (fun v -> v 0)))));;
                            
 (* evals: (neu *(unit -> sem)) list -> lam -> sem *)     
 let rec evals ctx l t =
-    match (l, t) with
-    | nab X in ([], X) -> N (assoc ctx X)
-    | nab Y in ((x, v)::env, Y) ->
-        if (x = Y) then v 0 (* We need unit !*)
-        else evals ctx env Y
-    | (env, Abs(r)) ->
-        new X in new Y in
-        L (fun v -> evals ((X, Y)::ctx) ((X,v)::env) (r @ X))
-    | (env, App(t1, t2)) ->
-        begin match (evals ctx env t1) with
-        | L f -> f (fun i -> evals ctx env t2)
-        | N n -> N (A(n, evals ctx env t2))
+    match t with
+    | nab X in X ->
+        begin match l with
+        | [] -> N (assoc ctx X)
+        | (x, v)::tl -> if x = X 
+                         then v 0
+                         else evals ctx tl X
+        end
+    | Abs(r) ->
+        L (fun v -> new X in new Y in 
+                    evals ((X, Y)::ctx) ((X,v)::l) (r @ X))
+    | App(t1, t2) ->
+        begin match (evals ctx l t1) with
+        | L f -> f (fun i -> evals ctx l t2)
+        | N n -> N (A(n, evals ctx l t2))
         end
         ;;
         
@@ -67,7 +71,11 @@ let eval t = evals [] [] t;;
 let norm t = reify [] (eval t);;
         
         
-eval (Abs(X\X));;
 norm (Abs(X\X));;
-norm (App(Abs(X\X), Abs(X\X)));;
-        
+norm (Abs(X\Abs(Y\ Y)));;
+norm (App(Abs(X\X), Abs(X\X)));;  
+norm (Abs(Y\ App(Abs(X\ App(X, X)), Y)));;    
+norm (Abs(Y\ App(Abs(X\ App(X, Abs(Z\ Z))), Y)));;    
+norm (App(App(Abs(X\Abs(Y\Abs(Z\App(App(X,Z),App(Y,Z))))),
+              Abs(X\Abs(Y\X))),
+          Abs(X\Abs(Y\X))));;
