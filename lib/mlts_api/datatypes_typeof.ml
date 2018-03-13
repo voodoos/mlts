@@ -27,10 +27,11 @@ let make_typeof_of_list tname =
          ^ " (" ^ (lp_typ_of_atypl (ty, a)) ^ ")"
   in List.mapi (aux)
 
-let typeof_val cname tname args typofs =
+let typeof_val arity cname tname args typofs =
   let open LpStrings in
   "\ntypeof (" ^ cname  ^ " "
-  ^ (to_separated_list ~nop:true " " args)
+  ^ (if (arity > 0) then (to_separated_list ~nop:true " " args)
+    else LpStrings.to_pr args)
   ^ ") " ^ tname
   ^ (if List.length args > 0 then
        " :- "
@@ -56,7 +57,8 @@ let gen_typeof_preds cname atypl =
     in
     let arg_list = make_args_from_list bla in
     let right_typeof_list = make_typeof_of_list tname bla in
-    (typeof_val cname tname arg_list right_typeof_list)
+    (*"\nbla:" ^ (print_bal bla )^*)
+    (typeof_val i cname tname arg_list right_typeof_list)
   in
   (aux_expr atypl)
   ^ (aux_val (cname ^ "_v") atypl) ^ "\n"

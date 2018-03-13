@@ -219,18 +219,22 @@ let toLPString p =
        let pl = List.map (aux_pattern env) pls in
        (*let vn = String.capitalize_ascii vn in*)
        (*print_endline ("Found " ^ vn ^ " ( " ^ (string_of_int (List.length pls))^ " )");*)
-       vn ^ (to_separated_list ~first:true " " (firsts pl)) , [vn, List.length pls]
+       vn ^ (to_separated_list ~first:true " " (firsts pl)) ,
+       [vn, List.length pls]
     | PApp(vn, pls) ->
        let pl = List.map (aux_pattern env) pls in
        (*let vn = String.capitalize_ascii vn in*)
        (*print_endline ("Found " ^ vn ^ " ( " ^ (string_of_int (List.length pls))^ " )");*)
-       vn ^ (to_separated_list ~first:true " " (firsts pl)) , [vn, List.length pls]
+       vn ^ (to_separated_list ~first:true " " (firsts pl)) ,
+       [vn, List.length pls]
     | PConstr(cp, pls) ->
        (try
           let cp = String.uncapitalize_ascii cp in
-	  let tname, _, _ = Hashtbl.find
+	  let tname, aritylist, _ = Hashtbl.find
                              constructors cp
           in
+
+          let sum = List.fold_left (+) 0 aritylist in
           
 	  let name = if tname = "$_nom"
                      then cp
@@ -242,17 +246,18 @@ let toLPString p =
           
           let parities = seconds (List.flatten (seconds pl)) in
 
-(*          
+       (*
                    print_string "\n\nParams: "; print_list (fun x -> x) params;
                    print_string "\nPArities: "; print_list (string_of_int) parities;
-                   print_string "\nArities: "; print_list (string_of_int) arities;
- *)
+                   print_string "\nAritylist: "; print_list (string_of_int) aritylist;
+ 
+        *)
 	  (*let marities = List.map2 (fun l1 l2 -> max l1 l2)
                                             parities arities in*)
           let pararity = List.map2 (fun l1 l2 -> l1, l2)
                                    params parities in
           (* let pararity = (List.flatten (seconds pl)) in *)
-	  type_constr name (firsts pl), pararity
+	  type_constr sum name (firsts pl), pararity
 	with Not_found -> 
           raise (makeException ("Unknown constructor \""
                                 ^ (strip_prefix cp) ^ "\"." 

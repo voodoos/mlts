@@ -203,10 +203,13 @@ let to_pair =
     | a::tl -> pair a (aux tl)
   in aux
                                           
-let type_constr name l =
+let type_constr a name l =
   "(" ^ name
   ^ (if List.length l > 0 then
-       " (" ^ (to_pr l) ^ ")"
+       if a > 0 then
+         (to_separated_list ~first:true " " l)
+       else
+         " (" ^ (to_pr l) ^ ")"
      else "")
   ^ ")"
 

@@ -6,16 +6,18 @@ let rec dashes = function
   | n -> "_ " ^ (dashes (n - 1))
                   
 
-let make_copy_clause cname argsx argsy clauses =
-  "\ncopy ("^ cname
-  ^ (LpStrings.to_separated_list ~first:true ~nop:true " " argsx)
-  ^ ") ("^ cname
-  ^ (LpStrings.to_separated_list ~first:true ~nop:true " " argsy)
+let make_copy_clause arity cname argsx argsy clauses =
+  "\ncopy ("^ cname ^ " " 
+  ^  (if (arity > 0) then (LpStrings.to_separated_list ~nop:true " " argsx)
+      else ( LpStrings.to_pr argsx))
+  ^ ") ("^ cname ^ " " 
+  ^  (if (arity > 0) then (LpStrings.to_separated_list ~nop:true " " argsy)
+      else LpStrings.to_pr argsy)
   ^ ")"
   ^ (if (List.length clauses > 0) then
-      " :- "
-      ^ (LpStrings.to_separated_list ~nop:true ", " clauses)
-    else "")
+       " :- "
+       ^ (LpStrings.to_separated_list ~nop:true ", " clauses)
+     else "")
   ^ "."
 
 let make_pi ars =
@@ -95,7 +97,7 @@ let make_eval_clause cname argsx argsy evals =
        " :- "
        ^ (fixbugs argsx)
        ^ (LpStrings.to_separated_list ~nop:true ", " evals)
-     else "bug")
+     else "")
   ^ "."
       
 let make_special cname n =
@@ -120,8 +122,11 @@ let gen_eval_preds cname atypl =
   in
   let ty, i = thety in
   
-  let gen_val () =
-    let n = List.length bla in
+  let gen_val arity =
+    let lgth = List.length bla in
+    let n =
+      if arity > 0 || lgth = 0 then lgth
+      else 1 in
     "\nval (" ^ cname ^ "_v"
     ^ (if n > 0 then (" " ^ (dashes n)) else "")
     ^ ")."
@@ -132,21 +137,23 @@ let gen_eval_preds cname atypl =
       let args_x = make_args_from_list bla in
       let args_y = make_args_from_list ~sym:"Y" bla in
       let clauses = make_copy_of_list bla in
-      (make_copy_clause cname args_x args_y clauses)
+      (make_copy_clause i cname args_x args_y clauses)
     in
     (copy (cname ^ "_v"))
-    ^ (copy cname)
+    ^ if (List.length bla = 0)
+         || (List.fold_left (fun acc (_,i) -> acc + i) 0 bla > 0)
+      then  (copy cname) else ""
   in
   let gen_eval () =
-    if i > 0 then
+    if i > 0 || List.length bla = 0 then
       let args_x = make_args_from_list bla in
       let args_y = make_args_from_list ~sym:"Y" bla in
       let evals = make_eval_of_list bla in
       (make_eval_clause cname args_x args_y evals)
     else
-      make_special cname (List.length bla)
+      make_special cname 1
   in
   
-  (gen_val ())
+  (gen_val i)
   ^  (gen_copy ())
   ^  (gen_eval ())
