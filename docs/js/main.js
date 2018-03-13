@@ -211,6 +211,7 @@ function show_resultas(results) {
 		  .replace(/null/g, '[]')
 		  .replace(/ab/g, 'Abt')
 		  .replace(/ap/g, 'App')
+		  .replace(/arobase/g, '@')
 		  .replace(/_[0-9]+/g, '')
 		  .replace(/c_/g, '')
 		  .replace(/_v/g, '')
