@@ -188,7 +188,7 @@ function show_resultas(results) {
 	row.append($('<td></td>')
 		   .text(decodeURI(res.type)
 			 .replace(/_[0-9]+/g, '')
-			 .replace(/arr (.*?) ((.*?))/g, '$1 -> $2')
+			 //.replace(/arr (.*?) ((.*?))/g, '$1 -> $2')
 			 .replace(/c_/g, '')
 			 .replace(/t_/g, '')));
 
