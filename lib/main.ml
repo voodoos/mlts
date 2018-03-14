@@ -5,13 +5,13 @@ exception No_kernel
 let kernel = ref None
                  
 let escape s =
-  Js.to_string (Js.encodeURI (Js.string s))
+  Js.to_string (Js.escape (Js.string s))
                
 let console ?pref:(p = "") (str : string) =
-  ignore (Js.Unsafe.eval_string ("sendLog(decodeURI('" ^ (escape (p ^ str)) ^"'))"))
+  ignore (Js.Unsafe.eval_string ("sendLog(unescape('" ^ (escape (p ^ str)) ^"'))"))
 
 let consoleError ?pref:(p = "") (str : string) =
-  ignore (Js.Unsafe.eval_string ("sendLog(decodeURI('"
+  ignore (Js.Unsafe.eval_string ("sendLog(unescape('"
                                  ^ (escape ("<span style=\"color:red;\">"
                                             ^ p ^ str ^ "</span>"))
                                  ^ "'))"))
@@ -42,7 +42,7 @@ let compile code =
     Array.of_list defs , 0, 0, true
   with Mlts_API.Error(s, line, char)
        -> (Js.string s, [||], line, char,  false)
-(*  | _ -> Js.string "Unknown error.", 0, 0, false *)
+  | _ -> Js.string "Unknown error.", [||], 0, 0, false
 
 
 let handle_out res iter f (out : Elpi_API.Execute.outcome) =
@@ -91,7 +91,7 @@ let compile_and_run code =
   let lpcode = compile (Js.to_string code) in
   lpcode, query ("run_all N.")
 
-let version = "0.1.11" 
+let version = "0.1.11b" 
 
 let _ =
   (* Redirect output to console *)
