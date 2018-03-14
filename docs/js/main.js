@@ -187,11 +187,11 @@ function run() {
 function show_resultas(results) {
     $('#answer').html('');
     results.reverse().forEach(function(res, id) {
-	var name = decodeURI(res.name);
-	var row = $('<tr></tr>').addClass("clickable").click(function(e) { goto_def(decodeURI(res.name)) });
+	var name = unescape(res.name);
+	var row = $('<tr></tr>').addClass("clickable").click(function(e) { goto_def(unescape(res.name)) });
 	row.append($('<td></td>').text(name));
 	row.append($('<td></td>')
-		   .text(decodeURI(res.type)
+		   .text(unescape(res.type)
 			 .replace(/_[0-9]+/g, '')
 			 //.replace(/arr (.*?) ((.*?))/g, '$1 -> $2')
 			 .replace(/c_/g, '')
@@ -209,7 +209,7 @@ function show_resultas(results) {
 	    .attr("id", "txt_" + name)
 	    .addClass("reslpl")
 	    .css('color', color)
-	    .text(decodeURI(res.value)
+	    .text(unescape(res.value)
 		  .replace(/i /g, '')
 		  .replace(/tt/g, 'True')
 		  .replace(/ff/g, 'False')
