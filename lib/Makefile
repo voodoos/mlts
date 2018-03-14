@@ -1,4 +1,4 @@
-.PHONY: translator data main.byte js
+.PHONY: translator data main.byte js core core-sync
 
 all: translator data main.byte js
 
@@ -14,3 +14,8 @@ main.byte:
 js: main.byte
 	js_of_ocaml --opt 3 +weak.js main.byte
 	#js_of_ocaml --pretty --no-inline --debug-info +weak.js main.byte
+
+core: core-sync
+	cd data/core && ../../to_elpi.sh
+core-sync:
+	./sync_core.sh 

@@ -8,6 +8,7 @@ accumulate utils.
 accumulate datatypes.
 accumulate progs_gen.
 accumulate json.
+accumulate errors.
 
 
 run_tests J4 :- prog Name Prog,

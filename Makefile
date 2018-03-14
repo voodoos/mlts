@@ -4,6 +4,10 @@ PYTHON=python3.6
 
 all: lib demo
 
+
+sync:
+	$(MAKE) -C lib core
+
 lib:
 	$(MAKE) -C lib
 

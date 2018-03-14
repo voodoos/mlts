@@ -128,7 +128,11 @@ function onMessageCB(event) {
 	unlock();
     }
     else if(event.data.type == 'log') {
-	$('#log').prepend('<br/>').prepend(event.data.text);
+	$('#log')
+	    //.append("[")
+	    //.append((new Date()).toLocaleTimeString())
+	    //.append("]")
+	    .append(event.data.text);
     }
     else if (event.data.type == 'error') {
 	unlock();
@@ -174,6 +178,7 @@ var ping = function() {
 
 // Binding Execute button :
 function run() {
+    $('#log').html('');
     lock('Running');
     var mltsCode = editor.getValue();
     elpi.postMessage(mltsCode);

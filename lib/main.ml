@@ -9,7 +9,12 @@ let escape s =
                
 let console ?pref:(p = "") (str : string) =
   ignore (Js.Unsafe.eval_string ("sendLog(decodeURI('" ^ (escape (p ^ str)) ^"'))"))
-  (* ignore (Js.Unsafe.eval_string ("console.log(decodeURI('" ^ (escape str) ^"'))")) *)
+
+let consoleError ?pref:(p = "") (str : string) =
+  ignore (Js.Unsafe.eval_string ("sendLog(decodeURI('"
+                                 ^ (escape ("<span style=\"color:red;\">"
+                                            ^ p ^ str ^ "</span>"))
+                                 ^ "'))"))
                  
 let compile code =
   try
@@ -54,11 +59,12 @@ let handle_out res iter f (out : Elpi_API.Execute.outcome) =
                     (* LP strings are surrounded by quotes, we remove them *)
                     String.sub str 1 (String.length str - 2))
                           data.assignments in
-      
+      console ("<br> Finished " ^ escape resp.(0) ^ ".");
+     flush_all ();
      res :=  "{ \"name\": \"" ^ (escape resp.(0)) ^ "\""
+            ^ ", \"code\": \"" ^ (escape resp.(1)) ^ "\""
             ^ ", \"value\": \"" ^ (escape resp.(2)) ^ "\""
             ^ ", \"type\": \"" ^ (escape resp.(3)) ^ "\""
-            ^ ", \"code\": \"" ^ (escape resp.(1)) ^ "\""
             ^ "}" ^ (if !iter > 0 then "," else (iter := 1; "")) ^ !res
   | _ -> ()
 
@@ -75,9 +81,9 @@ let query prog =
                            (fun () -> true)
                            (handle_out res iter);
      
-  flush_all ();
+     flush_all ();
      "{ \"output\": [" ^ !res
-                           
+                          
 
 let run () = query("run_one Name Prog Value Type.")
                   
@@ -85,12 +91,12 @@ let compile_and_run code =
   let lpcode = compile (Js.to_string code) in
   lpcode, query ("run_all N.")
 
-let version = "0.1.10" 
+let version = "0.1.11" 
 
 let _ =
   (* Redirect output to console *)
   Sys_js.set_channel_flusher stdout (console);
-  Sys_js.set_channel_flusher stderr (console);
+  Sys_js.set_channel_flusher stderr (consoleError);
   
   ignore (Js.Unsafe.eval_string ("sendVersion('" ^ (version) ^"')"));
   
@@ -99,7 +105,7 @@ let _ =
   Data.load ();
 
   (* Initialize Elpi *)
-  ignore (Elpi_API.Setup.init ~silent:false [] "");
+  ignore (Elpi_API.Setup.init ~silent:true [] "");
   Elpi_API.Setup.set_warn (console ~pref:"[elpi]");
   Elpi_API.Setup.set_error (console ~pref:"[elpi]");
   Elpi_API.Setup.set_anomaly (console ~pref:"[elpi]");

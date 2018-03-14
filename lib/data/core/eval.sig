@@ -1,5 +1,6 @@
 sig eval.
 accum_sig spy, control, lists.
+accum_sig errors.
 
 % Converting to string forces normalization and fixes some endless cycling
 type fixbug   A -> prop.
@@ -44,10 +45,10 @@ type new         (tm -> tm) -> tm.
 
 %% The addition of untyped lambda-terms as expressions (abt/app) and
 %% as values (ab/ap).
-%type app        tm.                 % expression 
-%type abt        (tm -> tm) -> tm.   % expression 
-%type ap         tm -> tm -> tm.     % value space
-%type ab         (tm -> tm) -> tm.   % value space
+type app        tm.                 % expression 
+type abt        (tm -> tm) -> tm.   % expression 
+type ap         tm -> tm -> tm.     % value space
+type ab         (tm -> tm) -> tm.   % value space
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% Staging area to develop a more general pattern matching mechanism

@@ -41,7 +41,9 @@ eval (M arobase N)      V :- eval M F, eval N U, apply F U V.
 eval (fixpt R)    V :- eval (R (fixpt R)) V.
 eval (let M R)    V :- eval M U, eval (R U) V.
 eval (cond C L R) V :- eval C B, if (B = tt) (eval L V) (eval R V).
-eval (new E)      V :- fixbug E, pin x\ eval (E x) V.
+eval (new E)      V :- fixbug E,
+  pin x\ (sigma U\ eval (E x) U,
+      (U = V, !; err_escaped x E, fail)).
 
 apply (lam R) U   V :- eval (R U) V.
 
@@ -81,17 +83,17 @@ notsup Noms T :- (pi N\ copy N N :- nom N, not(member N Noms)) => copy T T.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%    The untyped datatype
-%val (ab _) & val (ap _ _).  % Object-level untyped lambda-terms
+val (ab _) & val (ap _ _).  % Object-level untyped lambda-terms
 
-%copy (abt R)   (abt S)   :- pi x\ copy x x => copy (R x) (S x).
-%copy (ab R)    (ab S)    :- pi x\ copy x x => copy (R x) (S x).
-%copy (ap  X Y) (ap  U V) :- copy X U, copy Y V.
+copy (abt R)   (abt S)   :- pi x\ copy x x => copy (R x) (S x).
+copy (ab R)    (ab S)    :- pi x\ copy x x => copy (R x) (S x).
+copy (ap  X Y) (ap  U V) :- copy X U, copy Y V.
 
-%special 2 app.
-%eval_spec app     (U::V::[]) (ap V U).
+special 2 app.
+eval_spec app     (U::V::[]) (ap V U).
 
-%eval  (abt R) (ab S)    :- fixbug R, pin x\ eval (R x) (S x).
-%apply (ab  R) T (R T).
+eval  (abt R) (ab S)    :- fixbug R, pin x\ eval (R x) (S x).
+apply (ab  R) T (R T).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%    The integer datatype
 val (i _).
