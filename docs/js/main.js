@@ -132,7 +132,7 @@ function onMessageCB(event) {
 	    //.append("[")
 	    //.append((new Date()).toLocaleTimeString())
 	    //.append("]")
-	    .append(event.data.text);
+	    .append((event.data.text).replace(/arobase/g, '@'));
     }
     else if (event.data.type == 'error') {
 	unlock();
