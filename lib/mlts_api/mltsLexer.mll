@@ -36,6 +36,9 @@
       let invalid_input = String.make 1 (Lexing.lexeme_char lexbuf 0) in
       raise (Error ("Invalid input \"" ^ invalid_input ^ "\"", lexbuf.Lexing.lex_curr_p))
 
+let comment_error lexbuf =
+      raise (Error ("Unclosed comment.", lexbuf.Lexing.lex_curr_p))
+
 }
 
 let digit = ['0'-'9']
@@ -115,7 +118,10 @@ and comment = parse
       { comment lexbuf; comment lexbuf }
   | "*)"
       { () }
+      
+  | newline
+      { Lexing.new_line lexbuf; comment lexbuf }
   | _
       { comment lexbuf }
   | eof
-      { failwith "Unterminated comment" }
+      {  comment_error lexbuf }

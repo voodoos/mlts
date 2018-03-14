@@ -124,6 +124,12 @@ let get_args_typs  =
   match ty with
   | Bindl(ty1, ty2) -> aux (ty, a)
   | _ -> []
+
+let rec get_last_bind (b, i) =
+  match b with
+  | Bindl(_, ((Bindl(_, _), _) as r)) -> get_last_bind r
+  | Bindl(_, r) -> r
+  | _ -> failwith "Not a bindl."
            
 let make_args_from_int ?sym:(s = "X") i =
   List.init i (fun i -> s ^ (string_of_int i))

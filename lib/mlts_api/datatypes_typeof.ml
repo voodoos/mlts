@@ -18,11 +18,15 @@ let make_typeof_of_list tname =
       let args = make_args_from_int ~sym:"x" a in
       let argstyps = get_args_typs (ty, a) in
       let pis = make_pi args argstyps in
-      "(" ^ pis ^ " => typeof (X"
+      let last = match ty with
+        | Bindl(_, _) -> lp_typ_of_atypl (get_last_bind (ty, a))
+        | _ -> tname in
+      (*(List.fold_left (fun acc l -> acc ^ ";"^ (string_of_atypl l)) "" argstyps)
+      ^ *)"(" ^ pis ^ " => typeof (X"
       ^ (string_of_int i)
       ^ " "
       ^ (LpStrings.to_separated_list ~nop:true " " args)
-      ^ ") " ^ tname ^ ")"
+      ^ ") " ^ last ^ ")"
     else "typeof X" ^ (string_of_int i)
          ^ " (" ^ (lp_typ_of_atypl (ty, a)) ^ ")"
   in List.mapi (aux)
