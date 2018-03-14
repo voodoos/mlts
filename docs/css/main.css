@@ -167,6 +167,22 @@ h4 {
     padding-left: 0.4em;
 }
 
+.file-menu {
+    max-height:70vh;
+    padding: 0;
+    overflow: hidden;
+}
+
+.file-menu .file-menu-inner {
+    max-height:70vh;
+    padding: 0.5rem 0;
+    overflow: auto;
+}
+
+.file-menu .dropdown-item {
+    padding-right: 2.5rem;
+}
+
 .droptitle {
 text-align: center;
 

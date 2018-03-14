@@ -47,24 +47,19 @@
 			       btn-outline-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 		  <span class="oi oi-folder"></span>
 		</button>
-		<div class="dropdown-menu">
+		<div class="dropdown-menu file-menu">
+		  <div class="file-menu-inner">
 		  <a class="dropdown-item" href="#"
-		     onClick="newdoc();">Empty</a>
+		     onClick="newdoc();">New</a>
 		  <div class="dropdown-divider"></div>
-		  <a class="dropdown-item" href="#fibo"
-		     onClick="load('fibo');">Fibonacci</a>
-		  <a class="dropdown-item" href="#lists"
-		     onClick="load('lists');">Lists</a>
-		  <a class="dropdown-item" href="#freevars"
-		     onClick="load('freevars');">Free vars</a>
-		  <a class="dropdown-item" href="#vacuous"
-		     onClick="load('vacuous');">Vacuous</a>
+		  <a class="dropdown-item disabled droptitle"
+		     disabled>Paper examples</a>
+		  <a class="dropdown-item" href="#t_vac"
+		     onClick="load('t_vac');">Vacuous</a>
 		  <a class="dropdown-item" href="#beta2"
 		     onClick="load('beta2');">Beta-reduction</a>
-		  <a class="dropdown-item" href="#mapvar"
-		     onClick="load('mapvar');">Substitution</a>
-		  <a class="dropdown-item" href="#mirror_terms"
-		     onClick="load('mirror_terms');">Mirror terms</a>
+		  <a class="dropdown-item" href="#nbe"
+		     onClick="load('nbe');">Norm. by subst.</a>
 		  <div class="dropdown-divider"></div>
 		  <a class="dropdown-item disabled droptitle"
 		     disabled>Talk examples</a>
@@ -76,9 +71,20 @@
 		     onClick="load('t_vac');">Vacuous</a>
 		  <div class="dropdown-divider"></div>
 		  <a class="dropdown-item disabled droptitle"
-		     disabled>Paper examples</a>
-		  <a class="dropdown-item" href="#nbe"
-		     onClick="load('nbe');">Norm. by subst.</a>
+		     disabled>Miscellaneous</a>
+		  <a class="dropdown-item" href="#fibo"
+		     onClick="load('fibo');">Fibonacci</a>
+		  <a class="dropdown-item" href="#lists"
+		     onClick="load('lists');">Lists</a>
+		  <a class="dropdown-item" href="#freevars"
+		     onClick="load('freevars');">Free vars</a>
+		  <a class="dropdown-item" href="#vacuous"
+		     onClick="load('vacuous');">Vacuous</a>
+		  <a class="dropdown-item" href="#mapvar"
+		     onClick="load('mapvar');">Substitution</a>
+		  <a class="dropdown-item" href="#mirror_terms"
+		     onClick="load('mirror_terms');">Mirror terms</a>
+		  </div>
 		</div>
 	      </div>
 	      <!--button class="btn my-2 my-sm-0 btn-outline-info"
