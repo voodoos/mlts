@@ -33,4 +33,6 @@ evals [] (Abs(X\Abs(Y\X)));;
 evals [] (Abs(X\Abs(Y\Y)));;
 evals [] (Abs(X\App(X,X)));;
 evals [] (Abs(X\App(Abs(Y\Y),X)));;
+evals [] (Abs(X\App(Abs(Y\Y),App(X, X))));;
+evals [] (Abs(X\App(Abs(Y\Y),App(X, Abs(Y\Y)))));;
 evals [] (Abs(X\App(Abs(Y\ App(Y, Y)), X)));;

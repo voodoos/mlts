@@ -1,0 +1,34 @@
+(* -*- mode: tuareg -*- *)
+
+type tm =
+  | Abs of tm => tm
+  | App of tm * tm
+;;
+
+
+let rec evals t =
+    match t with
+    | nab X in X -> X
+    | Abs r -> Abs (Y\ evals (r @ Y))
+    | App(l, r) -> evals ((eval_lam t) @ (eval r))
+;;
+
+let rec eval_lam t : tm => tm =
+    match evals t with
+        | Abs r -> r
+        | m -> X \ App(m, X)
+;;
+
+evals (Abs(X\X));;
+evals (Abs(X\Abs(Y\X)));;
+evals (Abs(X\Abs(Y\Y)));;
+evals (Abs(X\App(X,X)));;
+evals (Abs(X\App(Abs(Y\Y),X)));;
+evals (Abs(X\App(Abs(Y\Y),App(X, X))));;
+evals (Abs(X\App(Abs(Y\Y),App(X, Abs(Y\Y)))));;
+
+evals (Abs(X\App(Abs(Y\ App(Y, Y)), X)));;
+
+evals ((App(App(Abs(X\Abs(Y\Abs(Z\App(App(X,Z),App(Y,Z))))),
+              Abs(X\Abs(Y\X))),
+          Abs(X\Abs(Y\X)))));;
