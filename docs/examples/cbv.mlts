@@ -1,0 +1,29 @@
+(* -*- mode: tuareg -*- *)
+
+type tm =
+  | Abs of tm => tm
+  | App of tm * tm
+;;
+
+let rec subst t x u =
+  match (x, t) with
+  | nab X in (X, X) -> u
+  | nab X Y in (X, Y) -> Y
+  | (x, App(m, n)) -> App(subst m x u, subst n x u)
+  | (x, Abs r) -> Abs(Y\ subst (r @ Y) x u)
+;;
+
+let rec cbv t =
+  match t with
+  | App(m, n) ->
+    let m = cbv m in
+    let n = cbv n in
+    begin 
+        match m with
+        | Abs r -> new X in cbv (subst (r @ X) X n)
+        | w -> App(m, n)
+    end
+  | t -> t
+;;
+
+cbv (App(App(Abs(X\X), Abs(X\X)),Abs(Y\App(Abs(X\X), Y))));;
