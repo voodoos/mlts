@@ -39,18 +39,10 @@ accumulate errors.
 run_one Name Prog Value Type :-
 	prog Name P, 
 	term_to_string P Prog,
-	if (typeof P T) (
-	  term_to_string T Type,
-	  %Size is size Name,
-	  %if (Size > 4) (
-	  %   Deb is substring Name 0 3,
-	  %   if (Deb = "val") (
-	        if (eval P V)
-	          (term_to_string V Value)
-		  (Value is "Evaluation failed.")
-	   %   )
-	   %   (Value is "<def>")
-	   %) (fail)
-	)
-	(Value is "Type error.")
+	if (typeof P T)
+	   (term_to_string T Type)
+  	   (Type is "Type error."),
+	if (eval P V)
+	   (term_to_string V Value)
+	   (Value is "Evaluation failed.")
 	.
