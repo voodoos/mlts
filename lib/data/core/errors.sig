@@ -3,3 +3,4 @@ sig errors.
 
 type errout string -> prop.
 type err_escaped A -> B -> prop.
+type err_wrong_type A -> B -> C -> prop.

@@ -1,6 +1,6 @@
 sig typing.
 accum_sig spy, control, lists.
-accum_sig eval.
+accum_sig eval, errors.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Typing of miniFP programs. (Figure 10.3)

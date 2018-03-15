@@ -4,8 +4,11 @@ module typing.
 % typematch  A B C :- announce (typematch A B C).
 % typematchrulex  A B C :- announce (typematchrulex A B C).
 
-typeof (M arobase N) A          :- typeof M (arr B A), typeof N B.
+typeof (M arobase N) A          :- typeof M (arr B A), typeof N B',
+       	       		     (B = B', !; err_wrong_type N B B', fail).
+			     
 typeof (cond P Q R) A     :- typeof P bool, typeof Q A, typeof R A.
+
 typeof (lam M) (arr A B)  :- pi x\ typeof x A => typeof (M x) B.
 typeof (fixpt M) A        :- pi x\ typeof x A => typeof (M x) A.
 typeof (let M R) A        :- typeof M B, pi x\ typeof x B => typeof (R x) A.
