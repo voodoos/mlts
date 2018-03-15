@@ -190,7 +190,14 @@ function show_resultas(results) {
 	var name = unescape(res.name);
 	var row = $('<tr></tr>').addClass("clickable").click(function(e) { goto_def(unescape(res.name)) });
 	row.append($('<td></td>').text(name));
+
+	
+	var colort = ((unescape(res.type).includes("error")
+		      || (unescape(res.type).includes("failed"))) ? "red"
+		     : "black");
+	
 	row.append($('<td></td>')
+		   .css('color', colort)
 		   .text(unescape(res.type)
 			 .replace(/_[0-9]+/g, '')
 			 //.replace(/arr (.*?) ((.*?))/g, '$1 -> $2')

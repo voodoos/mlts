@@ -1,5 +1,5 @@
 # TryMLTS
-A web app designed to try and play with the  NabMLTS (to be renamed) programming language.
+A web app designed to try and play with the MLTS programming language.
 Source is hosted on [GitHub](https://github.com/voodoos/mlts) as is the [demo](http://voodoos.github.io/mlts/).
 
 ## Known issues and missing features

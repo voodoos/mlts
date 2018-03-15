@@ -1,81 +1,82 @@
-(* -*- mode: tuareg -*- *)
-
-type tm =
-  | Abs of tm => tm
-  | App of tm * tm
+type lam =
+    | Lam of lam => lam
+    | App of lam * lam
 ;;
 
 type sem =
-  (* function (should be unit) *)
-  | L of (neu => sem)
-  (* neutral *)
-  | N of neu
+    | L of ((lam * sem) list) * (lam => lam)
+    | N of neu
 ;;
 
 type neu =
-  (* variables are nominals *)
-  (* neutral appn *)
-  | A of neu * sem
-;;
-
-let rec assoc l x =
-    match l with
-    | ((y, a)::l) -> if x = y then a
-        else assoc l x
+    | A of neu * sem
 ;;
 
 
-  
-(* reify sem -> tm *)
-let rec reify ctx s =
-       (* reifn neu -> tm *)
-  let rec reifn c neutral =
-    match neutral with
-    | nab X in X -> assoc c X
-    | A (n, s) ->
-        App(reifn c n, reify c s)
-  in
-  
-  match s with
-  | N n -> reifn ctx n
-  | L r -> new X in Abs(Y\ reify ((X,Y)::ctx) (r @ X))
+let rec assoc x g =
+    match g with
+    | ((y, a)::tl) -> if x = y then a
+        else assoc x tl
+;;
+let rec rassoc x g =
+    match g with
+    | ((a, y)::tl) -> if x = y then a
+        else rassoc x tl
 ;;
 
-reify [] (L (X\ L (Y\ N X)));;
-reify [] (L (X\ L (Y\ N Y)));;
-reify [] (L (X\ L (Y\ N (A(Y, N X)))));;
-                           
-(* evals: (neu *(unit -> sem)) list -> lam -> sem *)     
-let rec evals ctx l t =
-    match t with
+
+let rec evals g env tm =
+    match tm with
     | nab X in X ->
-        begin match l with
-        | [] -> N (assoc ctx X)
-        | x::tl -> if x = (assoc ctx X) 
-                         then N (assoc ctx X)
-                         else evals ctx tl X
+        begin match env with
+        | [] -> N (rassoc X g)
+        | ((x, v)::tl) ->
+            if x = X then v 
+            else evals g tl X
         end
-    | Abs(r) ->
-        L (X\ new Y in 
-              evals ((Y, X)::ctx) (X::l) (r @ Y))
-    | App(t1, t2) ->
-        begin match (evals ctx l t1) with
-        | L r -> new X in evals ctx l t2
-        | N n -> N (A(n, evals ctx l t2))
+    | Lam r -> L(env, r)
+    | App(l, r) ->
+        begin match (evals g env l) with
+        | L (cenv, r2) -> 
+            new X in new Y in
+            evals ((Y, X)::g) ((X, evals ((Y, X)::g) env r)::env) (r2 @ X)
+        | N n -> N (A (n, evals g env r))
         end
 ;;
-        
-let eval t = evals [] [] t;;
+(*
+evals [] [] (Lam(X\Lam(Y\Y)));;
+evals [] [] (Lam(X\Lam(Y\X)));;
+evals [] [] (Lam(X\App(X, X)));;
+evals [] [] (App(Lam(Y\Y), Lam(Y\Y)));;
+evals [] [] (App(App(Lam(Y\Y), Lam(Y\Y)), Lam(Y\Y)));;
+*)
 
+let rec reify g sem =
+    let rec reifyn neu =
+        match neu with
+        | nab X in X -> assoc X g
+        | A(n, s) -> App(reifyn n, reify g s)
+    in
+    
+    match sem with
+    | L(env, r) -> Lam(X\ new Y in 
+                          reify ((Y, X)::g) 
+                                (evals ((Y, X)::g)
+                                       ((X, N Y)::env)
+                                       (r @ X)
+                                )
+                      )
+    | N n -> reifyn n
+;;
+
+let eval t = evals [] [] t;;
 let norm t = reify [] (eval t);;
-        
-        
-norm (Abs(X\X));;
-eval (Abs(X\Abs(Y\ Y)));;
-norm (Abs(X\Abs(Y\ Y)));;
-norm (App(Abs(X\X), Abs(X\X)));;  
-norm (Abs(Y\ App(Abs(X\ App(X, X)), Y)));;    
-norm (Abs(Y\ App(Abs(X\ App(X, Abs(Z\ Z))), Y)));;    
-norm (App(App(Abs(X\Abs(Y\Abs(Z\App(App(X,Z),App(Y,Z))))),
-              Abs(X\Abs(Y\X))),
-          Abs(X\Abs(Y\X))));;
+
+norm (Lam(X\X));;
+norm (Lam(X\X));;
+norm (Lam(X\Lam(Y\Y)));;
+norm (Lam(X\Lam(Y\X)));;
+norm (Lam(Y\App(Lam(X\ App(X, X)), Y)));;
+eval (App(App(Lam(X\Lam(Y\Lam(Z\App(App(X,Z),App(Y,Z))))),
+              Lam(X\Lam(Y\X))),
+          Lam(X\Lam(Y\X))));;
