@@ -5,18 +5,18 @@ module typing.
 % typematchrulex  A B C :- announce (typematchrulex A B C).
 
 typeof (M arobase N) A          :- typeof M (arr B A), typeof N B',
-       	       		     (B = B', !; err_wrong_type N B B', fail).
+       	       		     (B = B', !; err_wrong_type N B B' (M arobase N), fail).
 			     
 typeof (cond P Q R) A     :- typeof P B, typeof Q A, typeof R A',
-       	       	    	     ( B = bool, !; err_wrong_type P (bool) B, fail),
-       	       		     (A = A', !; err_wrong_type R A A', fail).
+       	       	    	     ( B = bool, !; err_wrong_type P (bool) B (cond P Q R), fail),
+       	       		     (A = A', !; err_wrong_type R A A' (cond P Q R), fail).
 
 typeof (lam M) (arr A B)  :- pi x\ typeof x A => typeof (M x) B.
 typeof (fixpt M) A        :- pi x\ typeof x A => typeof (M x) A.
 typeof (let M R) A        :- typeof M B, pi x\ typeof x B => typeof (R x) A.
 
 typeof (cns X Y) (lst A)    :- typeof X A, typeof Y A',
-       	       		       (A' = lst A, !; err_wrong_type Y (lst A') A', fail).
+       	       		       (A' = lst A, !; err_wrong_type Y (lst A') A' (cns X Y), fail).
 			       
 typeof (pr X Y)  (prty A B) :- typeof X A, typeof Y B.
 

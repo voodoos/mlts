@@ -11,11 +11,13 @@ err_escaped N S :- term_to_string N Name,
 	      	   errout Mess.
 
 
-err_wrong_type N B C  :-
+err_wrong_type N B C D :-
 	       	   term_to_string N Name,
 	      	   term_to_string B GoodTyp,
 	      	   term_to_string C BadTyp,
+	      	   term_to_string D Code,
 		   Mess is "Expected " ^ Name
 		   	   ^ " to be of type \"" ^ GoodTyp
-			   ^ "\" got \"" ^ BadTyp ^ "\".",
+			   ^ "\" got \"" ^ BadTyp
+			   ^ "\" in " ^ Code ^ ".",
 	      	   errout Mess.
