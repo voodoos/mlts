@@ -218,6 +218,11 @@ let appc head args =
   (*^"toto"^(string_of_int (List.length args))*)
     ^(if args = [] then "" else " arobase (" ^ (to_pair args) ^ ")")
              
+let appvc head args =
+  (specials head)
+  (*^"toto"^(string_of_int (List.length args))*)
+  ^(if args = [] then "" else " (" ^ (to_pr args) ^ ")")
+     
 let app head args =
   (specials head)
   (*^"toto"^(string_of_int (List.length args))*)
