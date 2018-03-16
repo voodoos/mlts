@@ -1,14 +1,20 @@
 module errors.
 
 
+type errout     string -> o.
+type type_error string -> o.
+type eval_error string -> o.
+
 errout S :- Mess is "<br>" ^ S, print Mess .
+type_error S :- Mess is "Typing error: " ^ S, errout Mess .
+eval_error S :- Mess is "Runtime error: " ^ S, errout Mess .
 
 err_escaped N S :- term_to_string N Name,
 	      	   term_to_string S Scope,
 	      	   Mess is "Nominal " ^ Name ^
 		   	   " escaped its scope in \""
 			   ^ Scope ^ "\".",
-	      	   errout Mess.
+	      	   eval_error Mess.
 
 
 err_wrong_type N B C D :-
@@ -20,4 +26,4 @@ err_wrong_type N B C D :-
 		   	   ^ " to be of type \"" ^ GoodTyp
 			   ^ "\" got \"" ^ BadTyp
 			   ^ "\" in " ^ Code ^ ".",
-	      	   errout Mess.
+	      	   type_error Mess.
