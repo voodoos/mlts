@@ -1,32 +1,19 @@
-(* -*- mode: tuareg -*- *)
-
 type tm =
-  | Abs of tm => tm
-  | App of tm * tm
-;;
+     | App of tm * tm
+     | Abs of tm => tm;;
 
-type tm2 =
-  | Abs2 of tm2 => tm2
-  | App2 of tm2 * tm2
-;;
+let rec assoc x alist = match alist with
+  | ((u,y)::alst) -> if (u = x) then y else (assoc x alst);;
 
-let rec assoc x l =
-    match l with
-    | ((y, a)::l) -> if x = y then a
-        else assoc x l
-;;
+type tm' =
+     | App' of tm' * tm'
+     | Abs' of tm' => tm';;
 
-(* We need a context (g) to keep trace
-   of the pairing of nominals *)
-let rec trans g t =
-    match t with
-    | App(l, r) -> App2(trans g l, trans g r)
-    | Abs(r) -> 
-        new X in 
-        Abs2(Y\ trans ((X,Y)::g) (r @ X))
-    | nab X in X -> (assoc X g)
-    ;;
-    
-trans [] (Abs(X\ X));;
-trans [] (Abs(X\ App(X, X)));;
-trans [] (Abs(X\ App(X, Abs(Y\Y))));;
+let rec id gamma term = match term with
+  | App(m,n)   -> App'(id gamma m,id gamma n)
+  | Abs(r)     -> new X in Abs'(Y\ (id ((X,Y)::gamma) (r @ X)))
+  | nab X in X -> assoc X gamma;;
+
+id [] (Abs(X\ (App(X,X))));;
+id [] (Abs(X\ (Abs(Y\ (App(X,Y))))));;
+

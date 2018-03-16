@@ -1,38 +1,51 @@
-(* -*- mode: tuareg -*- *)
-
 type tm =
-  | Abs of tm => tm
-  | App of tm * tm
+    | App of tm * tm
+    | Abs of tm => tm
 ;;
 
-type sem =
-  | Lam of (sem => sem)
-  | Pair of sem * sem
+type expval =
+    | Fun of expval => expval
+    | Res of res_at
 ;;
 
+type res_nf =
+    | Lam of res_at => res_nf
+    | Val of res_at
+;;
 
-let rec assoc l x =
+type res_at =
+    | A of res_at * res_nf
+;;
+
+let rec assoc x l =
     match l with
     | ((y, a)::l) -> if x = y then a
-        else assoc l x
+        else assoc x l
 ;;
 
-let rec evals ctx t =
-    match t with
-    | nab X in X -> assoc ctx X
-    | Abs r -> Lam (Y\ new X in evals ((X, Y)::ctx) (r @ X))
+
+let norm t =
+    let rec reify ev =
+    match ev with
+    | Fun f -> Lam(X\ reify (f @ (Res X)))
+    | Res at -> Val at
+    in
+    
+    let rec eval evl t = match t with
+    | nab X in X -> let y = assoc X evl in y
+    | Abs r -> Fun (Y\ new X in eval 
+                                     ((X, Y)::evl)
+                                     (r @ X)) 
+  (*  | Abs r -> Fun (fun v -> new Y in 
+                             eval ((Y, v)::evl) (r @ Y)) *)
     | App(l, r) ->
-        begin match (evals ctx l) with
-        | Lam s -> s @ (evals ctx r) 
-        | s -> Pair(s, evals ctx r)
+        begin match eval evl l with
+        | Fun f -> f @ (eval evl r)
+        | Res at -> Res (A(at, reify (eval evl r)))
         end
+    in reify (eval [] t)
 ;;
 
-evals [] (Abs(X\X));;
-evals [] (Abs(X\Abs(Y\X)));;
-evals [] (Abs(X\Abs(Y\Y)));;
-evals [] (Abs(X\App(X,X)));;
-evals [] (Abs(X\App(Abs(Y\Y),X)));;
-evals [] (Abs(X\App(Abs(Y\Y),App(X, X))));;
-evals [] (Abs(X\App(Abs(Y\Y),App(X, Abs(Y\Y)))));;
-evals [] (Abs(X\App(Abs(Y\ App(Y, Y)), X)));;
+
+norm (Abs(X\ X));;
+norm (App(Abs(X\ X), Abs(Y\ App(Y, Y))));;
