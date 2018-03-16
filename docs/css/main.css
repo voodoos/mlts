@@ -93,6 +93,11 @@ tr.clickable:hover{
 #values td {
     padding: 5px;
 }
+.values_disclaimer {
+text-align: center !important;
+margin: 0.5rem;
+font-size: 105%;
+}
 
 .right #lpl br {
    display: block;
