@@ -94,9 +94,9 @@ tr.clickable:hover{
     padding: 5px;
 }
 .values_disclaimer {
-text-align: center !important;
-margin: 0.5rem;
-font-size: 105%;
+    text-align: center !important;
+    margin: 0.5rem;
+    font-size: 105%;
 }
 
 .right #lpl br {
@@ -113,6 +113,15 @@ font-size: 105%;
     position: absolute;
     top: 0;
     left: 0;*/
+}
+
+#scroll_handle {
+    width: 10px;
+    height: 100%;
+    left:50%;
+    cursor: col-resize;
+    position: absolute;
+    z-index: 100;
 }
 
 h4 {
@@ -271,11 +280,14 @@ font-weight: bold;
 	padding-left: 0.5em;
     }
     .right {
-	height: auto;≈Ò
+	height: auto;
     }
     .main-wrapper, .main-wrapper .row {
 	height: auto;
 	padding: 0vh;
 	margin: 0;
+    }
+    #scroll_handle {
+	display:none;
     }
 }
