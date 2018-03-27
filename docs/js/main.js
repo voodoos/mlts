@@ -91,6 +91,31 @@ function load(name) {
     }
 }
 
+function useFile(corr, instr, name) {
+    console.log("Using file " + name );
+    var res;
+    var request = new XMLHttpRequest();
+    request.open('GET', name, false);  // `false` makes the request synchronous
+    request.send(null);
+
+    if (request.status === 200) {
+	res = (request.responseText);
+    }
+    else {
+	res = "(* Failed to load file "  + name + "*)";
+    }
+    /*$.ajax({
+      url: name,//"examples/" + name + ".mlts",
+      success: function (result) {
+      if (result.isOk == false) res = (result.message);
+      else res = ("(* unknown file " + name + " *)");
+      },
+      async: false
+      });*/
+    console.log(res);
+    return res
+}
+
 function save() {
     var uri = 'data:text/octet-stream;charset=utf-8;base64,' +
 	btoa(editor.getValue());
@@ -181,6 +206,8 @@ function run() {
     $('#log').html('');
     lock('Running');
     var mltsCode = editor.getValue();
+    mltsCode = mltsCode.replace(/(use "(.*)";;)/g, useFile);
+    console.log(mltsCode);
     elpi.postMessage(mltsCode);
 }
 
