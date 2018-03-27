@@ -1,18 +1,32 @@
 <h1 id="trymlts">TryMLTS</h1>
 <p>A web app designed to try and play with the MLTS programming language. Source is hosted on <a href="https://github.com/voodoos/mlts">GitHub</a> as is the <a href="http://voodoos.github.io/mlts/">demo</a>.</p>
+<h2 id="the-λprolog-interpreter">The λProlog interpreter</h2>
+<p>Our prototype interpreter is written in λProlog. Its source is located in the <a href="https://github.com/voodoos/mlts/tree/master/lib/data/core">lib/data/core folder</a>. The more interesting parts are:</p>
+<ul>
+<li>The <a href="https://github.com/voodoos/mlts/blob/master/lib/data/core/typing.mod">type checking algorithm</a></li>
+<li>The <a href="https://github.com/voodoos/mlts/blob/master/lib/data/core/eval.mod">evaluation algorithm</a></li>
+</ul>
 <h2 id="known-issues-and-missing-features">Known issues and missing features</h2>
 <p>This work is highly experimental and you should expect bugs to appear. If so please report them on the <a href="https://github.com/voodoos/mlts/issues">issue tracker</a>.</p>
 <ul>
 <li>There is no syntactic sugar for non-empty lists. Use <code>a::b::c::[]</code> instead of <code>[a;b;c]</code>.</li>
 <li>Error messages are not always meaningfull of even shown.</li>
+<li>There is no <code>_</code> wildcard to match anything but you can use a pattern variable like <code>iWillMatchAnything</code>.</li>
+<li>There is no way to declare mutually recursive functions but mutually rescursive types are accepted.</li>
 </ul>
 <h2 id="concrete-syntax">Concrete syntax</h2>
 <p>MLTS concrete syntax is based on OCaml. A program written in MLTS not using the new constructs <code>nab in</code>, <code>new in</code>, <code>\</code> and <code>=&gt;</code> should compile with the <code>ocamlc</code> compiler.</p>
+<ul>
+<li><p>Datatypes can be extended to contain new <em>nominal</em> constants and the <code>new X in body</code> program phrase provides a binding that declares that the nominal <code>X</code> is new within the lexical scope given by <code>body</code>.</p></li>
+<li><p>The <code>\</code> isan infix symbol that is used to form an abstraction of a nominal over its scope. For example, <code>X\ body</code> is a syntactic expression that hides the nominal <code>X</code> in the scope <code>body</code>. Thus the backslash <em>introduces</em> an abstraction. The <code>@</code>, conversely, <em>eliminates</em> an abstraction: for example, the expression <code>(X\body) @ Y</code> denotes the result of substituting the abstracted nominal <code>X</code> with the nominal <code>Y</code> in <code>body</code>. Expressions involving <code>@</code> are restricted to be of the form <code>m @ X1 ... Xj</code> where <code>m</code> is a pattern (match) variable and <code>X1, ..., Xj</code> are nominals bound within the scope of the binding off <code>m</code>.</p></li>
+<li><p>A new typing constructor <code>=&gt;</code> is used to type bindings within term structures. This constructor is an addition to the already familiar constructor <code>-&gt;</code> used for typing functional expressions.</p></li>
+<li><p>Rules within match-expression can also contain the <code>nab X in rule</code> binder: in the scope of this binder, the symbol <code>X</code> can match existing nominals introduced by the <code>new</code> binder and the <code>\</code> operator. Note that <code>X</code> is bound over the entire rule (including both the left and right-side of the rule).</p></li>
+</ul>
 <h2 id="how-it-works">How it works</h2>
 <p>Our protoype interpreter for MLTS is written in λProlog. When you press the &quot;Run&quot; button the MLTS concrete syntax is transpilled to it's λProlog counterpart and <a href="https://github.com/LPCIC/elpi">Elpi</a>, an embeddable λProlog interpreter written in OCaml, runs it.</p>
 <p>All this happens locally in your browser thanks to the js_of_ocaml <a href="https://github.com/ocsigen/js_of_ocaml">js_of_ocaml</a>.</p>
 <h2 id="build-dependencies">Build dependencies</h2>
-<p>Before attempting to build the project you should make sure that you have the following dependencies installed :</p>
+<p>[TODO : does not work as-is on a fresh install] Before attempting to build the project you should make sure that you have the following dependencies installed :</p>
 <ul>
 <li><p><a href="https://opam.ocaml.org/doc/Install.html">Opam</a> :</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">wget</span> https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh -O - <span class="kw">|</span> <span class="fu">sh</span> -s /usr/local/bin</code></pre></div></li>
