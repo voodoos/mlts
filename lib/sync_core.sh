@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ORIG=../../code
+ORIG=../../code/parser/interpreter
 DEST=data/core
 
 cp ${ORIG}/eval.mod ${DEST}

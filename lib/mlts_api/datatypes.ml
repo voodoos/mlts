@@ -136,7 +136,33 @@ let make_args_from_int ?sym:(s = "X") i =
 let make_args_from_list ?sym:(s = "X") l =
   make_args_from_int ~sym:s (List.length l)
 
- 
+
+(* New target :
+
+  
+val (c_abs _).
+copy (c_abs X0) (c_abs Y0) :- (pi x0\ copy x0 x0 => copy  (X0 x0) (Y0 x0)).
+
+
+eval (c_abs X0) (c_abs Y0) :- fixbug X0, (pin x0\  eval  (X0 x0) (Y0 x0)).
+
+apply (c_abs R) T (R T).
+%val (c_App_2_v _).
+copy (c_app (pr (X0) (X1))) (c_app (pr (Y0) (Y1))) :- copy X0 Y0, copy X1 Y1.
+
+eval  (c_app (pr (X0) (X1)))  V
+:- eval X0 V0, eval X1 V1, apply V0 V1 V.
+
+%special 1 c_app.
+%eval_spec c_app (X0::nil) (c_app X0).
+typeof (c_abs X0) t_tm :- ((pi x0\ typeof x0 t_tm => typeof (X0 x0) t_tm)).
+%typeof (c_Abs_3_v X0) t_tm_1 :- ((pi x0\ typeof x0 t_tm_1 => typeof (X0 x0) t_tm_1)).
+
+%typeof c_app (arr (prty t_tm t_tm) t_tm).
+typeof (c_app (pr (X0) (X1))) t_tm :- (typeof X0 (t_tm)), (typeof X1 (t_tm)).
+
+
+ *) 
 (* Target :
 
 val (c_Abs_3_v _).

@@ -185,7 +185,8 @@ let cpair p1 p2 =
 
                              
 let pair e1 e2 =
-  "(pair arobase (" ^ e1 ^ ") arobase (" ^ e2 ^ "))"
+  (* "(pair arobase (" ^ e1 ^ ") arobase (" ^ e2 ^ "))" *)
+  cpair e1 e2
 
 let to_pr =
   let rec aux = function
@@ -216,7 +217,7 @@ let type_constr a name l =
 let appc head args =
   (specials head)
   (*^"toto"^(string_of_int (List.length args))*)
-    ^(if args = [] then "" else " arobase (" ^ (to_pair args) ^ ")")
+    ^(if args = [] then "" else " (" ^ (to_pr args) ^ ")")
              
 let appvc head args =
   (specials head)

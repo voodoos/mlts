@@ -11,7 +11,9 @@ type fixbug   A -> prop.
 kind tm       type.
 % Special forms: these have their own evaluation clauses
 type arobase        tm -> tm -> tm.                % application
+type arobase'       tm ->  (tm -> tm) -> tm.                % application
 type lam      (tm -> tm) -> tm.              % function abstraction
+type lam'      ((tm -> tm) -> tm) -> tm.              % function abstraction
 type cond     tm -> tm -> tm -> tm.          % conditional
 type fixpt    (tm -> tm) -> tm.              % recursive functions
 type let      tm -> (tm -> tm) -> tm.        % let binding
@@ -26,7 +28,7 @@ type greater, zerop, minus, sum, times  tm.  % integer functions and predicates
 type equal                              tm.  % General equality
 
 type pr           tm -> tm -> tm.
-type pair         tm.
+%type pair         tm.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Big step evaluation
@@ -45,10 +47,10 @@ type new         (tm -> tm) -> tm.
 
 %% The addition of untyped lambda-terms as expressions (abt/app) and
 %% as values (ab/ap).
-type app        tm.                 % expression 
-type abt        (tm -> tm) -> tm.   % expression 
-type ap         tm -> tm -> tm.     % value space
-type ab         (tm -> tm) -> tm.   % value space
+%type app        tm.                 % expression 
+%type abt        (tm -> tm) -> tm.   % expression 
+%type ap         tm -> tm -> tm.     % value space
+%type ab         (tm -> tm) -> tm.   % value space
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% Staging area to develop a more general pattern matching mechanism

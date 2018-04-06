@@ -43,26 +43,14 @@ let typeof_val arity cname tname args typofs =
        ^ "."
      else ".")
       
-let gen_typeof_preds cname atypl =
-  
-  let rec aux_expr (typ, arity) = 
-    if arity > 0 then
-      aux_val cname (typ, arity)
-    else
-      "\ntypeof "
-      ^ cname ^ " "
-      ^ (lp_typ_of_atypl (typ, arity))
-      ^ "."
-          
-  and aux_val cname (typ, i) =
+let gen_typeof_preds cname atypl =          
+  let rec  aux_val cname (typ, i) =
     let thety, tname, bla = match typ with
       | Arrowl(ty, (Consl(tname), _)) -> ty, tname, base_level_arities ty
       | _ -> (typ, i), lp_typ_of_atypl (typ, i), []
     in
     let arg_list = make_args_from_list bla in
     let right_typeof_list = make_typeof_of_list tname bla in
-    (*"\nbla:" ^ (print_bal bla )^*)
     (typeof_val i cname tname arg_list right_typeof_list)
   in
-  (aux_expr atypl)
-  ^ (aux_val (cname ^ "_v") atypl) ^ "\n"
+  (aux_val cname atypl) ^ "\n"

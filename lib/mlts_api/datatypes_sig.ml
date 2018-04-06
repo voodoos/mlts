@@ -29,15 +29,10 @@ let gen_sig cname atypl =
     ^ arity_type_of_atypl atypl
     ^ "."
   in
-  let aux_expr (_, i) =
-    if i > 0 then aux_val cname
-    else "\ntype " ^ cname ^ " tm."
-  in
   let tname = match atypl with
     | Arrowl(ty, (Consl(tname), _)), _ -> tname
     | _, _ -> lp_typ_of_atypl atypl
   in
   
   "\ntype " ^ tname ^ " ty."
-  ^ (aux_expr atypl)
-  ^ (aux_val (cname ^ "_v"))     
+  ^ (aux_val cname)     

@@ -1,8 +1,14 @@
 module eval.
 
+% In case you wish to trace one of these predicates, uncomment a line.
+
 % eval A B  :- announce (eval A B).
 % applymatch A B C D E :- announce (applymatch A B C D E).
 % copy   A B   :- announce (copy A B).
+
+% This can be used in Teyjus to remove some of its bug: printing
+% forces normalization and that seems to make the internal term
+% structure simplier. As a result, some bugs are avoided.
 
 fixbug T :- term_to_string T _.
  
@@ -82,7 +88,7 @@ not_supported Noms (arity2 T) :- pi x\ copy x x => pi y\ copy y y => notsup Noms
 notsup Noms T :- (pi N\ copy N N :- nom N, not(member N Noms)) => copy T T.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%    The untyped datatype
+%%%%    The untyped lambda-term datatype
 val (ab _) & val (ap _ _).  % Object-level untyped lambda-terms
 
 copy (abt R)   (abt S)   :- pi x\ copy x x => copy (R x) (S x).
@@ -131,7 +137,8 @@ eval_spec nullp   (U::[]) V :- if (U = null) (V = tt) (V = ff).
 eval_spec consp   (U::[]) V :- if (U = null) (V = ff) (V = tt).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%    The pairing datatype
-val (pr _ _).
-special 2 pair.
-eval_spec pair   (U::V::[]) (pr V U).
+%val (pr _ _).
+%special 2 pair.
+%eval_spec pair   (U::V::[]) (pr V U).
+eval (pr X Y) (pr VX VY) :- eval X VX, eval Y VY.
 copy (pr X Y) (pr U V) :- copy X U, copy Y V.

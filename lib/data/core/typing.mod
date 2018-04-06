@@ -28,7 +28,7 @@ typeof equal (arr A (arr A' bool)).
 typeof null  (lst A)             & typeof cons  (arr A (arr (lst A) (lst A))).
 typeof car   (arr (lst A) A)     & typeof cdr   (arr (lst A) (lst A)).
 typeof consp (arr (lst A) bool)  & typeof nullp (arr (lst A) bool).
-typeof pair  (arr A (arr B (prty A B))).
+%typeof pair  (arr A (arr B (prty A B))).
 
 typeof (i I) int                        & typeof zerop   (arr int bool).
 typeof greater (arr int (arr int bool)) & typeof minus   (arr int (arr int int)).
