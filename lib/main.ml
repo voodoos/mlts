@@ -16,7 +16,7 @@ let consoleError ?pref:(p = "") (str : string) =
                                             ^ p ^ str ^ "</span>"))
                                  ^ "'))"))
                  
-let compile code =
+let compile header code =
   try
     (* First mlts => lprolog *)
     let lpcode, typsig, typmod, defs =
@@ -33,7 +33,7 @@ let compile code =
         ["core/datatypes.mod";
          "core/progs_gen.mod";
          "core/run.mod";] in
-    kernel := Some(Elpi_API.Compile.program  [parsed]);
+    kernel := Some(Elpi_API.Compile.program header [parsed]);
 
     (* We return the lprolog code for reference *)
     Js.string (lpcode
@@ -84,11 +84,12 @@ let query prog =
   | Some(k) ->
      let goal = Elpi_API.Parse.goal prog in
      let goalc = Elpi_API.Compile.query k goal in
+     let exec = Elpi_API.Compile.link goalc in
      let res = ref "] }" in
      let iter = ref 0 in
-     Elpi_API.Execute.loop k goalc
-                           (fun () -> true)
-                           (handle_out res iter);
+     Elpi_API.Execute.loop exec
+                           ~more:(fun () -> true)
+                           ~pp:(handle_out res iter);
      
      flush_all ();
      "{ \"output\": [" ^ !res
@@ -96,8 +97,8 @@ let query prog =
 
 let run () = query Printf.(sprintf "run_one %s %s %s %s." q_name q_prog q_value q_type)
                   
-let compile_and_run code =
-  let lpcode = compile (Js.to_string code) in
+let compile_and_run header code =
+  let lpcode = compile header (Js.to_string code) in
   lpcode, query ("run_all N.")
 
 let version = "0.1.12" 
@@ -114,17 +115,17 @@ let _ =
   Data.load ();
 
   (* Initialize Elpi *)
-  ignore (Elpi_API.Setup.init ~silent:true [] "");
+  let header, _ = Elpi_API.Setup.init ~silent:true [] ~basedir:"" ~builtins:Elpi_builtin.std_builtins in
   Elpi_API.Setup.set_warn (console ~pref:"[elpi]");
   Elpi_API.Setup.set_error (console ~pref:"[elpi]");
   Elpi_API.Setup.set_anomaly (console ~pref:"[elpi]");
   Elpi_API.Setup.set_type_error (console ~pref:"[elpi]");
   
   let parsed =  Elpi_API.Parse.program ["core/run.mod"] in
-  kernel := Some(Elpi_API.Compile.program [parsed]);
+  kernel := Some(Elpi_API.Compile.program header [parsed]);
 
   (* JS API *)
-  Js.export "compile" (fun jstr -> compile (Js.to_string jstr)) ;
+  Js.export "compile" (fun jstr -> compile header (Js.to_string jstr)) ;
   Js.export "query"  (fun jstr -> query (Js.to_string jstr)) ;
   Js.export "run" run
 
