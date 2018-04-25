@@ -1,6 +1,6 @@
 .PHONY: lib demo release release-mac release-win release-linux
 
-PYTHON=python3.6
+export PYTHON=python3.6
 
 all: lib demo
 
