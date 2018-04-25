@@ -45,26 +45,35 @@ let compile code =
   | _ -> Js.string "Unknown error.", [||], 0, 0, false
 
 
+(* Names used in the query *)
+let q_name  = "Name"
+let q_prog  = "Prog"
+let q_value = "Value"
+let q_type  = "Type"
+
 let handle_out res iter f (out : Elpi_API.Execute.outcome) =
   match out with
   | Success(data) -> 
      
-     (* Elpi returns answers as a list of terms *)
-     (* We transform it into a list of strings *)
-     let resp = Array.map (fun term ->
-                    Elpi_API.Pp.term
-                      (Format.str_formatter)
-                      term;
-                    let str = Format.flush_str_formatter () in
-                    (* LP strings are surrounded by quotes, we remove them *)
-                    String.sub str 1 (String.length str - 2))
-                          data.assignments in
-      console ("<br> Finished " ^ escape resp.(0) ^ ".");
+     (* Elpi returns answers as a map from query variable names to terms *)
+     (* We transform it into a map from names to strings *)
+     let resp =
+       Elpi_API.Data.StrMap.map (fun term ->
+         Elpi_API.Pp.term (Format.str_formatter) term;
+         let str = Format.flush_str_formatter () in
+         (* LP strings are surrounded by quotes, we remove them *)
+         let str = String.sub str 1 (String.length str - 2) in
+         escape str)
+       data.assignments in
+     let get name =
+       try Elpi_API.Data.StrMap.find name resp
+       with Not_found -> consoleError ("Assignment for " ^ name ^ " not found"); "error" in
+      console ("<br> Finished " ^ get q_name ^ ".");
      flush_all ();
-     res :=  "{ \"name\": \"" ^ (escape resp.(0)) ^ "\""
-            ^ ", \"code\": \"" ^ (escape resp.(1)) ^ "\""
-            ^ ", \"value\": \"" ^ (escape resp.(2)) ^ "\""
-            ^ ", \"type\": \"" ^ (escape resp.(3)) ^ "\""
+     res :=  "{ \"name\": \"" ^ get q_name ^ "\""
+            ^ ", \"code\": \"" ^ get q_prog ^ "\""
+            ^ ", \"value\": \"" ^ get q_value ^ "\""
+            ^ ", \"type\": \"" ^ get q_type ^ "\""
             ^ "}" ^ (if !iter > 0 then "," else (iter := 1; "")) ^ !res
   | _ -> ()
 
@@ -85,7 +94,7 @@ let query prog =
      "{ \"output\": [" ^ !res
                           
 
-let run () = query("run_one Name Prog Value Type.")
+let run () = query Printf.(sprintf "run_one %s %s %s %s." q_name q_prog q_value q_type)
                   
 let compile_and_run code =
   let lpcode = compile (Js.to_string code) in
