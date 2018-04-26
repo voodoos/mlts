@@ -9,8 +9,6 @@ sed -i '' 's/rule/rulex/g' *.sig
 sed -i '' 's/rule/rulex/g' *.mod
 sed -i '' 's/@/arobase/g' *.sig
 sed -i '' 's/@/arobase/g' *.mod
-sed -i '' 's/nil/[]/g' *.sig
-sed -i '' 's/nil/[]/g' *.mod
 
 sed -i '' 's/^external //' *.sig
 sed -i '' '/%external/s/^/external /' *.sig
