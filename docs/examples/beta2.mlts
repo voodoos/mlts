@@ -19,15 +19,14 @@ let rec beta t = match t with
         | w -> App(m, n)
     end ;;
 
-let two   = (Abs(F\ (Abs(X\ (App(F,(App(F,App(F,X)))))))));;
-let plus  = (Abs(M\ (Abs(N\ (Abs(F\ (Abs(X\ 
-                            (App(App(M,F),App(App(N,F),X)))))))))));;
-let times = (Abs(M\ (Abs(N\ (Abs(F\ (Abs(X\ 
-                            (App(App(M,App(N,F)),X))))))))));;
+let two   = Abs(F\ Abs(X\ App(F, App(F, X))));;
+let plus  = Abs(M\ Abs(N\ Abs(F\ Abs(X\ 
+                            App(App(M, F), App(App(N, F),X))))));;
+let times = Abs(M\ Abs(N\ Abs(F\ Abs(X\ 
+                            App(App(M, App(N, F)), X)))));;
 
-beta (App(App(plus, two),two));;
-beta (App(App(times,two),two));;
-
+beta (App(App(plus, two), two));;
+beta (App(App(times,two), two));;
 
 
 new X in Abs(Y\ subst (App(X, X)) X (App(Y, Y)));;
