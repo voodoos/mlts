@@ -1,16 +1,16 @@
 # TryMLTS
 A web app designed to try and play with the MLTS programming language.
-Source is hosted on [GitHub](https://github.com/voodoos/mlts) as is the [demo](http://voodoos.github.io/mlts/).
+Source is hosted on [GitHub](https://github.com/voodoos/mlts){target="_blank"} as is the [demo](http://voodoos.github.io/mlts/){target="_blank"}. You can also check the [latest draft](http://www.lix.polytechnique.fr/Labo/Dale.Miller//papers/mlts-draft-may-2018.pdf){target="_blank"} of the paper describing MLTS.
 
 
 ## The λProlog interpreter
-Our prototype interpreter is written in λProlog. Its source is located in the [lib/data/core folder](https://github.com/voodoos/mlts/tree/master/lib/data/core). The more interesting parts are:
+Our prototype interpreter is written in λProlog. Its source is located in the [lib/data/core folder](https://github.com/voodoos/mlts/tree/master/lib/data/core){target="_blank"}. The more interesting parts are:
 
-- The [type checking algorithm](https://github.com/voodoos/mlts/blob/master/lib/data/core/typing.mod) 
-- The [evaluation algorithm](https://github.com/voodoos/mlts/blob/master/lib/data/core/eval.mod)
+- The [type checking algorithm](https://github.com/voodoos/mlts/blob/master/lib/data/core/typing.mod){target="_blank"} 
+- The [evaluation algorithm](https://github.com/voodoos/mlts/blob/master/lib/data/core/eval.mod){target="_blank"}
 
 ## Known issues and missing features
-This work is highly experimental and you should expect bugs to appear. If so please report them on the [issue tracker](https://github.com/voodoos/mlts/issues).
+This work is highly experimental and you should expect bugs to appear. If so please report them on the [issue tracker](https://github.com/voodoos/mlts/issues){target="_blank"}.
 
 - There is no syntactic sugar for non-empty lists. Use `a::b::c::[]` instead of `[a;b;c]`.
 - Error messages are not always meaningfull of even shown.
@@ -58,19 +58,19 @@ All this happens locally in your browser thanks to the js_of_ocaml [js_of_ocaml]
 ## Build dependencies
 [TODO : does not work as-is on a fresh install] Before attempting to build the project you should make sure that you have the following dependencies installed :
 
-- [Opam](https://opam.ocaml.org/doc/Install.html) : 
+- [Opam](https://opam.ocaml.org/doc/Install.html){target="_blank"} : 
 ```bash
 wget https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh -O - | sh -s /usr/local/bin
 ```
-- [OCaml](https://caml.inria.fr/) 4.06.0 :
+- [OCaml](https://caml.inria.fr/){target="_blank"} 4.06.0 :
 ```bash
 opam switch install 4.06.0
 ```
-- [Menhir](http://gallium.inria.fr/~fpottier/menhir/), [js_of_ocaml](https://github.com/ocsigen/js_of_ocaml), [base64](https://github.com/mirage/ocaml-base64) :
+- [Menhir](http://gallium.inria.fr/~fpottier/menhir/){target="_blank"}, [js_of_ocaml](https://github.com/ocsigen/js_of_ocaml){target="_blank"}, [base64](https://github.com/mirage/ocaml-base64){target="_blank"} :
 ```bash
 opam install menhir js_of_ocaml js_of_ocaml-ppx base64
 ```
-- [Elpi](https://github.com/LPCIC/elpi) :
+- [Elpi](https://github.com/LPCIC/elpi){target="_blank"} :
 ```bash
 opam pin add elpi https://github.com/LPCIC/elpi.git
 ```

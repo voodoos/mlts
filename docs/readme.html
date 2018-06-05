@@ -1,13 +1,13 @@
 <h1 id="trymlts">TryMLTS</h1>
-<p>A web app designed to try and play with the MLTS programming language. Source is hosted on <a href="https://github.com/voodoos/mlts">GitHub</a> as is the <a href="http://voodoos.github.io/mlts/">demo</a>.</p>
+<p>A web app designed to try and play with the MLTS programming language. Source is hosted on <a href="https://github.com/voodoos/mlts" target="_blank">GitHub</a> as is the <a href="http://voodoos.github.io/mlts/" target="_blank">demo</a>. You can also check the <a href="http://www.lix.polytechnique.fr/Labo/Dale.Miller//papers/mlts-draft-may-2018.pdf" target="_blank">latest draft</a> of the paper describing MLTS.</p>
 <h2 id="the-λprolog-interpreter">The λProlog interpreter</h2>
-<p>Our prototype interpreter is written in λProlog. Its source is located in the <a href="https://github.com/voodoos/mlts/tree/master/lib/data/core">lib/data/core folder</a>. The more interesting parts are:</p>
+<p>Our prototype interpreter is written in λProlog. Its source is located in the <a href="https://github.com/voodoos/mlts/tree/master/lib/data/core" target="_blank">lib/data/core folder</a>. The more interesting parts are:</p>
 <ul>
-<li>The <a href="https://github.com/voodoos/mlts/blob/master/lib/data/core/typing.mod">type checking algorithm</a></li>
-<li>The <a href="https://github.com/voodoos/mlts/blob/master/lib/data/core/eval.mod">evaluation algorithm</a></li>
+<li>The <a href="https://github.com/voodoos/mlts/blob/master/lib/data/core/typing.mod" target="_blank">type checking algorithm</a></li>
+<li>The <a href="https://github.com/voodoos/mlts/blob/master/lib/data/core/eval.mod" target="_blank">evaluation algorithm</a></li>
 </ul>
 <h2 id="known-issues-and-missing-features">Known issues and missing features</h2>
-<p>This work is highly experimental and you should expect bugs to appear. If so please report them on the <a href="https://github.com/voodoos/mlts/issues">issue tracker</a>.</p>
+<p>This work is highly experimental and you should expect bugs to appear. If so please report them on the <a href="https://github.com/voodoos/mlts/issues" target="_blank">issue tracker</a>.</p>
 <ul>
 <li>There is no syntactic sugar for non-empty lists. Use <code>a::b::c::[]</code> instead of <code>[a;b;c]</code>.</li>
 <li>Error messages are not always meaningfull of even shown.</li>
@@ -28,13 +28,13 @@
 <h2 id="build-dependencies">Build dependencies</h2>
 <p>[TODO : does not work as-is on a fresh install] Before attempting to build the project you should make sure that you have the following dependencies installed :</p>
 <ul>
-<li><p><a href="https://opam.ocaml.org/doc/Install.html">Opam</a> :</p>
+<li><p><a href="https://opam.ocaml.org/doc/Install.html" target="_blank">Opam</a> :</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">wget</span> https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh -O - <span class="kw">|</span> <span class="fu">sh</span> -s /usr/local/bin</code></pre></div></li>
-<li><p><a href="https://caml.inria.fr/">OCaml</a> 4.06.0 :</p>
+<li><p><a href="https://caml.inria.fr/" target="_blank">OCaml</a> 4.06.0 :</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">opam</span> switch install 4.06.0</code></pre></div></li>
-<li><p><a href="http://gallium.inria.fr/~fpottier/menhir/">Menhir</a>, <a href="https://github.com/ocsigen/js_of_ocaml">js_of_ocaml</a>, <a href="https://github.com/mirage/ocaml-base64">base64</a> :</p>
+<li><p><a href="http://gallium.inria.fr/~fpottier/menhir/" target="_blank">Menhir</a>, <a href="https://github.com/ocsigen/js_of_ocaml" target="_blank">js_of_ocaml</a>, <a href="https://github.com/mirage/ocaml-base64" target="_blank">base64</a> :</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">opam</span> install menhir js_of_ocaml js_of_ocaml-ppx base64</code></pre></div></li>
-<li><p><a href="https://github.com/LPCIC/elpi">Elpi</a> :</p>
+<li><p><a href="https://github.com/LPCIC/elpi" target="_blank">Elpi</a> :</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">opam</span> pin add elpi https://github.com/LPCIC/elpi.git</code></pre></div></li>
 </ul>
 <h2 id="credits">Credits</h2>
