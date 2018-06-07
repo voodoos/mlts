@@ -1,6 +1,6 @@
 # TryMLTS
 A web app designed to try and play with the MLTS programming language.
-Source is hosted on [GitHub](https://github.com/voodoos/mlts){target="_blank"} as is the [demo](http://voodoos.github.io/mlts/){target="_blank"}. You can also check the [latest draft](http://www.lix.polytechnique.fr/Labo/Dale.Miller//papers/mlts-draft-may-2018.pdf){target="_blank"} of the paper describing MLTS.
+Source is hosted on [GitHub](https://github.com/voodoos/mlts){target="_blank"} as is the [demo](http://voodoos.github.io/mlts/){target="_blank"}. You can also check the [latest draft](http://voodoos.github.io/mlts/mlts-paper.pdf){target="_blank"} of the paper describing MLTS.
 
 
 ## The λProlog interpreter
