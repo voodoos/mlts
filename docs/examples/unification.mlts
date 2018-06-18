@@ -141,23 +141,40 @@ let rec varElim uni =
         to start subtitution
         The start thing ensure we try all dpair, 
         not only the first one *)
-    let rec aux_scan dpairs done forSubst =
+    let rec aux_scan dpairs subs forSubst =
         match dpairs with
-        | [] -> (concat forSubst done)
+        | [] -> (forSubst, subs)
         | dpair::tl ->
             if (occursp dpair)
-            then aux_scan tl done (dpair::forSubst)
+            then aux_scan tl subs (dpair::forSubst)
             else match dpair with
                  | nab X in (X, t) ->
                     aux_scan 
                       (aux_subst X t (concat forSubst tl))
-                      (dpair::(aux_subst X t done))
+                      (dpair::(aux_subst X t subs))
                       []
-                 | dpair -> aux_scan tl done (dpair::forSubst)
+                 | dpair -> aux_scan tl subs (dpair::forSubst)
     in 
     match uni with
     | Some r -> Some(X\ varElim (r @ X))
-    | Coerce(dpl, subl) -> Coerce(aux_scan dpl [] [], subl)
+    | Coerce(dpl, subl) -> 
+        match (aux_scan dpl subl []) with
+        | (dpairs, subs) -> Coerce(dpairs, subs)
+;;
+
+type subst = 
+   | Subs of (folterm * folterm) list
+   | Var  of (folterm => subst) ;;
+   
+type result = 
+   | Fail
+   | Sub of subst
+;;
+
+let rec getSubs uni =
+    match uni with 
+    | Some(X\ u @ X) -> Var(X\ getSubs (u @ X))
+    | Coerce(dpl, subl) -> Subs(subl)
 ;;
 
 (* We successively :
@@ -165,19 +182,13 @@ let rec varElim uni =
     eliminate variables (todo)
     check failure
   until success or stale state *)
-
-type result = 
-   | Fail
-   | Sub of unif
-;;
-   
 let rec unify uni =
     let newUni = varElim (simplify uni) in
     if (failurep newUni) 
     then (if (unifEq uni newUni)
          then Fail
          else unify newUni)
-    else Sub(newUni)
+    else Sub(getSubs newUni)
 ;;
 
 let unif1 = Some (X\ Some (Y\ (Coerce 
@@ -192,76 +203,3 @@ let unif3 = Some (X\ Some (Y\ (Coerce
 let res1 = unify unif1;;
 let res2 = unify unif2;;
 let res3 = unify unif3;;
-
-(*****************************************************************
-eqfoterm(A,A);;
-eqfoterm(H A, H A);;
-eqfoterm(H A, H B);;
-new X in eqfoterm(X,X);;
-new X in eqfoterm(A,X);;
-
-simpl [];;
-simpl ((A,A)::[]);;
-simpl ((B,B)::(A,A)::[]);;
-simpl ((A,B)::(A,A)::[]);;
-new X in simpl ((H X, H X)::[]);;
-
-simplify (Some (X\ (Coerce (((A,A)::[]), []))));;
-simplify (Some (X\ (Coerce (((X,A)::[]), []))));;
-simplify (Some (X\ (Some (Y\ (Coerce (((G(H X,H A),(G(X,H Y)))::[]), []))))));;
-simplify (Some (X\ (Some (Y\ (Coerce (((G(X,Y),G(Y,X))::[]),[]))))));;
-
-new X in occursp(X,H(A));;
-new X in occursp(X,H(X));;
-new X in occursp(X,G(H(A),X));;
-new X in occursp(X,G(H(A),H(B)));;
-
-let unif1 = Some (X\ Some (Y\ (Coerce 
-      (((G(H(X),G(H(Y),A)), G(H(Y),G(H(X),A)))::[]),[]))));;
-
-let unif2 = Some (X\ Some (Y\ (Coerce 
-      (((G(H(X),G(H(Y),B)), G(H(Y),G(H(X),A)))::[]),[]))));;
-
-let unif3 = Some (X\ Some (Y\ (Coerce 
-      (((G(H(X),G(H(Y),A)), G(H(Y),G(H(Y),A)))::[]),[]))));;
-
-simplify unif1;;
-simplify unif2;;
-simplify unif3;;
-*)
-(** Working backwards
-
-type result = 
-   | Fail
-   | Sub of (folterm,folterm) list;
-
-let varp t = match t with
-    | nab X\ X -> true
-    | y -> false;;
-
-better to differentiate between apply subs to dpairs and to
-substitutions: the latter only applies them to the second components
-and it adds itself to the substitution.
-
-let rec applysubterm(v,s,u) = 
-
-let rec applysubdpairs(v,s,dp) = 
-    (map (lam (T\ match T with (t,u) ->
-         (applysubterm(v,s,t),applysubterm(v,s,u)))) dp);;
-
-let rec applysubsub(t,s,subs)
-
-
-let rec applysub args = match args with
-    | (t,s,(dp,sub)) = ( (map (lam (T\ (applysubterm(t,s,T)))) dp),
-                         (map (lam (T\ (applysubterm(t,s,T)))) sub),
-
-let rec loop ustate = match ustate with
-  | ([],sub)          ->  Okay sub
-  | (((t,s)::dp),sub) ->  if failurep(t,s) then Fail else
-                          if (varp t) then (uloop (applysub(t,s,(dp,sub)))
-                                      else (uloop (applysub(s,t,(dp,sub)));;
-
-let rec unify unip = match unip with
-    | (Some uni) -> (Some (X\ (unify (uni @ X))))
-    | (Coerce dpairs) -> loop (dpairs, []);; *)
