@@ -163,7 +163,11 @@ let unif3 = Some (X\ Some (Y\ (Coerce
 let unif4 = Some (X\ Some (Y\ (Coerce 
       ((H(H(X)), H(Y))::[],[]))));;
       
+let unif5 = Some (X\ Some (Y\ (Coerce 
+      ((G(H(X), X), G(Y, A))::[],[]))));;
+      
 let res1 = unify unif1;;
 let res2 = unify unif2;;
 let res3 = unify unif3;;
 let res4 = unify unif4;; 
+let res5 = unify unif5;; 
