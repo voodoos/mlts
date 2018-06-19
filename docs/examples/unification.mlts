@@ -27,23 +27,12 @@ let rec subst x t s = match (x, s) with
      | (x, H u)          -> H (subst x t u)
      | (x, G(u,v))       -> G (subst x t u, subst x t v);;
 
-new X in subst X B X;;
+(*new X in subst X B X;;
 new X in subst X (H A) X;;
 new X in subst X A (H X);;
 new X in subst X A (H B);;
 new X in subst X A (H (G(X,X)));;
-new X in subst X A (G (G(X,X),G(X,X)));;
-
-(* folterm * folterm -> bool
-    Checks the equality of two terms in a pair *)
-let rec eqfoterm args =
-     match args with
-         | nab X in (X,X) -> true
-         | (A,A)          -> true
-         | (B,B)          -> true
-         | (H x, H u)     -> eqfoterm(x,u)
-         | (G(x,y), G(u,v)) -> eqfoterm(x,u) && eqfoterm(y,v)
-         | x              -> false;;
+new X in subst X A (G (G(X,X),G(X,X)));;*)
 
 
 (* Unification problems 
@@ -73,29 +62,6 @@ type result =
    | Fail
    | Success of subst
 ;;
-   
-(* The next two functions are used to check 
-  the equality of two uniufication problems
-  to stop the algorithm if no change can be made *)
-let rec fflistEq ffl1 ffl2 =
-    match (ffl1, ffl2) with
-    | ((f11, f12)::l1, (f21, f22)::l2) ->
-        if (eqfoterm (f11, f21) && eqfoterm (f21, f21))
-        then fflistEq l1 l2
-        else false
-    | ([], []) -> true
-    | (l1, l2) -> false
-;;
-
-let rec unifEq u1 u2 =
-    match (u1, u2) with
-    | (Coerce(dpl1, subl1), Coerce(dpl2, subl2)) -> 
-        fflistEq dpl1 dpl2 && fflistEq subl1 subl2
-    | (Some (X\ r1 @ X), Some (X\ r2 @ X)) ->
-        new X in unifEq (r1 @ X) (r2 @ X)
-    | z -> false
-;;
-
     
 (* The simpl function simplifies a list 
   of disagrement pairs by removing not 
@@ -130,7 +96,7 @@ let rec occursp p = match p with
   | nab X in (X,G((t @ X),(s @ X))) -> occursp (X,t @ X) || occursp (X,s @ X)
   | x -> false;;
 
-(* a list of disagrement pairs is failing
+(* a SIMPLIFIED list of disagrement pairs is failing
    if one of the pairs contains two rigid terms
    or if t appears in s or vice versa. *)
 let rec failuredp dpairs = match dpairs with
@@ -144,7 +110,14 @@ let rec failurep unif = match unif with
   | (Some r) -> (new X in (failurep (r @ X)))
   | (Coerce (dps,subs)) -> (failuredp dps);;
   
-let rec varElim uni =
+let rec endp unif = match unif with
+  | (Some r) -> (new X in (endp (r @ X)))
+  | (Coerce (dps,subs)) -> 
+      match dps with
+      | [] -> true
+      | d -> false;;
+  
+let rec varElimFirst uni =
     (* This auxilliary replace a var by a term
         in all disagrement pairs *)
     let rec aux_subst x t dpairs = 
@@ -154,29 +127,24 @@ let rec varElim uni =
             (subst x t lf, subst x t rf)::(aux_subst x t tl)
     in
     
-    (* This auxilliary looks for potential var
-        to start subtitution
-        The start thing ensure we try all dpair, 
-        not only the first one *)
-    let rec aux_scan dpairs subs forSubst =
-        match dpairs with
-        | [] -> (forSubst, subs)
-        | dpair::tl ->
-            if (occursp dpair)
-            then aux_scan tl subs (dpair::forSubst)
-            else match dpair with
-                 | nab X in (X, t) ->
-                    aux_scan 
-                      (aux_subst X t (concat forSubst tl))
-                      (dpair::(aux_subst X t subs))
-                      []
-                 | dpair -> aux_scan tl subs (dpair::forSubst)
+    let rec doFirst dpairs subs =
+            (* Because simpl and failure check are 
+            called before VarElim we can assume that: 
+               The dpair list is non-empty
+               We only have f / f or f / r dpairs
+             and in the later case f is not in r *)
+            match dpairs with
+            | nab X in (X, t)::tl -> 
+                      Coerce(
+                        aux_subst X t tl,
+                        (X, t)::(aux_subst X t subs)
+                      )
+                      
+            (*| (a, b)::tl -> Coerce((a, b)::tl,subs)*)
     in 
     match uni with
-    | Some r -> Some(X\ varElim (r @ X))
-    | Coerce(dpl, subl) -> 
-        match (aux_scan dpl subl []) with
-        | (dpairs, subs) -> Coerce(dpairs, subs)
+    | Some r -> Some(X\ varElimFirst (r @ X))
+    | Coerce(dpl, subl) -> doFirst dpl subl
 ;;
 
 
@@ -186,17 +154,18 @@ let rec varElim uni =
     check failure
   until success or stale state *)
 let rec unify uni =
-    let newUni = varElim (simplify uni) in
-    if (failurep newUni) 
-    then (if (unifEq uni newUni)
-         then Fail
-         else unify newUni)
-    else Success(getSubs newUni)
+    let simpleUni = simplify uni in
+    if (failurep simpleUni) 
+    then Fail
+    else if (endp simpleUni)
+         then Success(getSubs simpleUni)
+         else unify (varElimFirst simpleUni)
 ;;
 
 let unif1 = Some (X\ Some (Y\ (Coerce 
       (((G(H(X),G(H(Y),A)), G(H(Y),G(H(X),A)))::[]),[]))));;
-      
+let simpleUni = simplify unif1;;
+let elimuni = varElimFirst simpleUni;;
 let unif2 = Some (X\ Some (Y\ (Coerce 
       (((G(H(X),G(H(Y),B)), G(H(Y),G(H(X),A)))::[]),[]))));;
 
@@ -205,8 +174,8 @@ let unif3 = Some (X\ Some (Y\ (Coerce
       
 let unif4 = Some (X\ Some (Y\ (Coerce 
       ((H(H(X)), H(Y))::[],[]))));;
-      
+      (*
 let res1 = unify unif1;;
 let res2 = unify unif2;;
 let res3 = unify unif3;;
-let res4 = unify unif4;;
+let res4 = unify unif4;; *)
