@@ -27,18 +27,9 @@ let rec subst x t s = match (x, s) with
      | (x, H u)          -> H (subst x t u)
      | (x, G(u,v))       -> G (subst x t u, subst x t v);;
 
-(*new X in subst X B X;;
-new X in subst X (H A) X;;
-new X in subst X A (H X);;
-new X in subst X A (H B);;
-new X in subst X A (H (G(X,X)));;
-new X in subst X A (G (G(X,X),G(X,X)));;*)
-
-
 (* Unification problems 
-    are a list of "disagrement pairs" *)
-
-(*
+    are a list of "disagrement pairs" 
+    
     unif = 
         Coerce(disagrementPairs, substitutions)
       | Some(X\ unif @ X)
@@ -134,16 +125,14 @@ let rec varElimFirst uni =
                We only have f / f or f / r dpairs
              and in the later case f is not in r *)
             match dpairs with
-            | nab X in (X, t)::tl -> 
+            | nab X in (X, t)::(tl @ X) -> 
                       Coerce(
-                        aux_subst X t tl,
-                        (X, t)::(aux_subst X t subs)
+                        aux_subst X t (tl @ X),
+                        ((X, t)::(aux_subst X t subs))
                       )
-                      
-            (*| (a, b)::tl -> Coerce((a, b)::tl,subs)*)
     in 
     match uni with
-    | Some r -> Some(X\ varElimFirst (r @ X))
+    | Some r -> Some(X\ (varElimFirst (r @ X)))
     | Coerce(dpl, subl) -> doFirst dpl subl
 ;;
 
@@ -164,8 +153,7 @@ let rec unify uni =
 
 let unif1 = Some (X\ Some (Y\ (Coerce 
       (((G(H(X),G(H(Y),A)), G(H(Y),G(H(X),A)))::[]),[]))));;
-let simpleUni = simplify unif1;;
-let elimuni = varElimFirst simpleUni;;
+
 let unif2 = Some (X\ Some (Y\ (Coerce 
       (((G(H(X),G(H(Y),B)), G(H(Y),G(H(X),A)))::[]),[]))));;
 
@@ -174,8 +162,8 @@ let unif3 = Some (X\ Some (Y\ (Coerce
       
 let unif4 = Some (X\ Some (Y\ (Coerce 
       ((H(H(X)), H(Y))::[],[]))));;
-      (*
+      
 let res1 = unify unif1;;
 let res2 = unify unif2;;
 let res3 = unify unif3;;
-let res4 = unify unif4;; *)
+let res4 = unify unif4;; 
