@@ -47,7 +47,7 @@ and pp_term_below_seq ppf =
   let self = pp_term_below_seq in
   function
   | Abs (n, t) ->
-    fprintf ppf "%a \ %a"
+    fprintf ppf "%a \\ %a"
       pp_local_name n
       self t
   | Hyp (t, u) ->
