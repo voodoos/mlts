@@ -12,10 +12,15 @@ type term =
 | Abs of local_name * term
 | Hyp of term * term
 | Eq of term * term
+| Lit of literal
 | App of atom * term list
 | Seq of term list
 | Cons of term * term
 | List of term list
+
+and literal =
+  | Int of int
+  | String of string
 
 and atom = name
 
