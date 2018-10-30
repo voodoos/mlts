@@ -1,0 +1,66 @@
+kind arity      type.
+
+type z          arity.
+type s          arity -> arity.
+
+
+kind tm         type.
+
+% lam x^A. t^B : A -> B
+% app t:A->B u:A
+% new X in t:A
+% X \ t^A
+% t^A @ X
+
+type nom        tm -> prop.
+type val        arity -> tm -> prop.
+
+type lam        arity -> arity -> (tm -> tm) -> tm.
+type app        arity -> arity -> tm -> tm -> tm.
+type backslash  arity -> (tm -> tm) -> tm.
+type arobase    arity -> tm -> tm -> tm.
+type new        arity -> (tm -> tm) -> tm.
+
+
+type eval   arity -> A -> A -> prop.
+
+
+val Ar (lam _ Ar _).
+val z N :- nom N.
+
+pin G :- pi x \ nom x => G x.
+piv Ar G :- pi x \ val Ar x => G x.
+
+%eval (s Ar) U V :- pin x \ eval Ar (U x) (V x).
+
+eval Ar V V :- val Ar V.
+
+eval ArB (app ArA ArB (lam ArA ArB R) U) V :-
+    eval ArA U VU,
+    eval ArB (R VU) V.
+
+eval Ar (new Ar R) V :- pin x \ eval Ar (R x) V.
+
+eval (s Ar) (backslash Ar R) (backslash Ar VR):-
+    pin x \ eval Ar (R x) (VR x).
+
+eval Ar (arobase (s Ar) T N) V :-
+    nom N,
+    eval (s Ar) T (backslash Ar R),
+    eval Ar (R N) V.
+
+test1 :-
+    piv z x \ eval z (app z z (lam z z (X \ X)) x) x.
+
+test2 :-
+    eval (s z) (backslash z (X \ X)) V,
+    pin x \
+    eval z (arobase (s z) V x) x.
+
+test3 :-
+    Id = backslash z (X \ X),
+    eval (s z) (app (s z) (s z) (lam (s z) (s z) (X \ X)) Id) V,
+    pin x \
+    eval z (arobase (s z) V x) x.
+
+main :- test1, test2, test3.
