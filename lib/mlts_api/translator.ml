@@ -19,33 +19,61 @@ let makeException message def pos =
                   | Some(p) -> pos)
 
 (* PROGRAM TRANSLATION *)
+type tdef = { name: string; body: P.term }
+type env = { local_vars: string list }
+let emptyenv = { local_vars = [] }
+
 let mlts_to_prolog p =
   let ctx = { nb_expr = 0 } in
   let rec t_items = function
     | [] -> []
     | item::tl -> 
        let titem = t_item item in
-       let def = P.Definition({
-                       name = "prog";
-                       args = [P.Lit(P.String("todoname")); titem];
-                       body = None}) 
-       in
-       def::(t_items tl)
+       P.Definition(titem)::(t_items tl)
   and t_item = function
+    | IDef(def, pos) -> 
+        let tdef = t_def def in
+        {
+          name = "prog";
+          args = [P.Lit(P.String(tdef.name)); tdef.body];
+          body = None (* todo: some def may depend on other *)
+        }
     | IExpr(expr, pos) -> 
-       incr_expr ctx; t_expr expr
+        incr_expr ctx; 
+        {
+          name = "prog";
+          args = [P.Lit(P.String("todoname")); t_expr expr];
+          body = None
+        }
+  and t_def = function
+    | DLet(LBVal(name, params, e)) -> { name = "f1"; body = t_expr e }
+    | DLetrec(_) -> failwith "Not implemented: DLetrec"
+    | DType(_, _) -> failwith "Not implemented: DType"
   and t_expr = function
+    | ELetin(_, _) -> failwith "Not implemented: ELetin"
+    | ELetRecin(_, _) -> failwith "Not implemented: ELetRecin"
+    | EMatch(_, _) -> failwith "Not implemented: EMatch"
+    | EIf(_, _, _) -> failwith "Not implemented: EIf"
+    | EApp(_, _) -> failwith "Not implemented: EApp"
+    | EBApp(_, _) -> failwith "Not implemented: EBApp"
     | EInfix(e1, op, e2) -> 
        let te1 = t_expr e1
        and te2 = t_expr e2 in
        P.make_spec (LpStrings.infix_to_lpstring op) [te1; te2]
     | EConst(c) -> t_constant c
-    (**)
+    | EVal(v) -> failwith ("Not implemented: EVal(" ^ v ^")")
+    | EPair(_, _) -> failwith "Not implemented: EPair"
+    | EConstr(_, _) -> failwith "Not implemented: EConstr"
+    | EPattern(_) -> failwith "Not implemented: EPattern"
+    | EBind(_, _) -> failwith "Not implemented: EBind"
+    | EFun(_, _) -> failwith "Not implemented: EFun"
+    | ENew(_, _) -> failwith "Not implemented: ENew"
 
     and t_constant = function
       | Int(i) -> P.make_int i
       | Bool(b) -> P.make_bool b
-                               (* todo string *)  
+      (*| String(s) -> P.make_string s *)
+      | EmptyList -> failwith "Not implemented: EmptyList"
   in
   t_items p
 

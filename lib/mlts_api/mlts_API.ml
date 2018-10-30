@@ -27,4 +27,4 @@ let parse_and_translate mlts_prog =
 
 let pp_prog = PrologPrinter.pp_prog
 
-let _ = pp_prog Format.std_formatter (parse_and_translate "42 + 5;;")
+let _ = pp_prog Format.std_formatter (parse_and_translate "let f x y = x + y;; 42 + 5;;")
