@@ -1,9 +1,14 @@
 open MltsAst
 open LpStrings
 
+module P = PrologAst
+
 exception TranslatorError of string * (Lexing.position option)
 
 type def = { mutable name: string; mutable pos: Lexing.position }
+
+type context = { mutable nb_expr: int }
+let incr_expr c = c.nb_expr <- c.nb_expr + 1
 
 let makeException message def pos =
   TranslatorError("In \"" ^ def.name ^ "\" (line "
@@ -17,7 +22,39 @@ let makeException message def pos =
 
 
 (* PROGRAM TRANSLATION *)
-let toLPString p =
+let mlts_to_prolog p =
+  let ctx = { nb_expr = 0 } in
+  let rec t_items = function
+  | [] -> []
+  | item::tl -> 
+    let titem = (match item with
+    | IExpr(expr, pos) -> 
+      incr_expr ctx; t_expr expr)
+    in
+    let def = P.Definition({
+      name = "prog";
+      args = [P.Lit(P.String("todoname")); titem];
+      body = None}) 
+    in
+    def::(t_items tl)
+                  
+  and t_expr = function
+  | EConst(c) -> t_constant c
+  (*| EInfix(e1, op, e2) -> 
+    let te1 = aux_expr e1
+    and te2 = aux_expr e2 in*)
+
+  and t_constant = function
+  | Int(i) -> P.App(P.Global("i"), [P.Lit(P.Int(i))])
+    
+  in
+  t_items p
+
+
+
+
+
+  (*
   let c = ref 0 in
   let constructors = Hashtbl.create 100 in
   let actualDef = { name = "" ;  pos = Lexing.dummy_pos} in
@@ -28,6 +65,8 @@ let toLPString p =
     actualDef.pos <- pos;
     allDefs := (n, pos.pos_lnum)::!allDefs  
   in
+  
+
   
   let rec aux env = function
       [] -> ("", [], [])
@@ -279,12 +318,13 @@ let toLPString p =
   let evalsig, evalmod, typing
     = Datatypes_translation.translate_types constructors in
   
+  
   (* print_string (string_of_constructors constructors);*)
   progs, evalsig, (evalmod ^ typing), !allDefs
 
+*)
 
-
-                    
+                 (*)   
 let make_lp_file prog =
   let progmod = open_out "export/progs_gen.mod" in
   let dtmod = open_out "export/datatypes.mod" in
@@ -309,5 +349,5 @@ let make_lp_file prog =
   
   close_out progmod;
   close_out dtmod;
-  close_out dtsig
+  close_out dtsig*)
             

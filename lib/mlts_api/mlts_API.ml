@@ -12,7 +12,7 @@ let parse_and_translate mlts_prog =
   try
     let p = MltsParser.main MltsLexer.token tokens in
 
-    Translator.toLPString p
+    Translator.mlts_to_prolog p
   with Translator.TranslatorError(s, popt)
        -> let l, c = match popt with
               None -> 0, 0
