@@ -4,7 +4,7 @@ open PrologAst
 
 let pp_global_name ppf s = fprintf ppf "%s" s
 let pp_local_name ppf (s, i) =
-  if i = 0
+  if false (*i = 0*)
   then fprintf ppf "%s" s
   else fprintf ppf "%s_%d" s i
 
