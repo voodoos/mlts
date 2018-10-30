@@ -16,6 +16,9 @@ type b          bool -> literal.
 type s          string -> literal.
 
 
+kind constructor type.
+type constructor_arities constructor -> list arity -> prop.
+
 kind tm         type.
 
 
@@ -37,7 +40,10 @@ type new        arity -> (tm -> tm) -> tm.
 type lit        literal -> tm.
 type special    special -> list tm -> tm.
 
+type variant    constructor -> list tm -> tm.
+
 type eval       arity -> A -> A -> prop.
+type eval_list  list arity -> list tm -> list tm -> prop.
 type eval_spec  special -> list tm -> tm -> prop.
 
 val Ar (lam _ Ar _).
@@ -65,6 +71,15 @@ eval Ar (arobase (s Ar) T N) V :-
     eval Ar (R N) V.
 
 eval z (special Spec Args) V :- eval_spec Spec Args V.
+
+eval z (variant C Ts) (variant C Vs) :-
+    constructor_arities C Ars,
+    eval_list Ars Ts Vs.
+
+eval_list [] [] [].
+eval_list (Ar::Ars) (T::Ts) (V::Vs) :-
+    eval Ar T V,
+    eval_list Ars Ts Vs.
 
 type sum   special.
 type eqint special.
@@ -107,4 +122,14 @@ test4 :-
     eval z (special sum [V1, V2]) V3,
     is_int V3 5.
 
-main :- test1, test2, test3, test4.
+type zero constructor.
+type succ constructor.
+constructor_arities zero [].
+constructor_arities succ [z].
+
+test5 :-
+    eval z
+      (variant succ [app z z (lam z z (X \ X)) (variant zero [])])
+      (variant succ [variant zero []]).
+
+main :- test1, test2, test3, test4, test5.
