@@ -14,6 +14,9 @@ type term =
 | Eq of term * term
 | App of atom * term list
 | Seq of term list
+| Nil
+| Cons of term * term
+
 and atom = name
 
 type decl = { 
