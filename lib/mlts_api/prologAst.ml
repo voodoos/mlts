@@ -26,7 +26,7 @@ and decl_sort = Kind | Type
 type def = {
     name: global_name;
     args: term list;
-    body: term;
+    body: term option;
 }
 
 type clause =

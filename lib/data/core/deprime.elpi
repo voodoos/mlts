@@ -22,7 +22,7 @@ type arobase    arity -> tm -> tm -> tm.
 type new        arity -> (tm -> tm) -> tm.
 
 
-type eval   arity -> A -> A -> prop.
+type eval       arity -> A -> A -> prop.
 
 
 val Ar (lam _ Ar _).
