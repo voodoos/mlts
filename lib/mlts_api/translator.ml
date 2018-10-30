@@ -7,8 +7,6 @@ exception TranslatorError of string * (Lexing.position option)
 
 type def = { mutable name: string; mutable pos: Lexing.position }
 
-type context = { mutable nb_expr: int }
-let incr_expr c = c.nb_expr <- c.nb_expr + 1
 
 let makeException message def pos =
   TranslatorError("In \"" ^ def.name ^ "\" (line "
@@ -19,17 +17,21 @@ let makeException message def pos =
                   | Some(p) -> pos)
 
 (* PROGRAM TRANSLATION *)
+type context = { mutable nb_expr: int; mutable global_vars : string list }
+let incr_expr c = c.nb_expr <- c.nb_expr + 1
 type tdef = { name: string; body: P.term }
 type env = { local_vars: string list }
 let emptyenv = { local_vars = [] }
 
 let mlts_to_prolog p =
-  let ctx = { nb_expr = 0 } in
+  let ctx = { nb_expr = 0; global_vars = [] } in
+
   let rec t_items = function
     | [] -> []
     | item::tl -> 
        let titem = t_item item in
        P.Definition(titem)::(t_items tl)
+
   and t_item = function
     | IDef(def, pos) -> 
         let tdef = t_def def in
@@ -42,13 +44,20 @@ let mlts_to_prolog p =
         incr_expr ctx; 
         {
           name = "prog";
-          args = [P.Lit(P.String("todoname")); t_expr expr];
+          args = [P.Lit(P.String("val" ^ (string_of_int (ctx.nb_expr)))); 
+                  t_expr expr];
           body = None
         }
+
   and t_def = function
-    | DLet(LBVal(name, params, e)) -> { name = "f1"; body = t_expr e }
+    | DLet(LBVal(name, params, e)) -> 
+      { 
+        name; 
+        body = P.make_lam params (t_expr e) 
+      }
     | DLetrec(_) -> failwith "Not implemented: DLetrec"
     | DType(_, _) -> failwith "Not implemented: DType"
+    
   and t_expr = function
     | ELetin(_, _) -> failwith "Not implemented: ELetin"
     | ELetRecin(_, _) -> failwith "Not implemented: ELetRecin"
@@ -61,7 +70,7 @@ let mlts_to_prolog p =
        and te2 = t_expr e2 in
        P.make_spec (LpStrings.infix_to_lpstring op) [te1; te2]
     | EConst(c) -> t_constant c
-    | EVal(v) -> failwith ("Not implemented: EVal(" ^ v ^")")
+    | EVal(v) -> P.App(Local(v, 0), []) (* todo Not so easy ! *)
     | EPair(_, _) -> failwith "Not implemented: EPair"
     | EConstr(_, _) -> failwith "Not implemented: EConstr"
     | EPattern(_) -> failwith "Not implemented: EPattern"

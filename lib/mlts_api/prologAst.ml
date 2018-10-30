@@ -59,10 +59,19 @@ let make_string s =
   App(Global("s"),
       [Lit(String(s))])
 
-let make_simple_app n =
+let make_global n =
   App(Global(n), [])
+
+let make_local n i =
+  App(Local(n, i), [])
   
 let make_spec s args =
   App(Global("special"),
-      [make_simple_app s;
+      [make_global s;
       List(args)])
+
+let make_lam params body =
+  App(Global("lam"),
+      [make_local "todo_ar" 1;
+       make_local "todo_ar" 2;
+       Abs(("x", 1), body)])
