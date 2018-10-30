@@ -16,13 +16,22 @@ let makeException message def pos =
                     None -> Some(def.pos)
                   | Some(p) -> pos)
 
-(* PROGRAM TRANSLATION *)
+(* Context : global vars and counters *)
 type context = { mutable nb_expr: int; mutable global_vars : string list }
 let incr_expr c = c.nb_expr <- c.nb_expr + 1
-type tdef = { name: string; body: P.term }
-type env = { local_vars: string list }
-let emptyenv = { local_vars = [] }
 
+(* (local) Environments *)
+type env = { local_vars: P.local_name list }
+let add_to_env v env = 
+  match List.assoc_opt v env.local_vars with
+  | None -> (v, 0), { local_vars = (v, 0)::env.local_vars }
+  | Some(i) -> (v, i + 1), { local_vars = (v, i + 1)::env.local_vars }
+
+let first_in_env v env = List.assoc v env.local_vars
+
+type tdef = { name: string; body: P.term; env: env }
+
+(* PROGRAM TRANSLATION *)
 let mlts_to_prolog p =
   let ctx = { nb_expr = 0; global_vars = [] } in
 
@@ -32,9 +41,11 @@ let mlts_to_prolog p =
        let titem = t_item item in
        P.Definition(titem)::(t_items tl)
 
-  and t_item = function
+  and t_item = 
+    let env = { local_vars = [] } in
+    function
     | IDef(def, pos) -> 
-        let tdef = t_def def in
+        let tdef = t_def env def in
         {
           name = "prog";
           args = [P.Lit(P.String(tdef.name)); tdef.body];
@@ -42,23 +53,39 @@ let mlts_to_prolog p =
         }
     | IExpr(expr, pos) -> 
         incr_expr ctx; 
+        let texpr, _env = t_expr env expr in
         {
           name = "prog";
-          args = [P.Lit(P.String("val" ^ (string_of_int (ctx.nb_expr)))); 
-                  t_expr expr];
+          args = [P.Lit(P.String("val_" ^ (string_of_int (ctx.nb_expr)))); 
+                  texpr];
           body = None
         }
 
-  and t_def = function
+  and t_def env =
+    let rec make_lam env params e =
+      (* 
+        fun f x y -> body
+          => lam ar11 ar12 (x\ lam ar21 ar22 (y\ body))
+      *)
+      match params with
+      | [] -> t_expr env e
+      | p::ptl -> 
+        let lvar, env = add_to_env p env in
+        let inner, env = make_lam env ptl e in
+        P.make_lam 0 0 lvar inner, env 
+    in
+    function
     | DLet(LBVal(name, params, e)) -> 
+      let body, env = make_lam env params e in
       { 
         name; 
-        body = P.make_lam params (t_expr e) 
+        body;
+        env;
       }
     | DLetrec(_) -> failwith "Not implemented: DLetrec"
     | DType(_, _) -> failwith "Not implemented: DType"
     
-  and t_expr = function
+  and t_expr env = function
     | ELetin(_, _) -> failwith "Not implemented: ELetin"
     | ELetRecin(_, _) -> failwith "Not implemented: ELetRecin"
     | EMatch(_, _) -> failwith "Not implemented: EMatch"
@@ -66,11 +93,11 @@ let mlts_to_prolog p =
     | EApp(_, _) -> failwith "Not implemented: EApp"
     | EBApp(_, _) -> failwith "Not implemented: EBApp"
     | EInfix(e1, op, e2) -> 
-       let te1 = t_expr e1
-       and te2 = t_expr e2 in
-       P.make_spec (LpStrings.infix_to_lpstring op) [te1; te2]
-    | EConst(c) -> t_constant c
-    | EVal(v) -> P.App(Local(v, 0), []) (* todo Not so easy ! *)
+       let te1, env = t_expr env e1 in
+       let te2, env = t_expr env e2 in
+       P.make_spec (LpStrings.infix_to_lpstring op) [te1; te2], env
+    | EConst(c) -> t_constant c, env
+    | EVal(v) -> P.App(Local(v, first_in_env v env), []), env (* todo Not so easy ! *)
     | EPair(_, _) -> failwith "Not implemented: EPair"
     | EConstr(_, _) -> failwith "Not implemented: EConstr"
     | EPattern(_) -> failwith "Not implemented: EPattern"

@@ -70,8 +70,9 @@ let make_spec s args =
       [make_global s;
       List(args)])
 
-let make_lam params body =
+let make_lam a1 a2 lvar inner =
   App(Global("lam"),
-      [make_local "todo_ar" 1;
-       make_local "todo_ar" 2;
-       Abs(("x", 1), body)])
+      [make_local "todo_ar" a1;
+       make_local "todo_ar" a2;
+      Abs(lvar, inner)   
+      ])
