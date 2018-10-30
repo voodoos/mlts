@@ -16,37 +16,36 @@ let makeException message def pos =
                   ^ ") : " ^ message,
                   match pos with
                     None -> Some(def.pos)
-                   | Some(p) -> pos)
-
-
-
+                  | Some(p) -> pos)
 
 (* PROGRAM TRANSLATION *)
 let mlts_to_prolog p =
   let ctx = { nb_expr = 0 } in
   let rec t_items = function
-  | [] -> []
-  | item::tl -> 
-    let titem = (match item with
+    | [] -> []
+    | item::tl -> 
+       let titem = t_item item in
+       let def = P.Definition({
+                       name = "prog";
+                       args = [P.Lit(P.String("todoname")); titem];
+                       body = None}) 
+       in
+       def::(t_items tl)
+  and t_item = function
     | IExpr(expr, pos) -> 
-      incr_expr ctx; t_expr expr)
-    in
-    let def = P.Definition({
-      name = "prog";
-      args = [P.Lit(P.String("todoname")); titem];
-      body = None}) 
-    in
-    def::(t_items tl)
-                  
+       incr_expr ctx; t_expr expr
   and t_expr = function
-  | EConst(c) -> t_constant c
-  (*| EInfix(e1, op, e2) -> 
-    let te1 = aux_expr e1
-    and te2 = aux_expr e2 in*)
+    | EInfix(e1, op, e2) -> 
+       let te1 = t_expr e1
+       and te2 = t_expr e2 in
+       P.make_spec (LpStrings.infix_to_lpstring op) [te1; te2]
+    | EConst(c) -> t_constant c
+    (**)
 
-  and t_constant = function
-  | Int(i) -> P.App(P.Global("i"), [P.Lit(P.Int(i))])
-    
+    and t_constant = function
+      | Int(i) -> P.make_int i
+      | Bool(b) -> P.make_bool b
+                               (* todo string *)  
   in
   t_items p
 
@@ -54,7 +53,7 @@ let mlts_to_prolog p =
 
 
 
-  (*
+          (*
   let c = ref 0 in
   let constructors = Hashtbl.create 100 in
   let actualDef = { name = "" ;  pos = Lexing.dummy_pos} in
@@ -290,7 +289,7 @@ let mlts_to_prolog p =
                    print_string "\nPArities: "; print_list (string_of_int) parities;
                    print_string "\nAritylist: "; print_list (string_of_int) aritylist;
  
-        *)
+           *)
 	  (*let marities = List.map2 (fun l1 l2 -> max l1 l2)
                                             parities arities in*)
           let pararity = List.map2 (fun l1 l2 -> l1, l2)
@@ -322,9 +321,9 @@ let mlts_to_prolog p =
   (* print_string (string_of_constructors constructors);*)
   progs, evalsig, (evalmod ^ typing), !allDefs
 
-*)
+           *)
 
-                 (*)   
+          (*)   
 let make_lp_file prog =
   let progmod = open_out "export/progs_gen.mod" in
   let dtmod = open_out "export/datatypes.mod" in
@@ -350,4 +349,4 @@ let make_lp_file prog =
   close_out progmod;
   close_out dtmod;
   close_out dtsig*)
-            
+    

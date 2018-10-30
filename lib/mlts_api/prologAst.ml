@@ -21,6 +21,7 @@ type term =
 and literal =
   | Int of int
   | String of string
+  | Bool of bool
 
 and atom = name
 
@@ -42,3 +43,26 @@ type clause =
 | Definition of def
 
 type prog = clause list
+
+
+
+(* TOOLS *)
+let make_int i =
+  App(Global("i"),
+        [Lit(Int(i))])
+
+let make_bool b =
+  App(Global("b"),
+        [Lit(Bool(b))])
+
+let make_string s =
+  App(Global("s"),
+      [Lit(String(s))])
+
+let make_simple_app n =
+  App(Global(n), [])
+  
+let make_spec s args =
+  App(Global("special"),
+      [make_simple_app s;
+      List(args)])
