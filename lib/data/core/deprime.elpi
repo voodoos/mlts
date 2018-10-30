@@ -42,7 +42,7 @@ type special    special -> list tm -> tm.
 
 type variant    constructor -> list tm -> tm.
 
-type eval       arity -> A -> A -> prop.
+type eval       arity -> tm -> tm -> prop.
 type eval_list  list arity -> list tm -> list tm -> prop.
 type eval_spec  special -> list tm -> tm -> prop.
 
