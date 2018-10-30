@@ -9,14 +9,14 @@ type ty =
 | Arrow of ty * ty
 
 type term = 
+| Seq of term list
 | Abs of local_name * term
 | Hyp of term * term
 | Eq of term * term
-| Lit of literal
 | App of atom * term list
-| Seq of term list
 | Cons of term * term
 | List of term list
+| Lit of literal
 
 and literal =
   | Int of int
