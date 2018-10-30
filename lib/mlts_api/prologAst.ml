@@ -76,3 +76,10 @@ let make_lam a1 a2 lvar inner =
        make_local "todo_ar" a2;
       Abs(lvar, inner)   
       ])
+
+let make_let a1 a2 lvar inner =
+  App(Global("let"),
+      [make_local "todo_ar" a1;
+       make_local "todo_ar" a2;
+      Abs(lvar, inner)   
+      ])

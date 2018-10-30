@@ -21,12 +21,11 @@ type context = { mutable nb_expr: int; mutable global_vars : string list }
 let incr_expr c = c.nb_expr <- c.nb_expr + 1
 
 (* (local) Environments *)
-type env = { local_vars: P.local_name list }
+type env = { local_vars: P.local_name list; free_vars:  P.global_name list }
 let add_to_env v env = 
   match List.assoc_opt v env.local_vars with
-  | None -> (v, 0), { local_vars = (v, 0)::env.local_vars }
-  | Some(i) -> (v, i + 1), { local_vars = (v, i + 1)::env.local_vars }
-
+  | None -> (v, 0), { env with local_vars = (v, 0)::env.local_vars }
+  | Some(i) -> (v, i + 1), { env with local_vars = (v, i + 1)::env.local_vars }
 let first_in_env v env = List.assoc v env.local_vars
 
 type tdef = { name: string; body: P.term; env: env }
@@ -42,7 +41,7 @@ let mlts_to_prolog p =
        P.Definition(titem)::(t_items tl)
 
   and t_item = 
-    let env = { local_vars = [] } in
+    let env = { local_vars = []; free_vars = [] } in
     function
     | IDef(def, pos) -> 
         let tdef = t_def env def in
@@ -86,18 +85,26 @@ let mlts_to_prolog p =
     | DType(_, _) -> failwith "Not implemented: DType"
     
   and t_expr env = function
-    | ELetin(_, _) -> failwith "Not implemented: ELetin"
+    | ELetin(LBVal(name, params, e), body) -> failwith "Not implemented: ELetin"
     | ELetRecin(_, _) -> failwith "Not implemented: ELetRecin"
     | EMatch(_, _) -> failwith "Not implemented: EMatch"
     | EIf(_, _, _) -> failwith "Not implemented: EIf"
-    | EApp(_, _) -> failwith "Not implemented: EApp"
+    | EApp(e, args) -> 
+        let te, env = t_expr env e in
+        let args = List.map (t_expr env) args in
+        (* todo freevars can appear in arg, don't forget it... *)
+        failwith "Not implemented: EApp"
     | EBApp(_, _) -> failwith "Not implemented: EBApp"
     | EInfix(e1, op, e2) -> 
        let te1, env = t_expr env e1 in
        let te2, env = t_expr env e2 in
        P.make_spec (LpStrings.infix_to_lpstring op) [te1; te2], env
     | EConst(c) -> t_constant c, env
-    | EVal(v) -> P.App(Local(v, first_in_env v env), []), env (* todo Not so easy ! *)
+    | EVal(v) -> 
+      begin
+        try P.make_local v (first_in_env v env), env (* todo Not so easy ? *)
+        with Not_found -> P.make_global v, { env with free_vars = v::env.free_vars }
+      end
     | EPair(_, _) -> failwith "Not implemented: EPair"
     | EConstr(_, _) -> failwith "Not implemented: EConstr"
     | EPattern(_) -> failwith "Not implemented: EPattern"
