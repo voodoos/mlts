@@ -98,12 +98,12 @@ let pp_decl ppf {sort; name; ty} =
     pp_ty ty
 
 let pp_def ppf {name; args; body} =
-  fprintf ppf "%a %t"
+  fprintf ppf "%a%t"
     pp_term_app (App (Global name, args))
     (fun ppf -> match body with
        | None -> ()
        | Some body ->
-         fprintf ppf ":- @[%a@]" pp_term body
+         fprintf ppf " :- @[%a@]" pp_term body
     )
 
 let pp_clause ppf = function
