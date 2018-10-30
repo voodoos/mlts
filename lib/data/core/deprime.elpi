@@ -3,8 +3,21 @@ kind arity      type.
 type z          arity.
 type s          arity -> arity.
 
+kind special    type.
+
+kind bool       type.
+type btrue      bool.
+type bfalse     bool.
+
+
+kind literal    type.
+type i          int -> literal.
+type b          bool -> literal.
+type s          string -> literal.
+
 
 kind tm         type.
+
 
 % lam x^A. t^B : A -> B
 % app t:A->B u:A
@@ -21,9 +34,11 @@ type backslash  arity -> (tm -> tm) -> tm.
 type arobase    arity -> tm -> tm -> tm.
 type new        arity -> (tm -> tm) -> tm.
 
+type lit        literal -> tm.
+type special    special -> list tm -> tm.
 
 type eval       arity -> A -> A -> prop.
-
+type eval_spec  special -> list tm -> tm -> prop.
 
 val Ar (lam _ Ar _).
 val z N :- nom N.
@@ -49,6 +64,29 @@ eval Ar (arobase (s Ar) T N) V :-
     eval (s Ar) T (backslash Ar R),
     eval Ar (R N) V.
 
+eval z (special Spec Args) V :- eval_spec Spec Args V.
+
+type sum   special.
+type eqint special.
+
+is_int (lit (i N)) N.
+is_bool (lit (b B)) B.
+
+eval_spec sum (V1 :: V2 :: []) V3 :-
+    is_int V1 N1,
+    is_int V2 N2,
+    N3 is N1 + N2,
+    is_int V3 N3.
+
+if P Q _R :- P, !, Q.
+if _P _Q R :- R.
+
+eval_spec eqint (V1 :: V2 :: []) V3 :-
+    is_int V1 N1,
+    is_int V2 N2,
+    if (N1 = N2) (B = btrue) (B = bfalse),
+    is_bool V3 B.
+
 test1 :-
     piv z x \ eval z (app z z (lam z z (X \ X)) x) x.
 
@@ -63,4 +101,10 @@ test3 :-
     pin x \
     eval z (arobase (s z) V x) x.
 
-main :- test1, test2, test3.
+test4 :-
+    is_int V1 2,
+    is_int V2 3,
+    eval z (special sum (V1 :: V2 :: [])) V3,
+    is_int V3 5.
+
+main :- test1, test2, test3, test4.
