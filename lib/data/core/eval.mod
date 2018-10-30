@@ -89,17 +89,17 @@ notsup Noms T :- (pi N\ copy N N :- nom N, not(member N Noms)) => copy T T.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%    The untyped lambda-term datatype
-val (ab _) & val (ap _ _).  % Object-level untyped lambda-terms
+%val (ab _) & val (ap _ _).  % Object-level untyped lambda-terms
 
-copy (abt R)   (abt S)   :- pi x\ copy x x => copy (R x) (S x).
-copy (ab R)    (ab S)    :- pi x\ copy x x => copy (R x) (S x).
-copy (ap  X Y) (ap  U V) :- copy X U, copy Y V.
+%copy (abt R)   (abt S)   :- pi x\ copy x x => copy (R x) (S x).
+%copy (ab R)    (ab S)    :- pi x\ copy x x => copy (R x) (S x).
+%copy (ap  X Y) (ap  U V) :- copy X U, copy Y V.
 
-special 2 app.
-eval_spec app     (U::V::[]) (ap V U).
+%special 2 app.
+%eval_spec app     (U::V::[]) (ap V U).
 
-eval  (abt R) (ab S)    :- fixbug R, pin x\ eval (R x) (S x).
-apply (ab  R) T (R T).
+%eval  (abt R) (ab S)    :- fixbug R, pin x\ eval (R x) (S x).
+%apply (ab  R) T (R T).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%    The integer datatype
 val (i _).

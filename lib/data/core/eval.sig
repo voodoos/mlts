@@ -66,7 +66,7 @@ type all''          ((tm -> tm -> tm) -> rulex) -> rulex.  % For pattern variabl
 
 type match          tm -> list rulex -> tm.
 type matching       tm -> list rulex -> tm -> prop.
-type applymatch    list o  -> list item -> tm -> rulex -> tm -> prop.
+type applymatch     list prop  -> list item -> tm -> rulex -> tm -> prop.
 
 type not_supported  list tm -> item -> prop.
 type notsup         list tm -> tm -> prop.
