@@ -16,6 +16,7 @@ type term =
 | Seq of term list
 | Nil
 | Cons of term * term
+| List of term list
 
 and atom = name
 
