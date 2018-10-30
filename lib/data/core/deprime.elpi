@@ -72,7 +72,7 @@ type eqint special.
 is_int (lit (i N)) N.
 is_bool (lit (b B)) B.
 
-eval_spec sum (V1 :: V2 :: []) V3 :-
+eval_spec sum [V1, V2] V3 :-
     is_int V1 N1,
     is_int V2 N2,
     N3 is N1 + N2,
@@ -81,7 +81,7 @@ eval_spec sum (V1 :: V2 :: []) V3 :-
 if P Q _R :- P, !, Q.
 if _P _Q R :- R.
 
-eval_spec eqint (V1 :: V2 :: []) V3 :-
+eval_spec eqint [V1, V2] V3 :-
     is_int V1 N1,
     is_int V2 N2,
     if (N1 = N2) (B = btrue) (B = bfalse),
@@ -104,7 +104,7 @@ test3 :-
 test4 :-
     is_int V1 2,
     is_int V2 3,
-    eval z (special sum (V1 :: V2 :: [])) V3,
+    eval z (special sum [V1, V2]) V3,
     is_int V3 5.
 
 main :- test1, test2, test3, test4.
