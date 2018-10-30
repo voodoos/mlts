@@ -52,8 +52,6 @@ val z N :- nom N.
 pin G :- pi x \ nom x => G x.
 piv Ar G :- pi x \ val Ar x => G x.
 
-%eval (s Ar) U V :- pin x \ eval Ar (U x) (V x).
-
 eval Ar V V :- val Ar V.
 
 eval ArB (app ArA ArB (lam ArA ArB R) U) V :-
