@@ -31,7 +31,8 @@ let _ =
   let c  = open_in "tests.mlts" in
   let lb = Lexing.from_channel c in
   let p  = MltsParser.main MltsLexer.token lb in
+  close_in c;
 
-  pp_prog Format.std_formatter (Translator.mlts_to_prolog p);
+  Format.printf "%a@."
+    pp_prog (Translator.mlts_to_prolog p)
 
-  close_in c

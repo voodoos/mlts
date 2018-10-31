@@ -21,7 +21,6 @@ type constructor_arities constructor -> list arity -> prop.
 
 kind tm         type.
 
-
 % lam x^A. t^B : A -> B
 % app t:A->B u:A
 % new X in t:A
