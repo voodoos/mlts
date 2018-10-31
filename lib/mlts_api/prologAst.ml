@@ -83,3 +83,12 @@ let make_let a1 a2 lvar inner =
        make_local "todo_ar" a2;
       Abs(lvar, inner)   
       ])
+
+    
+let make_app a1 a2 f args =
+  App(Global("app"),
+      [make_local "todo_ar" a1;
+       make_local "todo_ar" a2;
+       f;
+       List args;
+      ])
