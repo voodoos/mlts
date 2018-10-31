@@ -49,7 +49,9 @@ let mlts_to_prolog p =
        add_global tdef.name;
        {
          name = "prog";
-         args = [P.Lit(P.String(tdef.name)); tdef.body];
+         args = [P.Lit(P.String(tdef.name));
+                 P.make_arity 0; (* todo *)
+                 tdef.body];
          body = P.make_deps (tdef.env.free_vars)
        }
     | IExpr(expr, pos) -> 
@@ -57,7 +59,10 @@ let mlts_to_prolog p =
        let texpr, env = t_expr env expr in
        {
          name = "prog";
-         args = [P.Lit(P.String("val_" ^ (string_of_int (ctx.nb_expr)))); 
+         args = [P.Lit(P.String(
+                           "val_"
+                           ^ (string_of_int (ctx.nb_expr)))); 
+                 P.make_arity 0; (* todo *)
                  texpr];
          body = P.make_deps (env.free_vars)
        }
