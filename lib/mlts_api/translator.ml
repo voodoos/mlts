@@ -41,7 +41,7 @@ let mlts_to_prolog p =
        let titem = t_item item in
        P.Definition(titem)::(t_items tl)
 
-  and t_item = 
+  and t_item =
     let env = { local_vars = []; free_vars = [] } in
     function
     | IDef(def, pos) -> 
@@ -50,16 +50,16 @@ let mlts_to_prolog p =
        {
          name = "prog";
          args = [P.Lit(P.String(tdef.name)); tdef.body];
-         body = None (* todo: some def may depend on other *)
+         body = P.make_deps (tdef.env.free_vars)
        }
     | IExpr(expr, pos) -> 
        incr_expr ctx; 
-       let texpr, _env = t_expr env expr in
+       let texpr, env = t_expr env expr in
        {
          name = "prog";
          args = [P.Lit(P.String("val_" ^ (string_of_int (ctx.nb_expr)))); 
                  texpr];
-         body = None
+         body = P.make_deps (env.free_vars)
        }
 
   and t_def env =

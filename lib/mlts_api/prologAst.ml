@@ -91,4 +91,14 @@ let make_app a1 a2 f args =
        make_local "todo_ar" a2;
        f;
        List args;
-      ])
+    ])
+
+let make_deps fvs = 
+  let make_dep name =
+    App(Global("prog"),
+        [Lit(String(name));
+         make_global name])
+  in match fvs with
+     | [] -> None
+     | _ -> Some(Seq (List.map make_dep fvs))
+
