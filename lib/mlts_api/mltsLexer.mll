@@ -3,6 +3,8 @@
   open Lexing
   open MltsParser
 
+  module B = Buffer
+
   let id_or_keyword =
     let h = Hashtbl.create 17 in
     List.iter (fun (s, k) -> Hashtbl.add h s k)
@@ -64,6 +66,8 @@ rule token = parse
       { id_or_keyword (lexeme lexbuf) }
   | uppercaseIdent
       { UPIDENT (lexeme lexbuf) }
+  | '"'
+      { STRING (string (B.create 100) lexbuf) }
   | "("
       { BEGIN }
   | ")"
@@ -112,6 +116,27 @@ rule token = parse
       { lexing_error lexbuf  }
   | eof
       { EOF }
+
+
+and string buf = parse
+  | [^'"' '\n' '\\']+  
+      { B.add_string buf @@ lexeme lexbuf
+      ; string buf lexbuf }
+  | '\n'
+      { B.add_string buf @@ lexeme lexbuf
+            ; Lexing.new_line lexbuf
+            ; string buf lexbuf }
+  | '\\' '"'  
+      { B.add_char buf '"' ; string buf lexbuf }
+  | '\\'
+      { B.add_char buf '\\'; string buf lexbuf }
+    
+  | '"'
+      { B.contents buf }
+  | eof       
+      { lexing_error lexbuf }
+  | _         
+      { lexing_error lexbuf }
 
 and comment = parse
   | "(*"

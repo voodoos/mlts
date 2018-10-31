@@ -46,6 +46,7 @@
 %token EQUAL NEQ LT LE
 %token <string> IDENT
 %token <string> UPIDENT
+%token <string> STRING
 %token BEGIN END
 %token LBRACK RBRACK
 %token IF THEN ELSE
@@ -256,6 +257,7 @@ trivial_pattern:
 constant:
 | CONST_INT				{ Int($1) }
 | CONST_BOOL				{ Bool($1) }
+| STRING				{ String($1) }	
 | LBRACK; RBRACK			{ EmptyList }
 ;
 

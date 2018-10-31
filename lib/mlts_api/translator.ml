@@ -42,6 +42,9 @@ let mlts_to_prolog p =
        P.Definition(titem)::(t_items tl)
 
   and t_item =
+    (* Each "toplevel" item transpile to a program *)
+    (* Each "toplevel" item ha its own env but shares
+         the global context *)
     let env = { local_vars = []; free_vars = [] } in
     function
     | IDef(def, pos) -> 
@@ -52,6 +55,7 @@ let mlts_to_prolog p =
          args = [P.Lit(P.String(tdef.name));
                  P.make_arity 0; (* todo *)
                  tdef.body];
+         (* Some programs may depend on others! *)
          body = P.make_deps (tdef.env.free_vars)
        }
     | IExpr(expr, pos) -> 
@@ -64,6 +68,7 @@ let mlts_to_prolog p =
                            ^ (string_of_int (ctx.nb_expr)))); 
                  P.make_arity 0; (* todo *)
                  texpr];
+         (* Some programs may depend on others! *)
          body = P.make_deps (env.free_vars)
        }
 
@@ -128,7 +133,7 @@ let mlts_to_prolog p =
   and t_constant = function
     | Int(i) -> P.make_int i
     | Bool(b) -> P.make_bool b
-    (*| String(s) -> P.make_string s *)
+    | String(s) -> P.make_string s 
     | EmptyList -> failwith "Not implemented: EmptyList"
   in
   t_items p

@@ -62,6 +62,7 @@ and pattern =
 and constant =
   | Int of int
   | Bool of bool
+  | String of string
   | EmptyList
 
 and infix_op =

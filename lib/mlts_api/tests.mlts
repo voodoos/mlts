@@ -2,3 +2,4 @@ let f x y = x + y;;
 let g x = 
   3 + x;;
 3 + g 4;;
+"toto";;
