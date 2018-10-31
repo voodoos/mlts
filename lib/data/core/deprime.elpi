@@ -40,13 +40,38 @@ type lit        literal -> tm.
 type special    special -> list tm -> tm.
 
 type variant    constructor -> list tm -> tm.
+type match      arity -> arity -> tm -> list clause -> tm.
+
+kind pat    type.
+
+type plit        literal -> pat.
+type pvar        tm -> pat.
+type pnom        tm -> pat.
+type pbackslash  arity -> (tm -> pat) -> pat.
+type parobase    arity -> pat -> tm -> pat.
+type pvariant    constructor -> list pat -> pat.
+
+kind clause     type.
+
+type arr        arity -> arity -> pat -> tm -> clause.
+type all        arity -> (tm -> clause) -> clause.
+type nab        (tm -> clause) -> clause.
 
 type eval       arity -> tm -> tm -> prop.
 type eval_list  list arity -> list tm -> list tm -> prop.
 type eval_spec  special -> list tm -> tm -> prop.
 
+type clause_matches arity -> arity -> tm -> clause -> tm -> prop.
+type matches    arity -> tm -> pat -> prop.
+
 val Ar (lam _ Ar _).
 val z N :- nom N.
+val z (lit L) :- val_lit L.
+
+val_lit (i _). % TODO: ?
+val_lit (s _). % TODO: ?
+val_lit (b btrue).
+val_lit (b bfalse).
 
 pin G :- pi x \ nom x => G x.
 piv Ar G :- pi x \ val Ar x => G x.
@@ -99,21 +124,42 @@ eval_spec eqint [V1, V2] V3 :-
     if (N1 = N2) (B = btrue) (B = bfalse),
     is_bool V3 B.
 
-test1 :-
+eval ArRet (match _ArT ArRet _T []) _V :- false.
+
+eval ArRet (match ArT ArRet T (Cl::Cls)) V :-
+    if (clause_matches ArT ArRet T Cl Tr)
+      (eval ArRet Tr V)
+      (eval ArRet (match ArT ArRet T Cls) V).
+
+clause_matches ArL ArR L (arr ArL ArR P R) R :- matches ArL L P.
+
+matches z (lit L) (plit L).
+
+matches z (variant C Ts) (pvariant C Ps) :-
+    constructor_arities C Ars,
+    matches_list Ars Ts Ps.
+
+type matches_list   list arity -> list tm -> list pat -> prop.
+matches_list [] [] [].
+matches_list (Ar::Ars) (T::Ts) (P::Ps) :-
+    matches Ar T P,
+    matches_list Ars Ts Ps.
+
+test_app_id :-
     piv z x \ eval z (app z z (lam z z (X \ X)) x) x.
 
-test2 :-
+test_higher_arity :-
     eval (s z) (backslash z (X \ X)) V,
     pin x \
     eval z (arobase (s z) V x) x.
 
-test3 :-
+test_return_higher_arity :-
     Id = backslash z (X \ X),
     eval (s z) (app (s z) (s z) (lam (s z) (s z) (X \ X)) Id) V,
     pin x \
     eval z (arobase (s z) V x) x.
 
-test4 :-
+test_special :-
     is_int V1 2,
     is_int V2 3,
     eval z (special sum [V1, V2]) V3,
@@ -124,9 +170,50 @@ type succ constructor.
 constructor_arities zero [].
 constructor_arities succ [z].
 
-test5 :-
+test_variant :-
     eval z
       (variant succ [app z z (lam z z (X \ X)) (variant zero [])])
       (variant succ [variant zero []]).
 
-main :- test1, test2, test3, test4, test5.
+test_matches_lit :-
+    matches z (lit (i 0)) (plit (i 0)).
+
+test_matches_data :-
+    matches_list [z]
+      [variant succ [variant zero []]]
+      [pvariant succ [pvariant zero []]].
+
+test_match_lit :-
+    eval z
+      (match z z (lit (i 0)) [arr z z (plit (i 0)) (lit (i 3))])
+      (lit (i 3)).
+
+test_match_easydata :-
+    eval z
+      (match z z (variant zero []) [arr z z (pvariant zero []) (lit (i 0))])
+      (lit (i 0)).
+
+test_clause_matches :-
+    clause_matches z z
+      (lit (i 0))
+      (arr z z (plit (i 0)) (lit (i 3)))
+      (lit (i 3)).
+
+test_match_data :-
+    eval z
+      (match z z (variant succ [variant zero []])
+       [arr z z (pvariant zero []) (lit (i 6)),
+        arr z z (pvariant succ [pvariant succ [pvariant zero []]]) (lit (i 12)),
+        arr z z (pvariant succ [pvariant zero []]) (lit (i 36))])
+      (lit (i 36)).
+
+main :-
+    test_app_id,
+    test_higher_arity,
+    test_return_higher_arity,
+    test_special,
+    test_variant,
+    test_matches_lit,
+    test_matches_data,
+    test_clause_matches,
+    test_match_data.
