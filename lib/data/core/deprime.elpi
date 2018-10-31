@@ -138,7 +138,16 @@ clause_matches ArL ArR L (arr ArL ArR P R) R :- matches ArL L P.
 clause_matches ArL ArR L (all ArX RCl) R :-
   sigma X \ arityof X ArX => clause_matches ArL ArR L (RCl X) R.
 clause_matches ArL ArR L (nab RCl) R :-
-  pi x \ nom x => clause_matches ArL ArR L (RCl x) R.
+  sigma x \ clause_matches ArL ArR L (RCl x) R.
+
+%% MLTS:
+%% new X in
+%%   match X with nab Y in Y -> Y
+
+%% LP:
+%% pin x \
+%%   eval (match x [nab (y \ arr (pnom y) y)]) V
+%% = eval (pin y \ clause_matches x y y]) y
 
 matches z (lit L) (plit L).
 
@@ -221,7 +230,7 @@ test_match_data :-
 test_match_all :-
     eval z
       (match z z (lit (i 3))
-        [all z (x \ arr z z (pvar z x) x)])
+        [all z x \ arr z z (pvar z x) x])
       (lit (i 3)).
 
 test_match_nab :-
@@ -237,6 +246,29 @@ test_match_nom :-
         [nab (x \ arr z z (pnom x) (lit (i 3)))]))
       (lit (i 3)).
 
+type pair constructor.
+constructor_arities pair [z, z].
+
+test_match_pair :-
+    eval z
+      (match z z (variant pair [(lit (i 0)), (lit (i 1))])
+        [all z (x \ all z (y \
+         arr z z (pvariant pair [pvar z x, pvar z y]) (variant pair [y, x])))])
+      (variant pair [lit (i 1), lit (i 0)]).
+
+test_match_wrong_nab :-
+    not (eval (s z)
+      (backslash z (X \ (match z z (variant pair [X, X])
+        [nab (x \ nab (y \
+         arr z z (pvariant pair [pnom x, pnom y]) (variant pair [y, x])))])))
+      (backslash z (X \ variant pair [X, X]))).
+
+%% test_match_nom_distinct :-
+%%     eval z
+%%       (new z (X \ match z z (variant pair [X, X])
+%%         [nab (x (nab y \ \ arr z z (pnom x) (lit (i 3)))]))
+%%       (lit (i 3)).
+
 main :-
     test_app_id,
     test_higher_arity,
@@ -249,5 +281,7 @@ main :-
     test_match_data,
     test_match_all,
     test_match_nab,
-    test_match_nom
+    test_match_nom,
+    test_match_pair,
+    test_match_wrong_nab
 .
