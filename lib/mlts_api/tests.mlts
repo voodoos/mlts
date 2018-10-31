@@ -1,5 +1,45 @@
 let f x y = x + y;;
-let g x = 
+let g x =
   3 + x;;
 3 + g 4;;
 "toto";;
+
+(* (* Votre mission, si vous l'acceptez. *)
+type name =
+  | A
+  | B
+  | C;;
+
+type proc =
+  | Null
+  | Plus of proc * proc
+  | Par  of proc * proc
+  | In   of name * (name => proc)
+  | Out  of name * name * proc
+  | Eqn  of name * name * proc
+  | Taup of proc
+  | Bang of proc
+  | Nu   of name => proc;;
+
+let rec assoc x alist = match alist with
+  | (u,y)::alst -> if u = x then y else assoc x alst;;
+
+type tm =
+     | App of tm * tm
+     | Abs of tm => tm;;
+
+type located = (name => proc);;
+
+let rec trans gamma term = match term with
+  | App(m, n) ->
+    begin
+      let p = trans gamma m in
+      let q = trans gamma n) in
+          | (p, q) ->
+                (U\ Nu(V\ Par(p @ V,
+                    Nu(X\ Out(V, X, Out(V, U, Bang(In(X, q))))))))
+  | Abs(m) -> new X in (U\ In(U, Y\
+    let p = trans ((X,Y)::gamma) (m @ X) in
+     In(U, V\ p @ V)))
+  | nab X in X -> U\ Out(assoc X gamma, U, Null);;
+*)
