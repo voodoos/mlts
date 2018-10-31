@@ -13,7 +13,7 @@ let pp_name ppf = function
   | Local n -> pp_local_name ppf n
 
 let with_parens printer ppf x =
-  fprintf ppf "(%a)" printer x
+  fprintf ppf "(@[<2>%a@])" printer x
 
 let rec pp_ty ppf ty =
   pp_ty_arrow ppf ty
@@ -32,9 +32,11 @@ let pp_atom ppf n = pp_name ppf n
 let pp_literal ppf = function
   | Int n -> fprintf ppf "%d" n
   | String s -> fprintf ppf "%S" s
+  | Bool b -> fprintf ppf "%b" b
 
 let rec pp_term ppf t =
-  pp_term_seq ppf t
+  fprintf ppf "@[<2>%a@]"
+    pp_term_seq t
 and pp_term_seq ppf = function
   | Seq [] -> fprintf ppf "true"
   | Seq [t] -> pp_term_seq ppf t
