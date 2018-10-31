@@ -47,9 +47,14 @@ type prog = clause list
 
 
 (* TOOLS *)
+let make_prog name body =
+  App(Global("prog"),
+      [Lit(String(name));
+       body])
+  
 let make_int i =
   App(Global("i"),
-        [Lit(Int(i))])
+      [Lit(Int(i))])
 
 let make_bool b =
   App(Global("b"),
@@ -95,9 +100,7 @@ let make_app a1 a2 f args =
 
 let make_deps fvs = 
   let make_dep name =
-    App(Global("prog"),
-        [Lit(String(name));
-         make_global name])
+    make_prog name (make_global name)
   in match fvs with
      | [] -> None
      | _ -> Some(Seq (List.map make_dep fvs))

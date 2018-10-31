@@ -106,11 +106,12 @@ let mlts_to_prolog p =
     | EVal(v) -> 
        begin
          try P.make_local v (first_in_env v env), env
-                                                    (* Non-local must be global *)
-         with Not_found ->
+         with Not_found -> (* Non-local must be global *)
            if (List.mem v ctx.global_vars) then
              P.make_global v, { env with free_vars = v::env.free_vars }
-           else failwith ("Non local, non global value " ^ v ^ ". (todo : nice exception)")
+           else failwith ("Non local, non global value \""
+                          ^ v
+                          ^ "\". (todo : nice exception)")
        end
     | EPair(_, _) -> failwith "Not implemented: EPair"
     | EConstr(_, _) -> failwith "Not implemented: EConstr"
