@@ -261,20 +261,20 @@ test_match_data :-
 test_match_all :-
     eval
       (match (lit (i 3))
-        [all x \ arr (pvar x) x])
+        [(all x \ arr (pvar x) x)])
       (lit (i 3)).
 
 test_match_nab :-
     eval
       (match (lit (i 3))
-        [nab (x \ arr (pnom x) x),
+        [(nab x \ arr (pnom x) x),
          arr pany (lit (i 4))])
       (lit (i 4)).
 
 test_match_nom :-
     eval
-      (new (x \ match x
-        [nab (y \ arr (pnom y) (lit (i 3)))]))
+      (new x \ match x
+        [(nab y \ arr (pnom y) (lit (i 3)))])
       (lit (i 3)).
 
 type pair constructor.
@@ -282,16 +282,16 @@ type pair constructor.
 test_match_pair :-
     eval
       (match (variant pair [(lit (i 0)), (lit (i 1))])
-        [all (x \ all (y \
-         arr (pvariant pair [pvar x, pvar y]) (variant pair [y, x])))])
+        [(all x \ all y \
+          arr (pvariant pair [pvar x, pvar y]) (variant pair [y, x]))])
       (variant pair [lit (i 1), lit (i 0)]).
 
 test_match_wrong_nab :-
     not (eval
-      (backslash (X \ (match (variant pair [X, X])
-        [nab (x \ nab (y \
-         arr (pvariant pair [pnom x, pnom y]) (variant pair [y, x])))])))
-      (backslash (X \ variant pair [X, X]))).
+      (backslash X \ (match (variant pair [X, X])
+        [(nab x \ nab y \
+         arr (pvariant pair [pnom x, pnom y]) (variant pair [y, x]))]))
+      (backslash X \ variant pair [X, X])).
 
 test_match_nom_distinct_ok :-
     eval
