@@ -314,12 +314,27 @@ test_match_wrong_nab :-
          arr z z (pvariant pair [pnom x, pnom y]) (variant pair [y, x])))])))
       (backslash z (X \ variant pair [X, X]))).
 
-test_match_nom_distinct :-
+test_match_nom_distinct_ok :-
     eval z
-      (new z (X \ match z z (variant pair [X, X])
-        [(nab x \ nab y \ arr z z (pnom x) (lit (i 3))),
-         (arr z z (pany z) (lit (i 2)))]))
-      (lit (i 2)).
+      (new z x \ new z y \ match z z (variant pair [x, y])
+        [(nab x \ nab y \ arr z z (pvariant pair [pnom x, pnom y]) (lit (b btrue))),
+         (arr z z (pany z) (lit (b bfalse)))])
+      (lit (b btrue)).
+
+test_match_nom_distinct_no :-
+    eval z
+      (new z x \ match z z (variant pair [x, x])
+        [(nab x \ nab y \ arr z z (pvariant pair [pnom x, pnom y]) (lit (b btrue))),
+         (arr z z (pany z) (lit (b bfalse)))])
+      (lit (b bfalse)).
+
+test_match_nom_distinct_another_no :-
+    eval z
+      (new z x \ new z y \ match z z (variant pair [x, y])
+        [(nab x \ arr z z (pvariant pair [pnom x, pnom x]) (lit (b btrue))),
+         (arr z z (pany z) (lit (b bfalse)))])
+      (lit (b bfalse)).
+
 
 main :-
     test_app_id, !,
@@ -337,6 +352,8 @@ main :-
     test_match_nom, !,
     test_match_pair, !,
     test_match_wrong_nab, !,
-    test_match_nom_distinct, !,
+    test_match_nom_distinct_ok, !,
+    test_match_nom_distinct_no, !,
+    test_match_nom_distinct_another_no, !,
     true
 .
