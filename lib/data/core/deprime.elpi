@@ -83,12 +83,7 @@ val_lit (b bfalse).
 
 val z (variant C Vs) :-
     constructor_arities C Ars,
-    val_list Ars Vs.
-
-val_list [] [].
-val_list (Ar::Ars) (V::Vs) :-
-    val Ar V,
-    val_list Ars Vs.
+    foreach2 val Ars Vs.
 
 pin G :- pi x \ nom x => G x.
 piv Ar G :- pi x \ val Ar x => G x.
@@ -113,13 +108,7 @@ eval z (special Spec Args) V :- eval_spec Spec Args V.
 
 eval z (variant C Ts) (variant C Vs) :-
     constructor_arities C Ars,
-    eval_list Ars Ts Vs.
-
-type eval_list  list arity -> list tm -> list tm -> prop.
-eval_list [] [] [].
-eval_list (Ar::Ars) (T::Ts) (V::Vs) :-
-    eval Ar T V,
-    eval_list Ars Ts Vs.
+    foreach3 eval Ars Ts Vs.
 
 type sum   special.
 type eqint special.
@@ -191,12 +180,7 @@ subst_val _Subst (lit L) (lit L).
 subst_val Subst X Y :- nom X, nom Y, binds Subst X Y.
 
 subst_val Subst (variant C V1s) (variant C V2s) :-
-    subst_val_list Subst V1s V2s.
-
-subst_val_list _Subst [] [].
-subst_val_list Subst (V1::V1s) (V2::V2s) :-
-    subst_val Subst V1 V2,
-    subst_val_list Subst V1s V2s.
+    foreach2 (subst_val Subst) V1s V2s.
 
 matches _Subst z (lit L) (plit L).
 
@@ -211,13 +195,19 @@ matches Subst z Xout (pnom Xin) :-
 
 matches Subst z (variant C Ts) (pvariant C Ps) :-
     constructor_arities C Ars,
-    matches_list Subst Ars Ts Ps.
+    foreach3 (matches Subst) Ars Ts Ps.
 
-type matches_list   list binding -> list arity -> list tm -> list pat -> prop.
-matches_list _Subst [] [] [].
-matches_list Subst (Ar::Ars) (T::Ts) (P::Ps) :-
-    matches Subst Ar T P,
-    matches_list Subst Ars Ts Ps.
+type foreach (A -> prop) -> list A -> prop.
+foreach _P [].
+foreach P (X::Xs) :- P X, foreach P Xs.
+
+type foreach2 (A -> B -> prop) -> list A -> list B -> prop.
+foreach2 _P [] [].
+foreach2 P (X::Xs) (Y::Ys) :- P X Y, foreach2 P Xs Ys.
+
+type foreach3 (A -> B -> C -> prop) -> list A -> list B -> list C -> prop.
+foreach3 _P [] [] [].
+foreach3 P (X::Xs) (Y::Ys) (Z::Zs) :- P X Y Z, foreach3 P Xs Ys Zs.
 
 test_app_id :-
     piv z x \ eval z (app z z (lam z z (X \ X)) x) x.
@@ -253,9 +243,9 @@ test_matches_lit :-
     matches [] z (lit (i 0)) (plit (i 0)).
 
 test_matches_data :-
-    matches_list [] [z]
-      [variant succ [variant zero []]]
-      [pvariant succ [pvariant zero []]].
+    matches [] z
+      (variant succ [variant zero []])
+      (pvariant succ [pvariant zero []]).
 
 test_matches_nom :-
     pin xout \
