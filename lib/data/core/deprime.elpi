@@ -160,12 +160,10 @@ eval_clause ArL ArR L Dom (nab RCl) R :-
   pin x \ eval_clause ArL ArR L (x::Dom) (RCl x) R.
 eval_clause ArL ArR Lout Dom (arr ArL ArR Pin Rin) Vout :-
     with_subst Dom Subst \
-    if (Dom = []) true (print 1 Dom Subst),
     matches Subst ArL Lout Pin,
-    if (Dom = []) true (print 2 Dom Subst),
     injective Subst,
     eval ArR Rin Vin,
-    subst_val Subst Vin Vout.
+    subst_val Subst Vout Vin.
 
 type with_subst list tm -> (list binding -> prop) -> prop.
 with_subst Dom K :- with_subst_acc Dom [] K.
@@ -207,9 +205,9 @@ matches _Subst Ar _X (pany Ar).
 matches _Subst Ar X (pvar Ar X) :-
     arityof X Ar.
 
-matches Subst z X (pnom Y) :-
-    nom X, nom Y,
-    binds Subst X Y.
+matches Subst z Xout (pnom Xin) :-
+    nom Xin, nom Xout,
+    binds Subst Xin Xout.
 
 matches Subst z (variant C Ts) (pvariant C Ps) :-
     constructor_arities C Ars,
@@ -260,10 +258,11 @@ test_matches_data :-
       [pvariant succ [pvariant zero []]].
 
 test_matches_nom :-
-    pin x \
-    pin y \
-    with_subst [x] Subst \
-    matches Subst z x (pnom y).
+    pin xout \
+    pin xin \
+    with_subst [xin] Subst \
+    matches Subst z xout (pnom xin),
+    subst_val Subst xin xout.
 
 test_match_lit :-
     eval z
@@ -325,11 +324,12 @@ test_match_wrong_nab :-
          arr z z (pvariant pair [pnom x, pnom y]) (variant pair [y, x])))])))
       (backslash z (X \ variant pair [X, X]))).
 
-%% test_match_nom_distinct :-
-%%     eval z
-%%       (new z (X \ match z z (variant pair [X, X])
-%%         [nab (x (nab y \ \ arr z z (pnom x) (lit (i 3)))]))
-%%       (lit (i 3)).
+test_match_nom_distinct :-
+    eval z
+      (new z (X \ match z z (variant pair [X, X])
+        [(nab x \ nab y \ arr z z (pnom x) (lit (i 3))),
+         (arr z z (pany z) (lit (i 2)))]))
+      (lit (i 2)).
 
 main :-
     test_app_id, !,
@@ -344,8 +344,9 @@ main :-
     test_match_data, !,
     test_match_all, !,
     test_match_nab, !,
-    %% test_match_nom, !,
+    test_match_nom, !,
     test_match_pair, !,
     test_match_wrong_nab, !,
+    test_match_nom_distinct, !,
     true
 .
