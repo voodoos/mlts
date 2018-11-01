@@ -1,25 +1,28 @@
-kind arity      type.
+kind unit                type.
+type unit                unit.
 
-type z          arity.
-type s          arity -> arity.
+kind arity               type.
 
-kind special    type.
+type z                   arity.
+type s                   arity -> arity.
 
-kind bool       type.
-type btrue      bool.
-type bfalse     bool.
+kind special             type.
+
+kind bool                type.
+type btrue               bool.
+type bfalse              bool.
 
 
-kind literal    type.
-type i          int -> literal.
-type b          bool -> literal.
-type s          string -> literal.
+kind literal             type.
+type i                   int -> literal.
+type b                   bool -> literal.
+type s                   string -> literal.
 
 
 kind constructor type.
 type constructor_arities constructor -> list arity -> prop.
 
-kind tm         type.
+kind tm                  type.
 
 % lam x^A. t^B : A -> B
 % app t:A->B u:A
@@ -27,54 +30,60 @@ kind tm         type.
 % X \ t^A
 % t^A @ X
 
-type nom        tm -> prop.
-type val        arity -> tm -> prop.
+type nom                 tm -> prop.
+type val                 arity -> tm -> prop.
 
-type lam        arity -> arity -> (tm -> tm) -> tm.
-type app        arity -> arity -> tm -> tm -> tm.
-type backslash  arity -> (tm -> tm) -> tm.
-type arobase    arity -> tm -> tm -> tm.
-type new        arity -> (tm -> tm) -> tm.
+type lam                 arity -> arity -> (tm -> tm) -> tm.
+type app                 arity -> arity -> tm -> tm -> tm.
+type backslash           arity -> (tm -> tm) -> tm.
+type arobase             arity -> tm -> tm -> tm.
+type new                 arity -> (tm -> tm) -> tm.
 
-type lit        literal -> tm.
-type special    special -> list tm -> tm.
+type lit                 literal -> tm.
+type special             special -> list tm -> tm.
 
-type variant    constructor -> list tm -> tm.
-type match      arity -> arity -> tm -> list clause -> tm.
+type variant             constructor -> list tm -> tm.
+type match               arity -> arity -> tm -> list clause -> tm.
 
-kind pat    type.
+kind pat                 type.
 
-type pany        arity -> pat.
-type plit        literal -> pat.
-type pvar        arity -> tm -> pat.
-type pnom        tm -> pat.
-type pbackslash  arity -> (tm -> pat) -> pat.
-type parobase    arity -> pat -> tm -> pat.
-type pvariant    constructor -> list pat -> pat.
+type pany                arity -> pat.
+type plit                literal -> pat.
+type pvar                arity -> tm -> pat.
+type pnom                tm -> pat.
+type pbackslash          arity -> (tm -> pat) -> pat.
+type parobase            arity -> pat -> tm -> pat.
+type pvariant            constructor -> list pat -> pat.
 
-kind clause     type.
+kind clause              type.
 
-type arr        arity -> arity -> pat -> tm -> clause.
-type all        arity -> (tm -> clause) -> clause.
-type nab        (tm -> clause) -> clause.
+type arr                 arity -> arity -> pat -> tm -> clause.
+type all                 arity -> (tm -> clause) -> clause.
+type nab                 (tm -> clause) -> clause.
 
-type arityof    tm -> arity -> prop.
+type arityof             tm -> arity -> prop.
 
-type eval       arity -> tm -> tm -> prop.
-type eval_list  list arity -> list tm -> list tm -> prop.
-type eval_spec  special -> list tm -> tm -> prop.
+type eval                arity -> tm -> tm -> prop.
+type eval_spec           special -> list tm -> tm -> prop.
 
-type clause_matches arity -> arity -> tm -> clause -> tm -> prop.
-type matches    arity -> tm -> pat -> prop.
+kind binding             type.
+type bind                tm -> tm -> binding.
+
+type matches             list binding -> arity -> tm -> pat -> prop.
 
 val Ar (lam _ Ar _).
-val z N :- nom N.
 val z (lit L) :- val_lit L.
+
+val z N :- nom N.
 
 val_lit (i _). % TODO: ?
 val_lit (s _). % TODO: ?
 val_lit (b btrue).
 val_lit (b bfalse).
+
+val z (variant C Vs) :-
+    constructor_arities C Ars,
+    foreach2 val Ars Vs.
 
 pin G :- pi x \ nom x => G x.
 piv Ar G :- pi x \ val Ar x => G x.
@@ -99,12 +108,7 @@ eval z (special Spec Args) V :- eval_spec Spec Args V.
 
 eval z (variant C Ts) (variant C Vs) :-
     constructor_arities C Ars,
-    eval_list Ars Ts Vs.
-
-eval_list [] [] [].
-eval_list (Ar::Ars) (T::Ts) (V::Vs) :-
-    eval Ar T V,
-    eval_list Ars Ts Vs.
+    foreach3 eval Ars Ts Vs.
 
 type sum   special.
 type eqint special.
@@ -127,43 +131,83 @@ eval_spec eqint [V1, V2] V3 :-
     if (N1 = N2) (B = btrue) (B = bfalse),
     is_bool V3 B.
 
-eval ArRet (match _ArT ArRet _T []) _V :- false.
+eval ArRet (match ArT ArRet T Cls) V :-
+    eval ArT T VT,
+    eval_clauses ArT ArRet VT Cls V.
 
-eval ArRet (match ArT ArRet T (Cl::Cls)) V :-
-    if (clause_matches ArT ArRet T Cl Tr)
-      (eval ArRet Tr V)
-      (eval ArRet (match ArT ArRet T Cls) V).
+type eval_clauses arity -> arity -> tm -> list clause -> tm -> prop.
+eval_clauses _ArL _ArR _VL [] _VR :- false.
+eval_clauses ArL ArR VL (Cl::Cls) VR :-
+    if (eval_clause ArL ArR VL [] Cl VR)
+      (true)
+      (eval_clauses ArL ArR VL Cls VR).
 
-clause_matches ArL ArR L (arr ArL ArR P R) R :- matches ArL L P.
-clause_matches ArL ArR L (all ArX RCl) R :-
-  sigma X \ arityof X ArX => clause_matches ArL ArR L (RCl X) R.
-clause_matches ArL ArR L (nab RCl) R :-
-  sigma x \ clause_matches ArL ArR L (RCl x) R.
+type eval_clause arity -> arity -> tm -> list tm -> clause -> tm -> prop.
+eval_clause ArL ArR L Dom (all ArX RCl) R :-
+  sigma X \ arityof X ArX => eval_clause ArL ArR L Dom (RCl X) R.
+eval_clause ArL ArR L Dom (nab RCl) R :-
+  pin x \ eval_clause ArL ArR L (x::Dom) (RCl x) R.
+eval_clause ArL ArR Lout Dom (arr ArL ArR Pin Rin) Vout :-
+    with_subst Dom Subst \
+    matches Subst ArL Lout Pin,
+    injective Subst,
+    eval ArR Rin Vin,
+    subst_val Subst Vout Vin.
 
-%% MLTS:
-%% new X in
-%%   match X with nab Y in Y -> Y
+type with_subst list tm -> (list binding -> prop) -> prop.
+with_subst Dom K :- with_subst_acc Dom [] K.
+with_subst_acc [] Acc K :- K Acc.
+with_subst_acc (X::Dom) Acc K :- sigma Y \ with_subst_acc Dom (bind X Y :: Acc) K.
 
-%% LP:
-%% pin x \
-%%   eval (match x [nab (y \ arr (pnom y) y)]) V
-%% = eval (pin y \ clause_matches x y y]) y
+injective [].
+injective (bind _X Y :: Subst) :-
+    not_in Subst Y,
+    injective Subst.
 
-matches z (lit L) (plit L).
+binds (bind X1 Y1 :: Subst) X2 Y2 :-
+    if (X1 = X2)
+       (Y1 = Y2)
+       (binds Subst X2 Y2).
 
-matches Ar _X (pany Ar).
-matches Ar X (pvar Ar X) :- arityof X Ar.
-matches z X (pnom X) :- nom X.
+not_in [] _Z.
+not_in (bind _X Y :: Subst) Z :-
+    not (Y = Z),
+    not_in Subst Z.
 
-matches z (variant C Ts) (pvariant C Ps) :-
+subst_val _Subst (lam ArA ArB T) (lam ArA ArB T).
+subst_val _Subst (lit L) (lit L).
+
+subst_val Subst X Y :- nom X, nom Y, binds Subst X Y.
+
+subst_val Subst (variant C V1s) (variant C V2s) :-
+    foreach2 (subst_val Subst) V1s V2s.
+
+matches _Subst z (lit L) (plit L).
+
+matches _Subst Ar _X (pany Ar).
+
+matches _Subst Ar X (pvar Ar X) :-
+    arityof X Ar.
+
+matches Subst z Xout (pnom Xin) :-
+    nom Xin, nom Xout,
+    binds Subst Xin Xout.
+
+matches Subst z (variant C Ts) (pvariant C Ps) :-
     constructor_arities C Ars,
-    matches_list Ars Ts Ps.
+    foreach3 (matches Subst) Ars Ts Ps.
 
-type matches_list   list arity -> list tm -> list pat -> prop.
-matches_list [] [] [].
-matches_list (Ar::Ars) (T::Ts) (P::Ps) :-
-    matches Ar T P,
-    matches_list Ars Ts Ps.
+type foreach (A -> prop) -> list A -> prop.
+foreach _P [].
+foreach P (X::Xs) :- P X, foreach P Xs.
+
+type foreach2 (A -> B -> prop) -> list A -> list B -> prop.
+foreach2 _P [] [].
+foreach2 P (X::Xs) (Y::Ys) :- P X Y, foreach2 P Xs Ys.
+
+type foreach3 (A -> B -> C -> prop) -> list A -> list B -> list C -> prop.
+foreach3 _P [] [] [].
+foreach3 P (X::Xs) (Y::Ys) (Z::Zs) :- P X Y Z, foreach3 P Xs Ys Zs.
 
 test_app_id :-
     piv z x \ eval z (app z z (lam z z (X \ X)) x) x.
@@ -196,12 +240,19 @@ test_variant :-
       (variant succ [variant zero []]).
 
 test_matches_lit :-
-    matches z (lit (i 0)) (plit (i 0)).
+    matches [] z (lit (i 0)) (plit (i 0)).
 
 test_matches_data :-
-    matches_list [z]
-      [variant succ [variant zero []]]
-      [pvariant succ [pvariant zero []]].
+    matches [] z
+      (variant succ [variant zero []])
+      (pvariant succ [pvariant zero []]).
+
+test_matches_nom :-
+    pin xout \
+    pin xin \
+    with_subst [xin] Subst \
+    matches Subst z xout (pnom xin),
+    subst_val Subst xin xout.
 
 test_match_lit :-
     eval z
@@ -213,10 +264,10 @@ test_match_easydata :-
       (match z z (variant zero []) [arr z z (pvariant zero []) (lit (i 0))])
       (lit (i 0)).
 
-test_clause_matches :-
-    clause_matches z z
+test_eval_clause :-
+    eval_clause z z
       (lit (i 0))
-      (arr z z (plit (i 0)) (lit (i 3)))
+      [] (arr z z (plit (i 0)) (lit (i 3)))
       (lit (i 3)).
 
 test_match_data :-
@@ -242,8 +293,8 @@ test_match_nab :-
 
 test_match_nom :-
     eval z
-      (new z (X \ match z z X
-        [nab (x \ arr z z (pnom x) (lit (i 3)))]))
+      (new z (x \ match z z x
+        [nab (y \ arr z z (pnom y) (lit (i 3)))]))
       (lit (i 3)).
 
 type pair constructor.
@@ -263,25 +314,46 @@ test_match_wrong_nab :-
          arr z z (pvariant pair [pnom x, pnom y]) (variant pair [y, x])))])))
       (backslash z (X \ variant pair [X, X]))).
 
-%% test_match_nom_distinct :-
-%%     eval z
-%%       (new z (X \ match z z (variant pair [X, X])
-%%         [nab (x (nab y \ \ arr z z (pnom x) (lit (i 3)))]))
-%%       (lit (i 3)).
+test_match_nom_distinct_ok :-
+    eval z
+      (new z x \ new z y \ match z z (variant pair [x, y])
+        [(nab x \ nab y \ arr z z (pvariant pair [pnom x, pnom y]) (lit (b btrue))),
+         (arr z z (pany z) (lit (b bfalse)))])
+      (lit (b btrue)).
+
+test_match_nom_distinct_no :-
+    eval z
+      (new z x \ match z z (variant pair [x, x])
+        [(nab x \ nab y \ arr z z (pvariant pair [pnom x, pnom y]) (lit (b btrue))),
+         (arr z z (pany z) (lit (b bfalse)))])
+      (lit (b bfalse)).
+
+test_match_nom_distinct_another_no :-
+    eval z
+      (new z x \ new z y \ match z z (variant pair [x, y])
+        [(nab x \ arr z z (pvariant pair [pnom x, pnom x]) (lit (b btrue))),
+         (arr z z (pany z) (lit (b bfalse)))])
+      (lit (b bfalse)).
+
 
 main :-
-    test_app_id,
-    test_higher_arity,
-    test_return_higher_arity,
-    test_special,
-    test_variant,
-    test_matches_lit,
-    test_matches_data,
-    test_clause_matches,
-    test_match_data,
-    test_match_all,
-    test_match_nab,
-    test_match_nom,
-    test_match_pair,
-    test_match_wrong_nab
+    test_app_id, !,
+    test_higher_arity, !,
+    test_return_higher_arity, !,
+    test_special, !,
+    test_variant, !,
+    test_matches_lit, !,
+    test_matches_data, !,
+    test_matches_nom, !,
+    test_eval_clause, !,
+    test_match_data, !,
+    test_match_all, !,
+    test_match_nab, !,
+    test_match_nom, !,
+    test_match_pair, !,
+    test_match_wrong_nab, !,
+    test_match_nom_distinct_ok, !,
+    test_match_nom_distinct_no, !,
+    test_match_nom_distinct_another_no, !,
+    true
 .
