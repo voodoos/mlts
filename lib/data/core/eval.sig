@@ -47,8 +47,8 @@ type new         (tm -> tm) -> tm.
 
 %% The addition of untyped lambda-terms as expressions (abt/app) and
 %% as values (ab/ap).
-%type app        tm.                 % expression 
-%type abt        (tm -> tm) -> tm.   % expression 
+%type app        tm.                 % expression
+%type abt        (tm -> tm) -> tm.   % expression
 %type ap         tm -> tm -> tm.     % value space
 %type ab         (tm -> tm) -> tm.   % value space
 
