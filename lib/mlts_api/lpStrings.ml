@@ -81,6 +81,7 @@ let const_to_lpstring = function
   | Bool(true) -> "tt"
   | Bool(false) -> "ff"
   | EmptyList ->  "null"
+  | _ -> failwith "arg not implemented"
                               
 let infix_to_lpstring = function
   | Mult -> "times" | Neq -> "nequal"
@@ -124,7 +125,7 @@ let funcl name args =
   name ^ "\\"
   ^  (lams args)
        
-let nofixpoint name args code =
+let nofixpoint _name args code =
   "(" ^ lams args ^ code ^ ")"
                                         
 let fixpoint name args code =

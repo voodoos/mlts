@@ -1,5 +1,4 @@
 open MltsAst
-open LpStrings
 
 module P = PrologAst
 
@@ -14,7 +13,7 @@ let make_exception message def pos =
                   ^ ") : " ^ message,
                   match pos with
                     None -> Some(def.pos)
-                  | Some(p) -> pos)
+                  | Some(_p) -> pos)
 
 (* Context : global vars and counters *)
 type context = { mutable nb_expr: int; mutable global_vars : string list }
@@ -47,7 +46,7 @@ let mlts_to_prolog p =
          the global context *)
     let env = { local_vars = []; free_vars = [] } in
     function
-    | IDef(def, pos) -> 
+    | IDef(def, _pos) -> 
        let tdef = t_def env def in
        add_global tdef.name;
        {
@@ -58,7 +57,7 @@ let mlts_to_prolog p =
          (* Some programs may depend on others! *)
          body = P.make_deps (tdef.env.free_vars)
        }
-    | IExpr(expr, pos) -> 
+    | IExpr(expr, _pos) -> 
        incr_expr ctx; 
        let texpr, env = t_expr env expr in
        {
@@ -97,7 +96,7 @@ let mlts_to_prolog p =
     | DType(_, _) -> failwith "Not implemented: DType"
                    
   and t_expr env = function
-    | ELetin(LBVal(name, params, e), body) -> failwith "Not implemented: ELetin"
+    | ELetin(LBVal(_name, _params, _e), _body) -> failwith "Not implemented: ELetin"
     | ELetRecin(_, _) -> failwith "Not implemented: ELetRecin"
     | EMatch(_, _) -> failwith "Not implemented: EMatch"
     | EIf(_, _, _) -> failwith "Not implemented: EIf"
@@ -106,7 +105,7 @@ let mlts_to_prolog p =
        let args = List.map (t_expr env) args in
        (* todo freevars can appear in arg, don't forget it... *)
        let args = List.map (fst) args in
-       P.make_app 0 0 te args, env
+       P.make_app te args, env
     | EBApp(_, _) -> failwith "Not implemented: EBApp"
     | EInfix(e1, op, e2) -> 
        let te1, env = t_expr env e1 in
@@ -412,7 +411,7 @@ let mlts_to_prolog p =
 
            *)
 
-          (*)   
+          (*
 let make_lp_file prog =
   let progmod = open_out "export/progs_gen.mod" in
   let dtmod = open_out "export/datatypes.mod" in

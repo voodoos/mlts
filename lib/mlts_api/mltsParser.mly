@@ -3,10 +3,10 @@
   open MltsAst
 
 
-  let lmax =
+  (*let lmax =
       List.fold_left
 	(fun acc (t,a) -> max acc a)
-	0
+	0*)
 
   let unik =
     let c = ref 0 in
@@ -188,18 +188,18 @@ arityp_expr:
 | BEGIN; arityp_expr; END;		{ $2 }
 | typeconstr_name			{ Cons($1), 0 }
 | tya1 = arityp_expr;
-  STAR; tya2 = arityp_expr		{ let ty1, a1 = tya1
-   	   	  			  and ty2, a2 = tya2   in
+  STAR; tya2 = arityp_expr		{ let _ty1, a1 = tya1
+   	   	  			  and _ty2, a2 = tya2   in
   	       				      Sum(tya1, tya2), max a1 a2 }
 					      
 | tya1 = arityp_expr;
-  ARROW; tya2 = arityp_expr		{ let ty1, a1 = tya1
-   	   	  			  and ty2, a2 = tya2   in
+  ARROW; tya2 = arityp_expr		{ let _ty1, a1 = tya1
+   	   	  			  and _ty2, a2 = tya2   in
   	       				      Arrow(tya1, tya2), max a1 a2 }
 					      
 |  tya1 = arityp_expr;
-   DARROW;  tya2 = arityp_expr		{ let ty1, a1 = tya1
-   	   	  			  and ty2, a2 = tya2   in
+   DARROW;  tya2 = arityp_expr		{ let _ty1, a1 = tya1
+   	   	  			  and _ty2, a2 = tya2   in
    	   	  	 		  Bind(tya1, tya2),
 					  1 + (max a1 a2)  }
 | tya = arityp_expr; LIST;		{ List(tya), (snd tya)  }

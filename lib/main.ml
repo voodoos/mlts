@@ -19,13 +19,13 @@ let consoleError ?pref:(p = "") (str : string) =
 let compile header code =
   try
     (* First mlts => lprolog *)
-    let lpcode, typsig, typmod, defs =
+    let lpcode =
       Mlts_API.parse_and_translate code in
 
     (* updating the pseudo files *)
     Sys_js.update_file "core/progs_gen.mod" lpcode;
-    Sys_js.update_file "core/datatypes.sig" typsig;
-    Sys_js.update_file "core/datatypes.mod" typmod;
+    (*Sys_js.update_file "core/datatypes.sig" typsig;
+    Sys_js.update_file "core/datatypes.mod" typmod;*)
 
     (* recompiling lprolog code *)
     let parsed =

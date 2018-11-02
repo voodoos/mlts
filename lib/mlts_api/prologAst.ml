@@ -93,23 +93,23 @@ let rec make_arity arity =
              [make_arity (n-1)])
 
     
-let make_app a1 a2 f args =
+let make_app f args =
   App(Global("app"),
-      [make_arity a1;
-       make_arity a2;
+      [(*make_arity a1;
+       make_arity a2;*)
        f;
        List args;
     ])
     
-let make_prog arity name body =
+let make_prog name body =
   App(Global("prog"),
       [Lit(String(name));
-       make_arity arity;
+       (*make_arity arity;*)
        body])
   
 let make_deps fvs = 
   let make_dep name =
-    make_prog 0 name (make_global name)
+    make_prog name (make_global name)
   in match fvs with
      | [] -> None
      | _ -> Some(Seq (List.map make_dep fvs))
