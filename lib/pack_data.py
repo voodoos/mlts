@@ -28,5 +28,5 @@ for path in pathlist:
     first = False
 
 output += "]"
-output += "\n let load () = List.iter (fun f -> Sys_js.create_file f.name (B64.decode f.text)) files"
+output += "\n let load () = List.iter (fun f -> Sys_js.create_file ~name:f.name ~content:(B64.decode f.text)) files"
 print(output)

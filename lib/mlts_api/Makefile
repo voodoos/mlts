@@ -1,8 +1,11 @@
 
-.PHONY: 	all test
+.PHONY: 	all test exe
 
 all:
 	ocamlbuild mlts_API.cma
 
-test:
-	ocamlbuild mlts_API.native && ./mlts_API.native
+test: exe
+	./_build/default/mlts_API.exe
+
+exe:
+	dune build mlts_API.exe

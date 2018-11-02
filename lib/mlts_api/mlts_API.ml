@@ -26,13 +26,12 @@ let parse_and_translate mlts_prog =
         raise (Error((string_of_pos l c) ^ "Parsing error.", l, c))
 
 let pp_prog = PrologPrinter.pp_prog
-(*
+
 let prologify prog =
   let prolog = parse_and_translate prog in
   let f = pp_prog (Format.str_formatter) prolog in
   Format.flush_str_formatter f
- *)
-
+ 
 let _ =
   let c  = open_in "tests.mlts" in
   let lb = Lexing.from_channel c in

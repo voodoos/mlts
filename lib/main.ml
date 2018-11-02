@@ -20,10 +20,10 @@ let compile header code =
   try
     (* First mlts => lprolog *)
     let lpcode =
-      Mlts_API.parse_and_translate code in
+      Mlts_API.prologify code in
 
     (* updating the pseudo files *)
-    Sys_js.update_file "core/progs_gen.mod" lpcode;
+    Sys_js.update_file ~name:"core/progs_gen.mod" ~content:lpcode;
     (*Sys_js.update_file "core/datatypes.sig" typsig;
     Sys_js.update_file "core/datatypes.mod" typmod;*)
 
@@ -36,10 +36,10 @@ let compile header code =
     kernel := Some(Elpi_API.Compile.program header [parsed]);
 
     (* We return the lprolog code for reference *)
-    Js.string (lpcode
-               ^ "%%% Datatypes/sig." ^ typsig
-               ^  "%%% Datatypes/mod." ^ typmod),
-    Array.of_list defs , 0, 0, true
+    Js.string (lpcode)
+              (* ^ "%%% Datatypes/sig." ^ typsig
+               ^  "%%% Datatypes/mod." ^ typmod)*),
+    Array.of_list [](* defs *) , 0, 0, true
   with Mlts_API.Error(s, line, char)
        -> (Js.string s, [||], line, char,  false)
   | _ -> Js.string "Unknown error.", [||], 0, 0, false
@@ -51,7 +51,7 @@ let q_prog  = "Prog"
 let q_value = "Value"
 let q_type  = "Type"
 
-let handle_out res iter f (out : Elpi_API.Execute.outcome) =
+let handle_out res iter _f (out : Elpi_API.Execute.outcome) =
   match out with
   | Success(data) -> 
      
@@ -102,14 +102,14 @@ let compile_and_run header code =
   lpcode, query ("run_all N.")
 
 let version = "0.1.12" 
-
+(*
+  
 let _ =
   (* Redirect output to console *)
   Sys_js.set_channel_flusher stdout (console);
   Sys_js.set_channel_flusher stderr (consoleError);
   
   ignore (Js.Unsafe.eval_string ("sendVersion('" ^ (version) ^"')"));
-  
   
   (* Loading data folder in the pseudo-filesystem *)
   Data.load ();
@@ -127,9 +127,8 @@ let _ =
   (* JS API *)
   Js.export "compile" (fun jstr -> compile header (Js.to_string jstr)) ;
   Js.export "query"  (fun jstr -> query (Js.to_string jstr)) ;
-  Js.export "run" run
-
-                                                      
+  Js.export "run" run                    
 
                                                     
                                      
+ *)

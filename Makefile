@@ -15,7 +15,7 @@ demo:
 	pandoc -f markdown -t html README.md -o docs/readme.html
 	cp lib/main.js docs/js/mlts.js
 
-run: 
+run: lib demo
 	(cd docs && $(PYTHON) -m http.server)
 
 release: release-all
