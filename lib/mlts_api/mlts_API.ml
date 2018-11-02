@@ -31,7 +31,7 @@ let prologify prog =
   let prolog = parse_and_translate prog in
   let f = pp_prog (Format.str_formatter) prolog in
   Format.flush_str_formatter f
- 
+
 let _ =
   let c  = open_in "tests.mlts" in
   let lb = Lexing.from_channel c in
@@ -41,3 +41,4 @@ let _ =
   Format.printf "%a@."
     pp_prog (Translator.mlts_to_prolog p)
 
+ 

@@ -15,6 +15,7 @@ playerlib/data/*.sig
 core/depend
 *#
 .DS_Store
+.merlin
 
 node_modules
 app/release-builds

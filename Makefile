@@ -1,4 +1,4 @@
-.PHONY: lib demo release release-mac release-win release-linux
+.PHONY: all lib demo release release-mac release-win release-linux
 
 export PYTHON=python3.6
 
@@ -15,7 +15,7 @@ demo:
 	pandoc -f markdown -t html README.md -o docs/readme.html
 	cp lib/main.js docs/js/mlts.js
 
-run: lib demo
+run: all
 	(cd docs && $(PYTHON) -m http.server)
 
 release: release-all
