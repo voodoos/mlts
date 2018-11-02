@@ -1,0 +1,8 @@
+(ocamllex
+ (modules mltsLexer))
+
+(menhir
+ (modules mltsParser))
+
+(executable
+ (name mlts_API))
