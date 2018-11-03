@@ -229,6 +229,9 @@ matches Subst Xout (pnom Xin) :-
 matches Subst (variant C Ts) (pvariant C Ps) :-
     foreach2 (matches Subst) Ts Ps.
 
+
+eval (fix F) V :- eval (F (fix F)) V.
+
 type foreach (A -> prop) -> list A -> prop.
 foreach _P [].
 foreach P (X::Xs) :- P X, foreach P Xs.
@@ -366,8 +369,6 @@ test_select :-
     is_int T3 5,
     is_int V 8,
     eval (select 2 (row [T1, T2, special add [T2, T3]])) V.
-
-eval (fix F) V :- eval (F (fix F)) V.
 
 test_fix :-
     eval (app
