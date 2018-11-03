@@ -47,21 +47,24 @@ type prog = clause list
 
 
 (* TOOLS *)
-  
+
+let make_app name tms =
+  App(Global name, tms)
+
+let make_lit l =
+  make_app "lit" [l]
+
 let make_int i =
-  App(Global("i"),
-      [Lit(Int(i))])
+  make_lit (make_app "i" [Lit (Int i)])
 
 let make_bool b =
-  App(Global("b"),
-        [Lit(Bool(b))])
+  make_lit (make_app "b" [Lit (Bool b)])
 
 let make_string s =
-  App(Global("s"),
-      [Lit(String(s))])
+  make_lit (make_app "s" [Lit (String s)])
 
 let make_global n =
-  App(Global(n), [])
+  make_app n []
 
 let make_local n i =
   App(Local(n, i), [])
@@ -71,45 +74,26 @@ let make_spec s args =
       [make_global s;
       List(args)])
 
-let make_lam a1 a2 lvar inner =
+let make_lam _a1 _a2 lvar inner =
   App(Global("lam"),
-      [make_local "todo_ar" a1;
-       make_local "todo_ar" a2;
-      Abs(lvar, inner)   
-      ])
+      [Abs(lvar, inner)])
 
-let make_let a1 a2 lvar inner =
+let make_let _a1 _a2 lvar inner =
   App(Global("let"),
-      [make_local "todo_ar" a1;
-       make_local "todo_ar" a2;
-      Abs(lvar, inner)   
-      ])
-
-
-let rec make_arity arity =
-  match arity with
-  | 0 -> make_global "z"
-  | n -> App(Global "s",
-             [make_arity (n-1)])
+      [Abs(lvar, inner)])
 
     
-let make_app f args =
-  App(Global("app"),
-      [(*make_arity a1;
-       make_arity a2;*)
-       f;
-       List args;
-    ])
+let make_appt f args =
+  make_app "app" (f::(args))
     
 let make_prog name body =
   App(Global("prog"),
       [Lit(String(name));
-       (*make_arity arity;*)
        body])
   
 let make_deps fvs = 
   let make_dep name =
-    make_prog name (make_global name)
+    make_prog name (make_global (String.capitalize_ascii name))
   in match fvs with
      | [] -> None
      | _ -> Some(Seq (List.map make_dep fvs))

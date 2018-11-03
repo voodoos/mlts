@@ -52,7 +52,7 @@ let mlts_to_prolog p =
        {
          name = "prog";
          args = [P.Lit(P.String(tdef.name));
-                 P.make_arity 0; (* todo *)
+                (* P.make_arity 0; todo *)
                  tdef.body];
          (* Some programs may depend on others! *)
          body = P.make_deps (tdef.env.free_vars)
@@ -65,7 +65,7 @@ let mlts_to_prolog p =
          args = [P.Lit(P.String(
                            "val_"
                            ^ (string_of_int (ctx.nb_expr)))); 
-                 P.make_arity 0; (* todo *)
+                 (*P.make_arity 0; todo *)
                  texpr];
          (* Some programs may depend on others! *)
          body = P.make_deps (env.free_vars)
@@ -105,7 +105,7 @@ let mlts_to_prolog p =
        let args = List.map (t_expr env) args in
        (* todo freevars can appear in arg, don't forget it... *)
        let args = List.map (fst) args in
-       P.make_app te args, env
+       P.make_appt te args, env
     | EBApp(_, _) -> failwith "Not implemented: EBApp"
     | EInfix(e1, op, e2) -> 
        let te1, env = t_expr env e1 in
@@ -117,7 +117,8 @@ let mlts_to_prolog p =
          try P.make_local v (first_in_env v env), env
          with Not_found -> (* Non-local must be global *)
            if (List.mem v ctx.global_vars) then
-             P.make_global v, { env with free_vars = v::env.free_vars }
+             let v2 = String.capitalize_ascii v in
+             P.make_global v2, { env with free_vars = v::env.free_vars }
            else failwith ("Non local, non global value \""
                           ^ v
                           ^ "\". (todo : nice exception)")
