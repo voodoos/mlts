@@ -23,12 +23,16 @@ type val                 tm -> prop.
 
 type lam                 (tm -> tm) -> tm.
 type app                 tm -> tm -> tm.
+type let                 tm -> (tm -> tm) -> tm.
+
 type backslash           (tm -> tm) -> tm.
 type arobase             tm -> tm -> tm.
 type new                 (tm -> tm) -> tm.
 
 type lit                 literal -> tm.
 type special             spec -> list tm -> tm.
+
+type if_then_else        tm -> tm -> tm -> tm.
 
 type variant             constructor -> list tm -> tm.
 type match               tm -> list clause -> tm.
@@ -70,13 +74,13 @@ type fix                 (tm -> tm) -> tm.
 %
 % (select row) is a term-former to extract an element from a row.
 %
-% Rows will be useful to definite mutual fixpoints, as a fixpoint on
+% Rows are useful to definite mutual fixpoints, as a fixpoint on
 % a row.
 kind tmrow               type.
 type row                 list tm -> tmrow.
 type select              int -> tmrow -> tm.
-
 type rowfix              (tmrow -> tmrow) -> tmrow.
+type letrow              tmrow -> (tmrow -> tm) -> tm.
 
 val (lam _).
 val (lit L) :- val_lit L.
@@ -100,6 +104,10 @@ eval (app T U) V :-
     eval U VU,
     eval (R VU) V.
 
+eval (let Def Body) V :-
+    eval Def VDef,
+    eval (Body VDef) V.
+
 eval (new R) V :- pin x \ eval (R x) V.
 
 eval (backslash R) (backslash VR):-
@@ -111,6 +119,10 @@ eval (arobase T N) V :-
     eval (R N) V.
 
 eval (special Spec Args) V :- eval_spec Spec Args V.
+
+eval (if_then_else TP TA TB) V :-
+    eval TP (lit (b B)),
+    if (B = btrue) (eval TA V) (eval TB V).
 
 eval (variant C Ts) (variant C Vs) :- foreach2 eval Ts Vs.
 
@@ -156,16 +168,21 @@ eval_spec eqint [E1, E2] V3 :-
     if (N1 = N2) (B = btrue) (B = bfalse),
     is_bool V3 B.
 
-eval_row (row Ts) Ts.
+eval_row (row Ts) (row Vs) :-
+    foreach2 eval Ts Vs.
 
 eval (select N Row) V :-
-    eval_row Row Ts,
-    eval_select N Ts V.
+    eval_row Row (row Vs),
+    eval_select N Vs V.
 
-eval_select 0 (T::_) V :- eval T V.
-eval_select N (_::Ts) V :-
+eval_select 0 (V::_) V.
+eval_select N (_::Vs) V :-
     Nm1 is N - 1,
-    eval_select Nm1 Ts V.
+    eval_select Nm1 Vs V.
+
+eval (letrow RowDef Body) V :-
+    eval_row RowDef VR,
+    eval (Body VR) V.
 
 eval (match T Cls) V :-
     eval T VT,
@@ -233,7 +250,7 @@ matches Subst (variant C Ts) (pvariant C Ps) :-
 
 
 eval (fix F) V :- eval (F (fix F)) V.
-eval_row (rowfix F) Ts :- eval_row (F (rowfix F)) Ts.
+eval_row (rowfix F) VR :- eval_row (F (rowfix F)) VR.
 
 type foreach (A -> prop) -> list A -> prop.
 foreach _P [].
@@ -384,21 +401,21 @@ test_fix :-
           (lit (i 0)).
 
 test_rowfix :-
-    Even = (select 0 (rowfix EvenOdd \ row [
-      (lam n \
-        match (special eqint [n, lit (i 0)])
-        [ arr (plit (b btrue))
-            (lit (b btrue)),
-          arr (plit (b bfalse))
-            (app (select 1 EvenOdd) (special sub [n, lit (i 1)])) ]),
-      (lam n \
-        match (special eqint [n, lit (i 0)])
-        [ arr (plit (b btrue))
-            (lit (b bfalse)),
-          arr (plit (b bfalse))
-            (app (select 0 EvenOdd) (special sub [n, lit (i 1)])) ]) ])),
-    eval (app Even (lit (i 8))) (lit (b btrue)),
-    eval (app Even (lit (i 13))) (lit (b bfalse)).
+    eval
+      (letrow (rowfix EvenOdd \ row [
+        (lam n \
+          if_then_else (special eqint [n, lit (i 0)])
+            (lit (b btrue))
+            (app (select 1 EvenOdd) (special sub [n, lit (i 1)]))),
+        (lam n \
+          if_then_else (special eqint [n, lit (i 0)])
+            (lit (b bfalse))
+            (app (select 0 EvenOdd) (special sub [n, lit (i 1)]))) ])
+       EvenOdd \
+       let (select 0 EvenOdd) Even \
+       let (select 1 EvenOdd) Odd \
+       (variant pair [app Even (lit (i 8)), app Even (lit (i 13))]))
+      (variant pair [lit (b btrue), lit (b bfalse)]).
 
 main :-
     test_app_id, !,
