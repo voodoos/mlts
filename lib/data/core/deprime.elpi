@@ -76,7 +76,8 @@ piv G :- pi x \ val x => G x.
 
 eval V V :- val V.
 
-eval (app (lam R) U) V :-
+eval (app T U) V :-
+    eval T (lam R),
     eval U VU,
     eval (R VU) V.
 
