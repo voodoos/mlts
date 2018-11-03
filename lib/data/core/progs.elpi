@@ -1,0 +1,4 @@
+prog "v_f" (lam (v_x_0 \ lam (v_y_0 \ special sum [v_x_0 , v_y_0 ]))).
+prog "v_g" (lam (v_x_0 \ special sum [lit (i 3), v_x_0 ])).
+prog "val_1" (special sum [lit (i 3), app V_g (lit (i 4))]) :- prog "v_g" V_g.
+prog "val_2" (lit (s "toto")).

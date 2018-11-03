@@ -1,7 +1,7 @@
 kind unit                type.
 type unit                unit.
 
-kind special             type.
+kind spec                type.
 
 kind bool                type.
 type btrue               bool.
@@ -28,7 +28,7 @@ type arobase             tm -> tm -> tm.
 type new                 (tm -> tm) -> tm.
 
 type lit                 literal -> tm.
-type special             special -> list tm -> tm.
+type special             spec -> list tm -> tm.
 
 type variant             constructor -> list tm -> tm.
 type match               tm -> list clause -> tm.
@@ -52,7 +52,7 @@ type nab                 (tm -> clause) -> clause.
 type arityof             tm -> prop.
 
 type eval                tm -> tm -> prop.
-type eval_spec           special -> list tm -> tm -> prop.
+type eval_spec           spec -> list tm -> tm -> prop.
 
 kind binding             type.
 type bind                tm -> tm -> binding.
@@ -94,13 +94,15 @@ eval (special Spec Args) V :- eval_spec Spec Args V.
 
 eval (variant C Ts) (variant C Vs) :- foreach2 eval Ts Vs.
 
-type sum   special.
-type eqint special.
+type sum   spec.
+type eqint spec.
 
 is_int (lit (i N)) N.
 is_bool (lit (b B)) B.
 
-eval_spec sum [V1, V2] V3 :-
+eval_spec sum [E1, E2] V3 :-
+    eval E1 V1,
+    eval E2 V2,
     is_int V1 N1,
     is_int V2 N2,
     N3 is N1 + N2,
@@ -109,7 +111,9 @@ eval_spec sum [V1, V2] V3 :-
 if P Q _R :- P, !, Q.
 if _P _Q R :- R.
 
-eval_spec eqint [V1, V2] V3 :-
+eval_spec eqint [E1, E2] V3 :-
+    eval E1 V1,
+    eval E2 V2,
     is_int V1 N1,
     is_int V2 N2,
     if (N1 = N2) (B = btrue) (B = bfalse),
