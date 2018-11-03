@@ -1,6 +1,7 @@
 
 
 console.log('[Elpi-worker] ' + "Starting Elpi...");
+//importScripts('mlts.runtime.js');
 importScripts('mlts.js');
 console.log('[Elpi-worker] ' + "Elpi started");
 

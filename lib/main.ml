@@ -23,16 +23,16 @@ let compile header code =
       Mlts_API.prologify code in
 
     (* updating the pseudo files *)
-    Sys_js.update_file ~name:"core/progs_gen.mod" ~content:lpcode;
+    Sys_js.update_file ~name:"core/progs.elpi" ~content:lpcode;
     (*Sys_js.update_file "core/datatypes.sig" typsig;
     Sys_js.update_file "core/datatypes.mod" typmod;*)
 
     (* recompiling lprolog code *)
     let parsed =
       Elpi_API.Parse.program
-        ["core/datatypes.mod";
-         "core/progs_gen.mod";
-         "core/run.mod";] in
+        [(*"core/datatypes.mod";*)
+         "core/progs.elpi";
+         "core/run.elpi";] in
     kernel := Some(Elpi_API.Compile.program header [parsed]);
 
     (* We return the lprolog code for reference *)
@@ -42,7 +42,7 @@ let compile header code =
     Array.of_list [](* defs *) , 0, 0, true
   with Mlts_API.Error(s, line, char)
        -> (Js.string s, [||], line, char,  false)
-  | _ -> Js.string "Unknown error.", [||], 0, 0, false
+  | e -> Js.string ("Unexpected error: " ^ (Printexc.to_string e)), [||], 0, 0, false
 
 
 (* Names used in the query *)
@@ -95,7 +95,7 @@ let query prog =
      "{ \"output\": [" ^ !res
                           
 
-let run () = query Printf.(sprintf "run_one %s %s %s %s." q_name q_prog q_value q_type)
+let run () = query Printf.(sprintf "run %s %s %s %s." q_name q_prog q_value q_type)
                   
 let compile_and_run header code =
   let lpcode = compile header (Js.to_string code) in

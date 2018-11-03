@@ -207,7 +207,7 @@ function run() {
     lock('Running');
     var mltsCode = editor.getValue();
     mltsCode = mltsCode.replace(/(use "(.*)";;)/g, useFile);
-    console.log(mltsCode);
+    //console.log(mltsCode);
     elpi.postMessage(mltsCode);
 }
 
