@@ -51,17 +51,17 @@ type prog = clause list
 let make_app name tms =
   App(Global name, tms)
 
-let make_lit l =
-  make_app "lit" [l]
+let make_lit is_pat l =
+  make_app (if is_pat then "plit" else "lit") [l]
 
-let make_int i =
-  make_lit (make_app "i" [Lit (Int i)])
+let make_int ?(is_pat = false) i =
+  make_lit is_pat (make_app "i" [Lit (Int i)])
 
-let make_bool b =
-  make_lit (make_app "b" [Lit (Bool b)])
+let make_bool ?(is_pat = false) b =
+  make_lit is_pat (make_app "b" [Lit (Bool b)])
 
-let make_string s =
-  make_lit (make_app "s" [Lit (String s)])
+let make_string ?(is_pat = false) s =
+  make_lit is_pat (make_app "s" [Lit (String s)])
 
 let make_global n =
   make_app n []
@@ -98,3 +98,15 @@ let make_deps fvs =
      | [] -> None
      | _ -> Some(Seq (List.map make_dep fvs))
 
+let rec make_rule nabs vars pat body =
+  match nabs, vars with
+    (* | n::ntl, _ -> *)
+  | [], v::vtl -> make_app "all" [Abs(v, make_rule nabs vtl pat body)]
+  | [], [] -> make_app "arr" [pat; body]
+  | _ -> failwith "arg"
+
+let make_match tm rules =
+  make_app "match" [tm; List rules]
+
+let make_pvar name id =
+  make_app "pvar" [make_local name id]

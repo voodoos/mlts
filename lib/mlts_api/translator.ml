@@ -20,11 +20,17 @@ type context = { mutable nb_expr: int; mutable global_vars : string list }
 let incr_expr c = c.nb_expr <- c.nb_expr + 1
 
 (* (local) Environments *)
-type env = { local_vars: P.local_name list; free_vars:  P.global_name list }
+type env = {
+    local_vars: P.local_name list;
+    free_vars:  P.global_name list;
+    pattern_vars: P.local_name list;
+  }
+         
 let add_to_env v env = 
   match List.assoc_opt v env.local_vars with
   | None -> (v, 0), { env with local_vars = (v, 0)::env.local_vars }
   | Some(i) -> (v, i + 1), { env with local_vars = (v, i + 1)::env.local_vars }
+             
 let first_in_env v env = List.assoc v env.local_vars
 
 type tdef = { name: string; body: P.term; env: env }
@@ -44,7 +50,7 @@ let mlts_to_prolog p =
     (* Each "toplevel" item transpile to a program *)
     (* Each "toplevel" item ha its own env but shares
          the global context *)
-    let env = { local_vars = []; free_vars = [] } in
+    let env = { local_vars = []; free_vars = []; pattern_vars = []; } in
     function
     | IDef(def, _pos) -> 
        let tdef = t_def env def in
@@ -98,7 +104,10 @@ let mlts_to_prolog p =
   and t_expr env = function
     | ELetin(LBVal(_name, _params, _e), _body) -> failwith "Not implemented: ELetin"
     | ELetRecin(_, _) -> failwith "Not implemented: ELetRecin"
-    | EMatch(_, _) -> failwith "Not implemented: EMatch"
+    | EMatch(e, rules) ->
+       let e, env = t_expr env e in
+       let rules = List.map (t_rule env) rules in
+       P.make_match e (List.map (fst) rules), env
     | EIf(_, _, _) -> failwith "Not implemented: EIf"
     | EApp(e, args) -> 
        let te, env = t_expr env e in
@@ -130,11 +139,37 @@ let mlts_to_prolog p =
     | EFun(_, _) -> failwith "Not implemented: EFun"
     | ENew(_, _) -> failwith "Not implemented: ENew"
 
-  and t_constant = function
-    | Int(i) -> P.make_int i
+  and t_constant ?(is_pat = false) = function
+    | Int(i) -> P.make_int ~is_pat i
     | Bool(b) -> P.make_bool b
     | String(s) -> P.make_string s 
     | EmptyList -> failwith "Not implemented: EmptyList"
+
+  and t_rule env = function
+    | RSimple(pat, e) -> t_rule env (RNa([], pat, e))
+    | RNa(names, pat, e) -> 
+       let pat, env = t_pattern env pat in
+       let body, env = t_expr env e in
+       P.make_rule names env.pattern_vars pat body, env
+
+  and t_pattern env = function
+    | PVal(name) -> 
+       (* todo: can also be a nominal *)
+       begin
+         try  
+           P.make_pvar name (List.assoc name env.pattern_vars), env
+         with Not_found ->
+           let lvar, env = add_to_env name env in
+           P.make_pvar (fst lvar) (snd lvar),
+           { env with pattern_vars = lvar::env.pattern_vars }
+       end
+    | PBind(_name,_pat) -> failwith "Not implemented: PBind"
+    | PApp(_name,_pats) -> failwith "Not implemented: PApp"
+    | PBApp(_name,_pats) -> failwith "Not implemented: PBApp"
+    | PConstr(_name,_pats) -> failwith "Not implemented: PConstr"
+    | PConstant(c) -> t_constant ~is_pat:true c, env
+    | PListCons(_pat1,_pat2) -> failwith "Not implemented: PListCons"
+    | PPair(_pat1,_pat2) -> failwith "Not implemented: PPair"
   in
   t_items p
 

@@ -1,8 +1,15 @@
+
+let p x = match x with | y -> y;;
+
+p 4;;
+p 3;;
+
 let f x y = x + y;;
 let g x =
   3 + x;;
 3 + g 4;;
 "toto";;
+
 
 (* (* Votre mission, si vous l'acceptez. *)
 type name =
