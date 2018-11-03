@@ -76,6 +76,8 @@ kind tmrow               type.
 type row                 list tm -> tmrow.
 type select              int -> tmrow -> tm.
 
+type rowfix              (tmrow -> tmrow) -> tmrow.
+
 val (lam _).
 val (lit L) :- val_lit L.
 
@@ -231,6 +233,7 @@ matches Subst (variant C Ts) (pvariant C Ps) :-
 
 
 eval (fix F) V :- eval (F (fix F)) V.
+eval_row (rowfix F) Ts :- eval_row (F (rowfix F)) Ts.
 
 type foreach (A -> prop) -> list A -> prop.
 foreach _P [].
@@ -380,6 +383,23 @@ test_fix :-
           (lit (i 8)))
           (lit (i 0)).
 
+test_rowfix :-
+    Even = (select 0 (rowfix EvenOdd \ row [
+      (lam n \
+        match (special eqint [n, lit (i 0)])
+        [ arr (plit (b btrue))
+            (lit (b btrue)),
+          arr (plit (b bfalse))
+            (app (select 1 EvenOdd) (special sub [n, lit (i 1)])) ]),
+      (lam n \
+        match (special eqint [n, lit (i 0)])
+        [ arr (plit (b btrue))
+            (lit (b bfalse)),
+          arr (plit (b bfalse))
+            (app (select 0 EvenOdd) (special sub [n, lit (i 1)])) ]) ])),
+    eval (app Even (lit (i 8))) (lit (b btrue)),
+    eval (app Even (lit (i 13))) (lit (b bfalse)).
+
 main :-
     test_app_id, !,
     test_higher_arity, !,
@@ -401,5 +421,6 @@ main :-
     test_match_nom_distinct_another_no, !,
     test_select, !,
     test_fix, !,
+    test_rowfix, !,
     true
 .
