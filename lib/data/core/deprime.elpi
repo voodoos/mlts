@@ -61,6 +61,21 @@ type matches             list binding -> tm -> pat -> prop.
 
 type fix                 (tm -> tm) -> tm.
 
+% A "row" <t1; t2; t3> is a piece of program that denotes not a single
+% term, but a composite of several terms together.
+%
+% A row should not be confused with a list literal, such as [t1; t2;
+% t3], which is a *single term* containing several subterms. Rows
+% belong to a different syntactic category.
+%
+% (select row) is a term-former to extract an element from a row.
+%
+% Rows will be useful to definite mutual fixpoints, as a fixpoint on
+% a row.
+kind tmrow               type.
+type row                 list tm -> tmrow.
+type select              int -> tmrow -> tm.
+
 val (lam _).
 val (lit L) :- val_lit L.
 
@@ -138,6 +153,17 @@ eval_spec eqint [E1, E2] V3 :-
     is_int V2 N2,
     if (N1 = N2) (B = btrue) (B = bfalse),
     is_bool V3 B.
+
+eval_row (row Ts) Ts.
+
+eval (select N Row) V :-
+    eval_row Row Ts,
+    eval_select N Ts V.
+
+eval_select 0 (T::_) V :- eval T V.
+eval_select N (_::Ts) V :-
+    Nm1 is N - 1,
+    eval_select Nm1 Ts V.
 
 eval (match T Cls) V :-
     eval T VT,
@@ -334,6 +360,13 @@ test_match_nom_distinct_another_no :-
          (arr pany (lit (b bfalse)))])
       (lit (b bfalse)).
 
+test_select :-
+    is_int T1 1,
+    is_int T2 3,
+    is_int T3 5,
+    is_int V 8,
+    eval (select 2 (row [T1, T2, special add [T2, T3]])) V.
+
 eval (fix F) V :- eval (F (fix F)) V.
 
 test_fix :-
@@ -365,6 +398,7 @@ main :-
     test_match_nom_distinct_ok, !,
     test_match_nom_distinct_no, !,
     test_match_nom_distinct_another_no, !,
+    test_select, !,
     test_fix, !,
     true
 .
