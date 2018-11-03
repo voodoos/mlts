@@ -101,8 +101,8 @@ let compile_and_run header code =
   let lpcode = compile header (Js.to_string code) in
   lpcode, query ("run_all N.")
 
-let version = "0.1.12" 
-(*
+let version = "0.1.12"
+
   
 let _ =
   (* Redirect output to console *)
@@ -121,7 +121,7 @@ let _ =
   Elpi_API.Setup.set_anomaly (console ~pref:"[elpi]");
   Elpi_API.Setup.set_type_error (console ~pref:"[elpi]");
   
-  let parsed =  Elpi_API.Parse.program ["core/run.mod"] in
+  let parsed =  Elpi_API.Parse.program ["core/run.elpi"] in
   kernel := Some(Elpi_API.Compile.program header [parsed]);
 
   (* JS API *)
@@ -131,4 +131,4 @@ let _ =
 
                                                     
                                      
- *)
+ 

@@ -10,7 +10,7 @@
     base64
   )
   (js_of_ocaml 
-    (flags    (:standard +dynlink.js +toplevel.js))
+    (flags    (:standard --linkall))
   )
   (preprocess (pps js_of_ocaml.ppx))
   (link_flags (:standard -linkall))

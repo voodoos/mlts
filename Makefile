@@ -13,7 +13,8 @@ lib:
 
 demo: 
 	pandoc -f markdown -t html README.md -o docs/readme.html
-	cp lib/main.js docs/js/mlts.js
+	cp lib/_build/default/main.bc.js docs/js/mlts.js
+	#cp lib/_build/default/main.bc.runtime.js docs/js/mlts.runtime.js
 
 run: all
 	(cd docs && $(PYTHON) -m http.server)
