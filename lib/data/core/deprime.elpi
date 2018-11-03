@@ -59,6 +59,8 @@ type bind                tm -> tm -> binding.
 
 type matches             list binding -> tm -> pat -> prop.
 
+type fix                 (tm -> tm) -> tm.
+
 val (lam _).
 val (lit L) :- val_lit L.
 
@@ -332,6 +334,17 @@ test_match_nom_distinct_another_no :-
          (arr pany (lit (b bfalse)))])
       (lit (b bfalse)).
 
+eval (fix F) V :- eval (F (fix F)) V.
+
+test_fix :-
+    eval (app
+          (fix X \ lam n \
+           (match
+            (special eqint [n, lit (i 0)])
+            [arr (plit (b btrue)) (lit (i 0)),
+             arr (plit (b bfalse)) (app X (special sub [n, lit (i 1)]))]))
+          (lit (i 8)))
+          (lit (i 0)).
 
 main :-
     test_app_id, !,
@@ -352,5 +365,6 @@ main :-
     test_match_nom_distinct_ok, !,
     test_match_nom_distinct_no, !,
     test_match_nom_distinct_another_no, !,
+    test_fix, !,
     true
 .
