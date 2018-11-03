@@ -191,10 +191,6 @@ type foreach2 (A -> B -> prop) -> list A -> list B -> prop.
 foreach2 _P [] [].
 foreach2 P (X::Xs) (Y::Ys) :- P X Y, foreach2 P Xs Ys.
 
-type foreach3 (A -> B -> C -> prop) -> list A -> list B -> list C -> prop.
-foreach3 _P [] [] [].
-foreach3 P (X::Xs) (Y::Ys) (Z::Zs) :- P X Y Z, foreach3 P Xs Ys Zs.
-
 test_app_id :-
     piv x \ eval (app (lam (X \ X)) x) x.
 
