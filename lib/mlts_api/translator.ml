@@ -67,7 +67,7 @@ let mlts_to_prolog p =
     | [] -> []
     | item::tl -> 
        let titem = t_item item in
-       P.Definition(titem)::(t_items tl)
+       titem::(t_items tl)
 
   and t_item =
     (* Each "toplevel" item transpile to a program *)
@@ -84,18 +84,18 @@ let mlts_to_prolog p =
     | IDef(def, _pos) -> 
        let tdef = t_def env def in
        add_global tdef.name;
-       {
+       P.Definition({
          name = "prog";
          args = [P.Lit(P.String(tdef.name));
                 (* P.make_arity 0; todo *)
                  tdef.body];
          (* Some programs may depend on others! *)
          body = P.make_deps (tdef.env.free_vars)
-       }
+       })
     | IExpr(expr, _pos) -> 
        incr_expr ctx; 
        let texpr, env = t_expr env expr in
-       {
+       P.Definition({
          name = "prog";
          args = [P.Lit(P.String(
                            "val_"
@@ -104,7 +104,7 @@ let mlts_to_prolog p =
                  texpr];
          (* Some programs may depend on others! *)
          body = P.make_deps (env.free_vars)
-       }
+       })
 
   and t_def env =
     let rec make_lam env params e =
@@ -132,7 +132,7 @@ let mlts_to_prolog p =
        let d = t_def env2 (DLet l) in
        { d with env = revert_locals env d.env }*)
        failwith "Not implemented: DLetRec"
-    | DType(_, _) -> failwith "Not implemented: DType"
+    | DType(name, _) -> P.make_type name "constructor"
                    
   and t_expr envIn = function
     | ELetin(LBVal(name, params, expr), body) ->
