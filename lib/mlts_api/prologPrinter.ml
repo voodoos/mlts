@@ -32,7 +32,7 @@ let pp_atom ppf n = pp_name ppf n
 let pp_literal ppf = function
   | Int n -> fprintf ppf "%d" n
   | String s -> fprintf ppf "%S" s
-  | Bool b -> fprintf ppf "%b" b
+  | Bool b -> fprintf ppf "b%b" b
 
 let rec pp_term ppf t =
   fprintf ppf "@[<2>%a@]"
