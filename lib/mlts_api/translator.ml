@@ -19,7 +19,8 @@ let make_exception message def pos =
 type context = {
     mutable nb_expr: int;
     mutable global_vars : string list;
-    mutable global_constrs : string list
+    mutable global_constrs : string list;
+    actual_def: def;
   }
 let incr_expr c = c.nb_expr <- c.nb_expr + 1
 
@@ -65,10 +66,20 @@ type tdef = { kind: k;  name: string; body: P.term; env: env }
 let mlts_to_prolog p =
   let ctx = { nb_expr = 0;
               global_vars = [];
-              global_constrs = ["pair"; "list_cons"]
-            } in
+              global_constrs = ["pair"; "list_cons"];
+              actual_def = { name = "Begining"; pos = Lexing.dummy_pos }
+            }
+  in
   let add_global v = ctx.global_vars <- v::ctx.global_vars in
   let add_constr c = ctx.global_constrs <- c::ctx.global_constrs in
+  let set_actual_name n =
+    ctx.actual_def.name <- n;
+  in
+  let set_actual_def n pos =
+    set_actual_name n;
+    ctx.actual_def.pos <- pos;
+  in
+  
 
   
   let rec t_items = function
@@ -89,17 +100,17 @@ let mlts_to_prolog p =
       }
     in
     function
-    | IDef(def, _pos) -> 
+    | IDef(def, pos) ->
+       set_actual_def "" pos;
        t_def env def
-    | IExpr(expr, _pos) -> 
+    | IExpr(expr, pos) ->
+       let name = "val_" ^ (string_of_int (ctx.nb_expr)) in
+       set_actual_def name pos;
        incr_expr ctx; 
        let texpr, env = t_expr env expr in
        [P.Definition({
          name = "prog";
-         args = [P.Lit(P.String(
-                           "val_"
-                           ^ (string_of_int (ctx.nb_expr)))); 
-                 (*P.make_arity 0; todo *)
+         args = [P.Lit(P.String(name)); 
                  texpr];
          (* Some programs may depend on others! *)
          body = P.make_deps (env.free_vars)
@@ -107,7 +118,8 @@ let mlts_to_prolog p =
 
   and t_def env =
     function
-    | DLet(LBVal(name, params, e)) -> 
+    | DLet(LBVal(name, params, e)) ->
+       set_actual_name name;
        let body, env = make_lam env params e in
        add_global name;
        [P.Definition({
@@ -116,6 +128,7 @@ let mlts_to_prolog p =
              body = P.make_deps (env.free_vars);
        })]
     | DLetrec(LBVal(name, params, e)) ->
+       set_actual_name name;
        let ln, env = add_to_env name env in
        (*let name = ((fst ln) ^ "_" ^ (string_of_int (snd ln))) in*)
        let body, env = make_lam env params e in
@@ -132,7 +145,8 @@ let mlts_to_prolog p =
       (* let _, env2 = add_to_env name env in
        let d = t_def env2 (DLet l) in
        { d with env = revert_locals env d.env }*)
-    | DType(_name, decls) -> 
+    | DType(name, decls) -> 
+       set_actual_name name;
        List.map (fun decl ->
            let c = match decl with
                           | Simple(c) -> c
@@ -211,9 +225,10 @@ let mlts_to_prolog p =
            if (List.mem v ctx.global_vars) then
              let v2 = String.capitalize_ascii v in
              P.make_global v2, { envIn with free_vars = v::envIn.free_vars }
-           else failwith ("Non local, non global value \""
-                          ^ v
-                          ^ "\". (todo : nice exception)")
+           else raise (make_exception
+               ("Unbound value '" ^ v ^ "'.")
+               ctx.actual_def
+               None)
        end
     | EPair(e1, e2) ->
        t_expr envIn (EConstr("pair", [e1; e2]))
@@ -227,7 +242,10 @@ let mlts_to_prolog p =
            let i = List.assoc name envIn.local_noms in
            if exprs = [] then
              P.make_nom name i, envIn
-           else failwith "Hmm, nominal constr do not take arguments"
+           else raise (make_exception
+               ("Nominals cannot have arguments. (" ^ name ^ ")")
+               ctx.actual_def
+               None)
          with
            Not_found ->
            if List.mem name ctx.global_constrs then
@@ -238,7 +256,11 @@ let mlts_to_prolog p =
                               ) ([], envIn) exprs in
              P.make_constr name  (List.rev tms), env
            else
-             failwith ("Unknown constructor " ^ name)
+             raise (make_exception
+               ("Unknown constructor " ^ name)
+               ctx.actual_def
+               None)
+               
        end
     | EPattern(_) -> failwith "Not implemented: EPattern"
                    
