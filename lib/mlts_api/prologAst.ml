@@ -105,9 +105,6 @@ let make_appt ?(nom=false)  ?(pattern=false) f args =
   List.fold_left (fun tm arg ->
       make_app app ([tm;arg])
     ) f args
-  (*make_app
-    app
-    (f::(args))*)
     
 let make_nom_appt ?(pattern=false) f args =
   make_appt ~nom:true ~pattern f args

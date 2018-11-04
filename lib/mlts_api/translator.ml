@@ -59,7 +59,7 @@ type tdef = { kind: k;  name: string; body: P.term; env: env }
 let mlts_to_prolog p =
   let ctx = { nb_expr = 0;
               global_vars = [];
-              global_constrs = ["pair"]
+              global_constrs = ["pair"; "list_cons"]
             } in
   let add_global v = ctx.global_vars <- v::ctx.global_vars in
   let add_constr c = ctx.global_constrs <- c::ctx.global_constrs in
@@ -277,7 +277,17 @@ let mlts_to_prolog p =
        P.make_bind ~pattern:true lname tm, revert_locals envIn env
        
     | PApp(_name,_pats) -> failwith "Not implemented: PApp"
-    | PBApp(_name, _pats) -> failwith "Not implemented: PApp"
+                         
+    | PBApp(name, pats) ->
+       (* todo: maybe the parser should accept more than just names ? *)
+       let var, env = t_pattern envIn (PVal(name)) in
+       let tms, env = List.fold_left (
+                           fun (tms, env) pat ->
+                           let tm, env = t_pattern env pat in
+                           tm::tms, env
+                       ) ([], env) pats
+       in P.make_appt ~nom:true ~pattern:true var tms, env
+                           
     | PConstr(name, pats) ->
        (* A constructor is either 
           a global datatype constructor 
@@ -302,7 +312,9 @@ let mlts_to_prolog p =
        end
       
     | PConstant(c) -> t_constant ~is_pat:true c, envIn
-    | PListCons(_pat1,_pat2) -> failwith "Not implemented: PListCons"
+    | PListCons(pat1, pat2) ->
+       (* todo : not in the interpreter *)
+       t_pattern envIn (PConstr("list_cons", [pat1; pat2]))
     | PPair(pat1, pat2) ->
        t_pattern envIn (PConstr("pair", [pat1; pat2]))
   and make_lam env params e =
