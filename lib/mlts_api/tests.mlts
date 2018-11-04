@@ -1,3 +1,10 @@
+(fun x y -> x + y) 13;;
+(fun x y -> x + y) 13 29;;
+
+let f x y = x + y;;
+f 12 30;;
+
+
 type ipair =
 | Pair of int * int;; 
 
@@ -13,8 +20,6 @@ p 3;;
 if false then 3 else let x = 42 in x;;
 
 new X in 3;;
-
-(X \ X) @ 3;;
 
 let f x y = x + y;;
 let g x =

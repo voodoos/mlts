@@ -63,6 +63,7 @@ let mlts_to_prolog p =
             } in
   let add_global v = ctx.global_vars <- v::ctx.global_vars in
 
+  
   let rec t_items = function
     | [] -> []
     | item::tl -> 
@@ -99,18 +100,6 @@ let mlts_to_prolog p =
        })
 
   and t_def env =
-    let rec make_lam env params e =
-      (* 
-        fun f x y -> body
-          => lam ar11 ar12 (x\ lam ar21 ar22 (y\ body))
-       *)
-      match params with
-      | [] -> t_expr env e
-      | p::ptl -> 
-         let lvar, env = add_to_env p env in
-         let inner, env = make_lam env ptl e in
-         P.make_lam 0 0 lvar inner, env 
-    in
     function
     | DLet(LBVal(name, params, e)) -> 
        let body, env = make_lam env params e in
@@ -185,7 +174,7 @@ let mlts_to_prolog p =
     | EInfix(e1, op, e2) -> 
        let te1, env = t_expr envIn e1 in
        let te2, env = t_expr (revert_locals envIn env) e2 in
-       P.make_spec (LpStrings.infix_to_lpstring op) [te1; te2],
+       P.make_spec op [te1; te2],
        env
        
     | EConst(c) -> t_constant c, envIn
@@ -233,7 +222,9 @@ let mlts_to_prolog p =
        let tm, env = t_expr env body in
        P.make_bind lname tm, revert_locals envIn env
        
-    | EFun(_, _) -> failwith "Not implemented: EFun"
+    | EFun(params, body) ->
+       let tm, env = make_lam envIn params body in
+       tm, env
                   
     | ENew(name, body) ->
        let lname, env = add_nom_to_env name envIn in
@@ -307,6 +298,22 @@ let mlts_to_prolog p =
     | PListCons(_pat1,_pat2) -> failwith "Not implemented: PListCons"
     | PPair(pat1, pat2) ->
        t_pattern envIn (PConstr("pair", [pat1; pat2]))
+  and make_lam env params e =
+    (* 
+        fun f x y -> body
+          => lam ar11 ar12 (x\ lam ar21 ar22 (y\ body))
+     *)
+    let envInitial = env in
+    let rec aux env params e =
+      match params with
+      | [] -> t_expr env e
+      | p::ptl -> 
+         let lvar, env = add_to_env p env in
+         let inner, env = aux env ptl e in
+         P.make_lam 0 0 lvar inner, env
+    in
+    let tm, env = aux envInitial params e in
+    tm, revert_locals envInitial env
   in
   t_items p
 

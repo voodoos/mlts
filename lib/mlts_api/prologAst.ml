@@ -48,6 +48,16 @@ type prog = clause list
 
 (* TOOLS *)
 
+let infix_to_string =
+  let open MltsAst in
+  function
+  | Mult -> "times" | Neq -> "nequal"
+  | Lt -> "lt" | Le -> "le"
+  | And -> "and" | Or -> "or"
+  | Add -> "add" | Minus -> "minus"
+  | Equal -> "equal"
+  | ListCons -> "cons"
+
 let make_app name tms =
   App(Global name, tms)
 
@@ -73,7 +83,7 @@ let make_localp p = make_local (fst p) (snd p)
   
 let make_spec s args =
   App(Global("special"),
-      [make_global s;
+      [make_global (infix_to_string s);
       List(args)])
 
 let make_lam _a1 _a2 lvar inner =
@@ -85,13 +95,22 @@ let make_let _a1 _a2 lvar inner =
       [Abs(lvar, inner)])
 
     
-let make_appt f args =
-  make_app "app" (f::(args))
+let make_appt ?(nom=false)  ?(pattern=false) f args =
+  let app = match nom, pattern with
+    | true, true   -> "parobase"
+    | true, false  -> "arobase"
+    | false, false -> "app"
+    | false, true  -> "papp"
+  in
+  List.fold_left (fun tm arg ->
+      make_app app ([tm;arg])
+    ) f args
+  (*make_app
+    app
+    (f::(args))*)
     
 let make_nom_appt ?(pattern=false) f args =
-  make_app
-    (if pattern then "parobase" else "arobase")
-    (f::(args))
+  make_appt ~nom:true ~pattern f args
   
 let make_prog name body =
   App(Global("prog"),
@@ -145,4 +164,3 @@ let make_constr ?(pattern=false) name tms =
   make_app
     (if pattern then "pvariant" else "variant")
     [make_global name; List tms]
-

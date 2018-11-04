@@ -30,7 +30,7 @@ and expr =
   | EConstr of  constr_path * (expr list)
   | EPattern of pattern
   | EBind of value_name * expr
-  | EFun of value_name * expr
+  | EFun of (value_name list) * expr
   | ENew of value_name * expr
                            
                   
