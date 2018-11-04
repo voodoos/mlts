@@ -1,3 +1,6 @@
+type ipair =
+| Pair of int * int;; 
+
 (3, 4 + 38);;
 
 

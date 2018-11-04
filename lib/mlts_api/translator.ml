@@ -52,8 +52,8 @@ let revert_locals envBefore envAfter = {
                                      
                                      
     
-
-type tdef = { name: string; body: P.term; env: env }
+type k = Decl | Def
+type tdef = { kind: k;  name: string; body: P.term; env: env }
 
 (* PROGRAM TRANSLATION *)
 let mlts_to_prolog p =
@@ -83,15 +83,7 @@ let mlts_to_prolog p =
     function
     | IDef(def, _pos) -> 
        let tdef = t_def env def in
-       add_global tdef.name;
-       P.Definition({
-         name = "prog";
-         args = [P.Lit(P.String(tdef.name));
-                (* P.make_arity 0; todo *)
-                 tdef.body];
-         (* Some programs may depend on others! *)
-         body = P.make_deps (tdef.env.free_vars)
-       })
+       tdef
     | IExpr(expr, _pos) -> 
        incr_expr ctx; 
        let texpr, env = t_expr env expr in
@@ -122,17 +114,23 @@ let mlts_to_prolog p =
     function
     | DLet(LBVal(name, params, e)) -> 
        let body, env = make_lam env params e in
-       { 
-         name; 
-         body;
-         env;
-       }
+       add_global name;
+       P.Definition({
+             name = "prog";
+             args = [P.Lit(P.String(name)); body];
+             body = P.make_deps (env.free_vars);
+       })
     | DLetrec(LBVal(_name, _params, _e)) ->
       (* let _, env2 = add_to_env name env in
        let d = t_def env2 (DLet l) in
        { d with env = revert_locals env d.env }*)
        failwith "Not implemented: DLetRec"
-    | DType(name, _) -> P.make_type name "constructor"
+    | DType(name, _) -> 
+       P.Declaration({
+             sort = Type;
+             name = name;
+             ty = P.Name "constructor"
+           })
                    
   and t_expr envIn = function
     | ELetin(LBVal(name, params, expr), body) ->
