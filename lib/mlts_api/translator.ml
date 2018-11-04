@@ -173,7 +173,7 @@ let mlts_to_prolog p =
                            let ta, env = t_expr env e in
                            ta::args, env
                          ) ([], env) args in
-       P.make_appt te args, env
+       P.make_appt te (List.rev args), env
        
     | EBApp(e, args) ->
        let te, env = t_expr envIn e in
@@ -182,7 +182,7 @@ let mlts_to_prolog p =
                            let ta, env = t_expr env e in
                            ta::args, env
                          ) ([], env) args in
-       P.make_nom_appt te args, env
+       P.make_nom_appt te (List.rev args), env
                         
     | EInfix(e1, op, e2) -> 
        let te1, env = t_expr envIn e1 in
@@ -204,7 +204,7 @@ let mlts_to_prolog p =
                           ^ "\". (todo : nice exception)")
        end
     | EPair(e1, e2) ->
-       t_expr envIn (EConstr("pair", [e2; e1]))
+       t_expr envIn (EConstr("pair", [e1; e2]))
                    
     | EConstr(name, exprs) -> 
        (* A constructor is either 
@@ -224,7 +224,7 @@ let mlts_to_prolog p =
                                 let tm, env = t_expr env e in
                                 (tm::tms, env)
                               ) ([], envIn) exprs in
-             P.make_constr name tms, env
+             P.make_constr name  (List.rev tms), env
            else
              failwith ("Unknown constructor " ^ name)
        end
@@ -260,7 +260,7 @@ let mlts_to_prolog p =
        let pat, env = t_pattern env pat in
        let body, env = t_expr env e in
        
-       P.make_rule pat_noms env.pattern_vars pat body,
+       P.make_rule  (List.rev pat_noms) env.pattern_vars pat body,
        revert_locals envIn env
 
   and t_pattern envIn = function
@@ -300,14 +300,15 @@ let mlts_to_prolog p =
                                 let tm, env = t_pattern env p in
                                 (tm::tms, env)
                               ) ([], envIn) pats in
-             P.make_constr ~pattern:true name tms, env
+             P.make_constr ~pattern:true name (List.rev tms), env
            else
              failwith ("Unknown constructor " ^ name)
        end
       
     | PConstant(c) -> t_constant ~is_pat:true c, envIn
     | PListCons(_pat1,_pat2) -> failwith "Not implemented: PListCons"
-    | PPair(_pat1,_pat2) -> failwith "Not implemented: PPair"
+    | PPair(pat1, pat2) ->
+       t_pattern envIn (PConstr("pair", [pat1; pat2]))
   in
   t_items p
 
