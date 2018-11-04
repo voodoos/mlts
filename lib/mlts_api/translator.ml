@@ -186,7 +186,10 @@ let mlts_to_prolog p =
     | EPattern(_) -> failwith "Not implemented: EPattern"
     | EBind(_, _) -> failwith "Not implemented: EBind"
     | EFun(_, _) -> failwith "Not implemented: EFun"
-    | ENew(_, _) -> failwith "Not implemented: ENew"
+    | ENew(name, body) ->
+       let lname, env = add_nom_to_env name envIn in
+       let tm, env = t_expr env body in
+       P.make_new lname tm, revert_locals envIn env
 
   and t_constant ?(is_pat = false) = function
     | Int(i) -> P.make_int ~is_pat i

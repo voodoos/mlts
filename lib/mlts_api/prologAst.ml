@@ -68,6 +68,8 @@ let make_global n =
 
 let make_local n i =
   App(Local(n, i), [])
+
+let make_localp p = make_local (fst p) (snd p)
   
 let make_spec s args =
   App(Global("special"),
@@ -118,3 +120,6 @@ let make_nom name id =
 
 let make_ite tm1 tm2 tm3 =
   make_app "if_then_else" [tm1; tm2; tm3]
+
+let make_new name tm =
+  make_app "new" [Abs(name, tm)]

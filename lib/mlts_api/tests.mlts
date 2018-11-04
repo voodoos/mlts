@@ -5,6 +5,10 @@ let p x = match x with | y -> y | nab X in X -> 4;;
 p 4;;
 p 3;;
 
+if false then 3 else 42;;
+
+new X in 3;;
+
 let f x y = x + y;;
 let g x =
   3 + x;;
