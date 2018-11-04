@@ -126,7 +126,7 @@ eval (if_then_else TP TA TB) V :-
 
 eval (variant C Ts) (variant C Vs) :- foreach2 eval Ts Vs.
 
-type eqint spec.
+type equal spec.
 type add   spec.
 type sub   spec.
 type mul   spec.
@@ -160,12 +160,12 @@ eval_spec sub [E1, E2] V3 :-
 if P Q _R :- P, !, Q.
 if _P _Q R :- R.
 
-eval_spec eqint [E1, E2] V3 :-
+eval_spec equal [E1, E2] V3 :-
     eval E1 V1,
     eval E2 V2,
-    is_int V1 N1,
-    is_int V2 N2,
-    if (N1 = N2) (B = btrue) (B = bfalse),
+    %is_int V1 N1,
+    %is_int V2 N2,
+    if (V1 = V2) (B = btrue) (B = bfalse),
     is_bool V3 B.
 
 eval_row (row Ts) (row Vs) :-
@@ -394,7 +394,7 @@ test_fix :-
     eval (app
           (fix X \ lam n \
            (match
-            (special eqint [n, lit (i 0)])
+            (special equal [n, lit (i 0)])
             [arr (plit (b btrue)) (lit (i 0)),
              arr (plit (b bfalse)) (app X (special sub [n, lit (i 1)]))]))
           (lit (i 8)))
@@ -404,11 +404,11 @@ test_rowfix :-
     eval
       (letrow (rowfix EvenOdd \ row [
         (lam n \
-          if_then_else (special eqint [n, lit (i 0)])
+          if_then_else (special equal [n, lit (i 0)])
             (lit (b btrue))
             (app (select 1 EvenOdd) (special sub [n, lit (i 1)]))),
         (lam n \
-          if_then_else (special eqint [n, lit (i 0)])
+          if_then_else (special equal [n, lit (i 0)])
             (lit (b bfalse))
             (app (select 0 EvenOdd) (special sub [n, lit (i 1)]))) ])
        EvenOdd \
