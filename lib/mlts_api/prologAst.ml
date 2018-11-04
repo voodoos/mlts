@@ -123,3 +123,7 @@ let make_ite tm1 tm2 tm3 =
 
 let make_new name tm =
   make_app "new" [Abs(name, tm)]
+
+let make_bind name tm =
+  make_app "backslash" [Abs(name, tm)]
+

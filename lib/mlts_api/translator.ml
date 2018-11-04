@@ -181,10 +181,13 @@ let mlts_to_prolog p =
              P.make_nom name i, env
            else failwith "Hmm, nominal constr do not take arguments"
          with
-           Not_found ->failwith "Not implemented: e-constructors"
+           Not_found -> failwith "Not implemented: e-constructors"
        end
     | EPattern(_) -> failwith "Not implemented: EPattern"
-    | EBind(_, _) -> failwith "Not implemented: EBind"
+    | EBind(name, body) -> 
+       let lname, env = add_nom_to_env name envIn in
+       let tm, env = t_expr env body in
+       P.make_bind lname tm, revert_locals envIn env
     | EFun(_, _) -> failwith "Not implemented: EFun"
     | ENew(name, body) ->
        let lname, env = add_nom_to_env name envIn in

@@ -9,6 +9,8 @@ if false then 3 else 42;;
 
 new X in 3;;
 
+X \ X;;
+
 let f x y = x + y;;
 let g x =
   3 + x;;
