@@ -210,23 +210,23 @@ let mlts_to_prolog p =
        (* A constructor is either 
           a global datatype constructor 
          or a localnominal *)
-       let tms, env = List.fold_left (
-                          fun (tms, env) e ->
-                          let tm, env = t_expr env e in
-                          (tm::tms, env)
-                        ) ([], envIn) exprs in
        begin
          try
-           let i = List.assoc name env.local_noms in
+           let i = List.assoc name envIn.local_noms in
            if exprs = [] then
-             P.make_nom name i, env
+             P.make_nom name i, envIn
            else failwith "Hmm, nominal constr do not take arguments"
          with
            Not_found ->
            if List.mem name ctx.global_constrs then
+             let tms, env = List.fold_left (
+                                fun (tms, env) e ->
+                                let tm, env = t_expr env e in
+                                (tm::tms, env)
+                              ) ([], envIn) exprs in
              P.make_constr name tms, env
-            else
-              failwith ("Unknown constructor " ^ name)
+           else
+             failwith ("Unknown constructor " ^ name)
        end
     | EPattern(_) -> failwith "Not implemented: EPattern"
                    
@@ -293,7 +293,16 @@ let mlts_to_prolog p =
              P.make_nom ~pattern:true name i, envIn
            else failwith "Hmm, nominal constr do not take arguments"
          with
-           Not_found ->failwith "Not implemented: p-constructors"
+           Not_found ->
+           if List.mem name ctx.global_constrs then
+             let tms, env = List.fold_left (
+                                fun (tms, env) p ->
+                                let tm, env = t_pattern env p in
+                                (tm::tms, env)
+                              ) ([], envIn) pats in
+             P.make_constr ~pattern:true name tms, env
+           else
+             failwith ("Unknown constructor " ^ name)
        end
       
     | PConstant(c) -> t_constant ~is_pat:true c, envIn
