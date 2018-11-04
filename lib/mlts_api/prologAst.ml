@@ -134,9 +134,11 @@ let make_pvar name id =
   make_app "pvar" [make_local name id]
 
 let make_nom ?(pattern=false) name id =
+  if pattern then
   make_app
-    (if pattern then "pnom" else "nom")
+    "pnom"
     [make_local name id]
+  else make_local name id
 
 let make_ite tm1 tm2 tm3 =
   make_app "if_then_else" [tm1; tm2; tm3]

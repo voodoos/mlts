@@ -41,13 +41,19 @@ let add_nom_to_env v env =
   | None -> (v, 0), { env with local_noms = (v, 0)::env.local_noms }
   | Some(i) -> (v, i + 1), { env with local_noms = (v, i + 1)::env.local_noms }
              
-let first_in_env v env = List.assoc v env.local_vars
+let first_in_env v env =
+  try List.assoc v env.pattern_vars with
+    Not_found -> List.assoc v env.local_vars
+    
 
 (* env are used to pass is used to carry different kind of information. Some, such as local variables should be erased when leaving scope, some like the list of "free variables" needed by an expr should not.
 
  This may be bad design (todo ?) but for now the revert_locals function can be use to strip newly declared locals using an "Original" environement without the new locals and the  "deeper" env with maybe new locals and infos *)
 let revert_locals envBefore envAfter = {
-    envBefore with free_vars = envAfter.free_vars
+    envAfter with local_vars = envBefore.local_vars
+  }
+let revert_patterns envBefore envAfter = {
+    envAfter with pattern_vars = envBefore.pattern_vars
   }
                                      
                                      
@@ -269,7 +275,7 @@ let mlts_to_prolog p =
        let body, env = t_expr env e in
        
        P.make_rule  (List.rev pat_noms) env.pattern_vars pat body,
-       revert_locals envIn env
+       revert_patterns envIn (revert_locals envIn env)
 
   and t_pattern envIn = function
     | PVal(name) -> 
