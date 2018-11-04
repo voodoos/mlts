@@ -247,9 +247,14 @@ let mlts_to_prolog p =
            P.make_pvar (fst lvar) (snd lvar),
            { env with pattern_vars = lvar::env.pattern_vars }
        end
-    | PBind(_name,_pat) -> failwith "Not implemented: PBind"
+      
+    | PBind(name,pat) ->
+       let lname, env = add_nom_to_env name envIn in
+       let tm, env = t_pattern env pat in
+       P.make_bind ~pattern:true lname tm, revert_locals envIn env
+       
     | PApp(_name,_pats) -> failwith "Not implemented: PApp"
-    | PBApp(_name,_pats) -> failwith "Not implemented: PBApp"
+    | PBApp(_name, _pats) -> failwith "Not implemented: PApp"
     | PConstr(name, pats) ->
        (* A constructor is either 
           a global datatype constructor 
@@ -258,7 +263,7 @@ let mlts_to_prolog p =
          try
            let i = List.assoc name envIn.local_noms in
            if pats = [] then
-             P.make_pnom name i, envIn
+             P.make_nom ~pattern:true name i, envIn
            else failwith "Hmm, nominal constr do not take arguments"
          with
            Not_found ->failwith "Not implemented: p-constructors"

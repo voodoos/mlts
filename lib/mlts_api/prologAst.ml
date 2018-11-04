@@ -88,8 +88,10 @@ let make_let _a1 _a2 lvar inner =
 let make_appt f args =
   make_app "app" (f::(args))
     
-let make_nom_appt f args =
-  make_app "arobase" (f::(args))
+let make_nom_appt ?(pattern=false) f args =
+  make_app
+    (if pattern then "parobase" else "arobase")
+    (f::(args))
   
 let make_prog name body =
   App(Global("prog"),
@@ -115,11 +117,10 @@ let make_match tm rules =
 let make_pvar name id =
   make_app "pvar" [make_local name id]
 
-let make_pnom name id =
-  make_app "pnom" [make_local name id]
-    
-let make_nom name id =
-  make_app "nom" [make_local name id]
+let make_nom ?(pattern=false) name id =
+  make_app
+    (if pattern then "pnom" else "nom")
+    [make_local name id]
 
 let make_ite tm1 tm2 tm3 =
   make_app "if_then_else" [tm1; tm2; tm3]
@@ -127,6 +128,8 @@ let make_ite tm1 tm2 tm3 =
 let make_new name tm =
   make_app "new" [Abs(name, tm)]
 
-let make_bind name tm =
-  make_app "backslash" [Abs(name, tm)]
+let make_bind ?(pattern=false) name tm =
+  make_app
+    (if pattern then "pbackslash" else "backslash")
+    [Abs(name, tm)]
 
