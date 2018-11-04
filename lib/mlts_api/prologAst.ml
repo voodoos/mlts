@@ -88,6 +88,9 @@ let make_let _a1 _a2 lvar inner =
 let make_appt f args =
   make_app "app" (f::(args))
     
+let make_nom_appt f args =
+  make_app "arobase" (f::(args))
+  
 let make_prog name body =
   App(Global("prog"),
       [Lit(String(name));

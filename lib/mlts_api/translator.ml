@@ -129,30 +129,47 @@ let mlts_to_prolog p =
                    
   and t_expr envIn = function
     | ELetin(LBVal(_name, _params, _e), _body) -> failwith "Not implemented: ELetin"
+                                                
     | ELetRecin(_, _) -> failwith "Not implemented: ELetRecin"
+                       
     | EMatch(e, rules) ->
        let e, env = t_expr envIn e in
        let rules = List.map (t_rule env) rules in
        (* todo warning escaping local vars !*)
        P.make_match e (List.map (fst) rules), env
+       
     | EIf(e1, e2, e3) ->
        let tm1, env = t_expr envIn e1 in
        let tm2, env = t_expr env e2 in
        let tm3, env = t_expr env e3 in
        P.make_ite tm1 tm2 tm3, env
+       
     | EApp(e, args) -> 
        let te, env = t_expr envIn e in
-       let args = List.map (t_expr env) args in
-       (* todo freevars can appear in arg, don't forget it... *)
-       let args = List.map (fst) args in
+       let args, env = List.fold_left (
+                           fun (args, env) e ->
+                           let ta, env = t_expr env e in
+                           ta::args, env
+                         ) ([], env) args in
        P.make_appt te args, env
-    | EBApp(_, _) -> failwith "Not implemented: EBApp"
+       
+    | EBApp(e, args) ->
+       let te, env = t_expr envIn e in
+       let args, env = List.fold_left (
+                           fun (args, env) e ->
+                           let ta, env = t_expr env e in
+                           ta::args, env
+                         ) ([], env) args in
+       P.make_nom_appt te args, env
+                        
     | EInfix(e1, op, e2) -> 
        let te1, env = t_expr envIn e1 in
        let te2, env = t_expr (revert_locals envIn env) e2 in
        P.make_spec (LpStrings.infix_to_lpstring op) [te1; te2],
        env
+       
     | EConst(c) -> t_constant c, envIn
+                 
     | EVal(v) -> 
        begin
          try P.make_local v (first_in_env v envIn), envIn
@@ -165,6 +182,7 @@ let mlts_to_prolog p =
                           ^ "\". (todo : nice exception)")
        end
     | EPair(_, _) -> failwith "Not implemented: EPair"
+                   
     | EConstr(name, exprs) -> 
        (* A constructor is either 
           a global datatype constructor 
@@ -184,11 +202,14 @@ let mlts_to_prolog p =
            Not_found -> failwith "Not implemented: e-constructors"
        end
     | EPattern(_) -> failwith "Not implemented: EPattern"
+                   
     | EBind(name, body) -> 
        let lname, env = add_nom_to_env name envIn in
        let tm, env = t_expr env body in
        P.make_bind lname tm, revert_locals envIn env
+       
     | EFun(_, _) -> failwith "Not implemented: EFun"
+                  
     | ENew(name, body) ->
        let lname, env = add_nom_to_env name envIn in
        let tm, env = t_expr env body in

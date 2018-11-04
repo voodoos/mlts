@@ -9,7 +9,7 @@ if false then 3 else 42;;
 
 new X in 3;;
 
-X \ X;;
+(X \ X) @ 3;;
 
 let f x y = x + y;;
 let g x =
