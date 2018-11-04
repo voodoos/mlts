@@ -24,6 +24,7 @@ type env = {
     local_vars: P.local_name list;
     free_vars:  P.global_name list;
     pattern_vars: P.local_name list;
+    local_noms: P.local_name list;
   }
          
 let add_to_env v env = 
@@ -31,7 +32,22 @@ let add_to_env v env =
   | None -> (v, 0), { env with local_vars = (v, 0)::env.local_vars }
   | Some(i) -> (v, i + 1), { env with local_vars = (v, i + 1)::env.local_vars }
              
+let add_nom_to_env v env = 
+  match List.assoc_opt v env.local_noms with
+  | None -> (v, 0), { env with local_noms = (v, 0)::env.local_noms }
+  | Some(i) -> (v, i + 1), { env with local_noms = (v, i + 1)::env.local_noms }
+             
 let first_in_env v env = List.assoc v env.local_vars
+
+(* env are used to pass is used to carry different kind of information. Some, such as local variables should be erased when leaving scope, some like the list of "free variables" needed by an expr should not.
+
+ This may be bad design (todo ?) but for now the revert_locals function can be use to strip newly declared locals using an "Original" environement without the new locals and the  "deeper" env with maybe new locals and infos *)
+let revert_locals envBefore envAfter = {
+    envBefore with free_vars = envAfter.free_vars
+  }
+                                     
+                                     
+    
 
 type tdef = { name: string; body: P.term; env: env }
 
@@ -50,7 +66,13 @@ let mlts_to_prolog p =
     (* Each "toplevel" item transpile to a program *)
     (* Each "toplevel" item ha its own env but shares
          the global context *)
-    let env = { local_vars = []; free_vars = []; pattern_vars = []; } in
+    let env = {
+        local_vars = [];
+        free_vars = [];
+        pattern_vars = [];
+        local_noms = []
+      }
+    in
     function
     | IDef(def, _pos) -> 
        let tdef = t_def env def in
@@ -98,42 +120,65 @@ let mlts_to_prolog p =
          body;
          env;
        }
-    | DLetrec(_) -> failwith "Not implemented: DLetrec"
+    | DLetrec(LBVal(name, _params, _e) as l) ->
+      (* let _, env2 = add_to_env name env in
+       let d = t_def env2 (DLet l) in
+       { d with env = revert_locals env d.env }*)
+       failwith "Not implemented: DLetRec"
     | DType(_, _) -> failwith "Not implemented: DType"
                    
-  and t_expr env = function
+  and t_expr envIn = function
     | ELetin(LBVal(_name, _params, _e), _body) -> failwith "Not implemented: ELetin"
     | ELetRecin(_, _) -> failwith "Not implemented: ELetRecin"
     | EMatch(e, rules) ->
-       let e, env = t_expr env e in
+       let e, env = t_expr envIn e in
        let rules = List.map (t_rule env) rules in
+       (* todo warning escaping local vars !*)
        P.make_match e (List.map (fst) rules), env
     | EIf(_, _, _) -> failwith "Not implemented: EIf"
     | EApp(e, args) -> 
-       let te, env = t_expr env e in
+       let te, env = t_expr envIn e in
        let args = List.map (t_expr env) args in
        (* todo freevars can appear in arg, don't forget it... *)
        let args = List.map (fst) args in
        P.make_appt te args, env
     | EBApp(_, _) -> failwith "Not implemented: EBApp"
     | EInfix(e1, op, e2) -> 
-       let te1, env = t_expr env e1 in
-       let te2, env = t_expr env e2 in
-       P.make_spec (LpStrings.infix_to_lpstring op) [te1; te2], env
-    | EConst(c) -> t_constant c, env
+       let te1, env = t_expr envIn e1 in
+       let te2, env = t_expr (revert_locals envIn env) e2 in
+       P.make_spec (LpStrings.infix_to_lpstring op) [te1; te2],
+       env
+    | EConst(c) -> t_constant c, envIn
     | EVal(v) -> 
        begin
-         try P.make_local v (first_in_env v env), env
+         try P.make_local v (first_in_env v envIn), envIn
          with Not_found -> (* Non-local must be global *)
            if (List.mem v ctx.global_vars) then
              let v2 = String.capitalize_ascii v in
-             P.make_global v2, { env with free_vars = v::env.free_vars }
+             P.make_global v2, { envIn with free_vars = v::envIn.free_vars }
            else failwith ("Non local, non global value \""
                           ^ v
                           ^ "\". (todo : nice exception)")
        end
     | EPair(_, _) -> failwith "Not implemented: EPair"
-    | EConstr(_, _) -> failwith "Not implemented: EConstr"
+    | EConstr(name, exprs) -> 
+       (* A constructor is either 
+          a global datatype constructor 
+         or a localnominal *)
+       let _tms, env = List.fold_left (
+                          fun (tms, env) e ->
+                          let tm, env = t_expr env e in
+                          (tm::tms, env)
+                        ) ([], envIn) exprs in
+       begin
+         try
+           let i = List.assoc name env.local_noms in
+           if exprs = [] then
+             P.make_nom name i, env
+           else failwith "Hmm, nominal constr do not take arguments"
+         with
+           Not_found ->failwith "Not implemented: e-constructors"
+       end
     | EPattern(_) -> failwith "Not implemented: EPattern"
     | EBind(_, _) -> failwith "Not implemented: EBind"
     | EFun(_, _) -> failwith "Not implemented: EFun"
@@ -145,29 +190,50 @@ let mlts_to_prolog p =
     | String(s) -> P.make_string s 
     | EmptyList -> failwith "Not implemented: EmptyList"
 
-  and t_rule env = function
-    | RSimple(pat, e) -> t_rule env (RNa([], pat, e))
-    | RNa(names, pat, e) -> 
+  and t_rule envIn = function
+    | RSimple(pat, e) -> t_rule envIn (RNa([], pat, e))
+    | RNa(names, pat, e) ->
+       let env, pat_noms = List.fold_left (
+           fun (env, pns) n ->
+           (* todo: nabs are constructors not local vars *)
+           let n, env = add_nom_to_env n env in
+           env, n::pns
+         ) (envIn, []) names in
        let pat, env = t_pattern env pat in
        let body, env = t_expr env e in
-       P.make_rule names env.pattern_vars pat body, env
+       
+       P.make_rule pat_noms env.pattern_vars pat body,
+       revert_locals envIn env
 
-  and t_pattern env = function
+  and t_pattern envIn = function
     | PVal(name) -> 
        (* todo: can also be a nominal *)
        begin
          try  
-           P.make_pvar name (List.assoc name env.pattern_vars), env
+           P.make_pvar name (List.assoc name envIn.pattern_vars), envIn
          with Not_found ->
-           let lvar, env = add_to_env name env in
+           let lvar, env = add_to_env name envIn in
            P.make_pvar (fst lvar) (snd lvar),
            { env with pattern_vars = lvar::env.pattern_vars }
        end
     | PBind(_name,_pat) -> failwith "Not implemented: PBind"
     | PApp(_name,_pats) -> failwith "Not implemented: PApp"
     | PBApp(_name,_pats) -> failwith "Not implemented: PBApp"
-    | PConstr(_name,_pats) -> failwith "Not implemented: PConstr"
-    | PConstant(c) -> t_constant ~is_pat:true c, env
+    | PConstr(name, pats) ->
+       (* A constructor is either 
+          a global datatype constructor 
+         or a localnominal *)
+       begin
+         try
+           let i = List.assoc name envIn.local_noms in
+           if pats = [] then
+             P.make_pnom name i, envIn
+           else failwith "Hmm, nominal constr do not take arguments"
+         with
+           Not_found ->failwith "Not implemented: p-constructors"
+       end
+      
+    | PConstant(c) -> t_constant ~is_pat:true c, envIn
     | PListCons(_pat1,_pat2) -> failwith "Not implemented: PListCons"
     | PPair(_pat1,_pat2) -> failwith "Not implemented: PPair"
   in

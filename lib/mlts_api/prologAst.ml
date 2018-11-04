@@ -100,13 +100,18 @@ let make_deps fvs =
 
 let rec make_rule nabs vars pat body =
   match nabs, vars with
-    (* | n::ntl, _ -> *)
+  | n::ntl, _ -> make_app "nab" [Abs(n, make_rule ntl vars pat body)]
   | [], v::vtl -> make_app "all" [Abs(v, make_rule nabs vtl pat body)]
   | [], [] -> make_app "arr" [pat; body]
-  | _ -> failwith "arg"
 
 let make_match tm rules =
   make_app "match" [tm; List rules]
 
 let make_pvar name id =
   make_app "pvar" [make_local name id]
+
+let make_pnom name id =
+  make_app "pnom" [make_local name id]
+    
+let make_nom name id =
+  make_app "nom" [make_local name id]
