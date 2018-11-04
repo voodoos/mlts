@@ -54,7 +54,7 @@ let infix_to_string =
   | Mult -> "times" | Neq -> "nequal"
   | Lt -> "lt" | Le -> "le"
   | And -> "and" | Or -> "or"
-  | Add -> "add" | Minus -> "minus"
+  | Add -> "add" | Minus -> "sub"
   | Equal -> "equal"
   | ListCons -> "cons"
 
@@ -161,3 +161,6 @@ let make_constr ?(pattern=false) name tms =
   make_app
     (if pattern then "pvariant" else "variant")
     [make_global name; List tms]
+
+let make_fix name body =
+  make_app "fix" [Abs(name, body)]

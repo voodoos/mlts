@@ -1,3 +1,16 @@
+(*let rec size t =
+  match t with
+  | nab X in X -> 1;;
+new X in size X;;
+
+let size2 t =
+  match t with
+  | nab X in X -> 1;;
+new X in size2 X;;*)
+
+new X in (match X with | nab X in X -> 1);;
+
+
 (fun x y -> x + y) 13;;
 (fun x y -> x + y) 13 29;;
 

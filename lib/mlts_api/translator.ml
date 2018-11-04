@@ -109,11 +109,23 @@ let mlts_to_prolog p =
              args = [P.Lit(P.String(name)); body];
              body = P.make_deps (env.free_vars);
        })]
-    | DLetrec(LBVal(_name, _params, _e)) ->
+    | DLetrec(LBVal(name, params, e)) ->
+       let ln, env = add_to_env name env in
+       (*let name = ((fst ln) ^ "_" ^ (string_of_int (snd ln))) in*)
+       let body, env = make_lam env params e in
+       add_global name;
+       
+       [P.Definition({
+             name = "prog";
+             args = [P.Lit(P.String(name));
+                     P.make_fix ln body];
+             body = P.make_deps (env.free_vars);
+       })]
+
+       
       (* let _, env2 = add_to_env name env in
        let d = t_def env2 (DLet l) in
        { d with env = revert_locals env d.env }*)
-       failwith "Not implemented: DLetRec"
     | DType(_name, decls) -> 
        List.map (fun decl ->
            let c = match decl with
