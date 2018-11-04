@@ -120,7 +120,7 @@ let mlts_to_prolog p =
          body;
          env;
        }
-    | DLetrec(LBVal(name, _params, _e) as l) ->
+    | DLetrec(LBVal(_name, _params, _e)) ->
       (* let _, env2 = add_to_env name env in
        let d = t_def env2 (DLet l) in
        { d with env = revert_locals env d.env }*)
@@ -135,7 +135,11 @@ let mlts_to_prolog p =
        let rules = List.map (t_rule env) rules in
        (* todo warning escaping local vars !*)
        P.make_match e (List.map (fst) rules), env
-    | EIf(_, _, _) -> failwith "Not implemented: EIf"
+    | EIf(e1, e2, e3) ->
+       let tm1, env = t_expr envIn e1 in
+       let tm2, env = t_expr env e2 in
+       let tm3, env = t_expr env e3 in
+       P.make_ite tm1 tm2 tm3, env
     | EApp(e, args) -> 
        let te, env = t_expr envIn e in
        let args = List.map (t_expr env) args in

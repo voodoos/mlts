@@ -115,3 +115,6 @@ let make_pnom name id =
     
 let make_nom name id =
   make_app "nom" [make_local name id]
+
+let make_ite tm1 tm2 tm3 =
+  make_app "if_then_else" [tm1; tm2; tm3]
