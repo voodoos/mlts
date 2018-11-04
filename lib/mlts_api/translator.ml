@@ -128,7 +128,22 @@ let mlts_to_prolog p =
     | DType(_, _) -> failwith "Not implemented: DType"
                    
   and t_expr envIn = function
-    | ELetin(LBVal(_name, _params, _e), _body) -> failwith "Not implemented: ELetin"
+    | ELetin(LBVal(name, params, expr), body) ->
+       (* let f x y = x + y in f 2 3;; *)
+       (* Add params to env for expr *)
+       let env =
+         List.fold_left (
+             fun env p ->
+             snd (add_to_env p env)
+           ) envIn params in
+       let exprtm, env = t_expr env expr in
+    (* Removing params from env (but keeping freevars) *)
+       let env = revert_locals envIn env in
+    (* Adding the let-local name to env for body *)
+       let lname, env = add_to_env name env in
+       let bodytm, env = t_expr env body in
+    (* Removing it *)
+       P.make_letin lname exprtm bodytm, revert_locals envIn env
                                                 
     | ELetRecin(_, _) -> failwith "Not implemented: ELetRecin"
                        

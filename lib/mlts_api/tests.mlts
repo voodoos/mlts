@@ -1,11 +1,11 @@
 
 let p x = match x with | y -> y;;
-let p x = match x with | y -> y | nab X in (r @ X) -> 4;;
+let p x = match x with | y -> y | nab X in (X) -> 4;;
 
 p 4;;
 p 3;;
 
-if false then 3 else 42;;
+if false then 3 else let x = 42 in x;;
 
 new X in 3;;
 

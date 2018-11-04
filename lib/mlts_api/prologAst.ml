@@ -133,3 +133,9 @@ let make_bind ?(pattern=false) name tm =
     (if pattern then "pbackslash" else "backslash")
     [Abs(name, tm)]
 
+
+let make_letin name expr body =
+  make_app
+    "let"
+    [expr; Abs(name, body)]
+
