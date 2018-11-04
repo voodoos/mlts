@@ -62,13 +62,14 @@ let mlts_to_prolog p =
               global_constrs = ["pair"]
             } in
   let add_global v = ctx.global_vars <- v::ctx.global_vars in
+  let add_constr c = ctx.global_constrs <- c::ctx.global_constrs in
 
   
   let rec t_items = function
     | [] -> []
     | item::tl -> 
        let titem = t_item item in
-       titem::(t_items tl)
+       titem@(t_items tl)
 
   and t_item =
     (* Each "toplevel" item transpile to a program *)
@@ -83,12 +84,11 @@ let mlts_to_prolog p =
     in
     function
     | IDef(def, _pos) -> 
-       let tdef = t_def env def in
-       tdef
+       t_def env def
     | IExpr(expr, _pos) -> 
        incr_expr ctx; 
        let texpr, env = t_expr env expr in
-       P.Definition({
+       [P.Definition({
          name = "prog";
          args = [P.Lit(P.String(
                            "val_"
@@ -97,30 +97,37 @@ let mlts_to_prolog p =
                  texpr];
          (* Some programs may depend on others! *)
          body = P.make_deps (env.free_vars)
-       })
+       })]
 
   and t_def env =
     function
     | DLet(LBVal(name, params, e)) -> 
        let body, env = make_lam env params e in
        add_global name;
-       P.Definition({
+       [P.Definition({
              name = "prog";
              args = [P.Lit(P.String(name)); body];
              body = P.make_deps (env.free_vars);
-       })
+       })]
     | DLetrec(LBVal(_name, _params, _e)) ->
       (* let _, env2 = add_to_env name env in
        let d = t_def env2 (DLet l) in
        { d with env = revert_locals env d.env }*)
        failwith "Not implemented: DLetRec"
-    | DType(name, _) -> 
-       P.Declaration({
-             sort = Type;
-             name = name;
-             ty = P.Name "constructor"
-           })
-                   
+    | DType(_name, decls) -> 
+       List.map (fun decl ->
+           let c = match decl with
+                          | Simple(c) -> c
+                          | Of(c, _) -> c
+           in
+           add_constr c;
+           P.Declaration({
+                 sort = Type;
+                 name =  c;
+                 ty = P.Name "constructor"
+             })
+         ) decls
+      
   and t_expr envIn = function
     | ELetin(LBVal(name, params, expr), body) ->
        (* let f x y = x + y in f 2 3;; *)

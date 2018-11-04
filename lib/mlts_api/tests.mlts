@@ -6,9 +6,10 @@ f 12 30;;
 
 
 type ipair =
+| Paire
 | Pair of int * int;; 
 
-(3, 4 + 38);;
+Pair(3, 4 + 38);;
 
 
 let p x = match x with | y -> y;;
