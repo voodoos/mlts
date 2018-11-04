@@ -139,3 +139,10 @@ let make_letin name expr body =
     "let"
     [expr; Abs(name, body)]
 
+
+
+let make_constr ?(pattern=false) name tms =
+  make_app
+    (if pattern then "pvariant" else "variant")
+    [make_global name; List tms]
+

@@ -16,7 +16,11 @@ let make_exception message def pos =
                   | Some(_p) -> pos)
 
 (* Context : global vars and counters *)
-type context = { mutable nb_expr: int; mutable global_vars : string list }
+type context = {
+    mutable nb_expr: int;
+    mutable global_vars : string list;
+    mutable global_constrs : string list
+  }
 let incr_expr c = c.nb_expr <- c.nb_expr + 1
 
 (* (local) Environments *)
@@ -53,7 +57,10 @@ type tdef = { name: string; body: P.term; env: env }
 
 (* PROGRAM TRANSLATION *)
 let mlts_to_prolog p =
-  let ctx = { nb_expr = 0; global_vars = [] } in
+  let ctx = { nb_expr = 0;
+              global_vars = [];
+              global_constrs = ["pair"]
+            } in
   let add_global v = ctx.global_vars <- v::ctx.global_vars in
 
   let rec t_items = function
@@ -196,13 +203,14 @@ let mlts_to_prolog p =
                           ^ v
                           ^ "\". (todo : nice exception)")
        end
-    | EPair(_, _) -> failwith "Not implemented: EPair"
+    | EPair(e1, e2) ->
+       t_expr envIn (EConstr("pair", [e2; e1]))
                    
     | EConstr(name, exprs) -> 
        (* A constructor is either 
           a global datatype constructor 
          or a localnominal *)
-       let _tms, env = List.fold_left (
+       let tms, env = List.fold_left (
                           fun (tms, env) e ->
                           let tm, env = t_expr env e in
                           (tm::tms, env)
@@ -214,7 +222,11 @@ let mlts_to_prolog p =
              P.make_nom name i, env
            else failwith "Hmm, nominal constr do not take arguments"
          with
-           Not_found -> failwith "Not implemented: e-constructors"
+           Not_found ->
+           if List.mem name ctx.global_constrs then
+             P.make_constr name tms, env
+            else
+              failwith ("Unknown constructor " ^ name)
        end
     | EPattern(_) -> failwith "Not implemented: EPattern"
                    
