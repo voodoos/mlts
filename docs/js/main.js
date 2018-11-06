@@ -215,7 +215,8 @@ function show_resultas(results) {
     $('#answer').html('');
     results.reverse().forEach(function(res, id) {
 	var name = unescape(res.name);
-	var row = $('<tr></tr>').addClass("clickable").click(function(e) { goto_def(unescape(res.name)) });
+	var row = $('<tr></tr>').addClass("clickable")
+	    .click(function(e) { goto_def(unescape(res.name)) });
 	row.append($('<td></td>').text(name));
 
 	

@@ -3,50 +3,61 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 kind ty                type.
 type int, bool, string ty.
+type sum               ty -> ty -> ty.  % Sum types '*'
 type lst               ty -> ty.        % Lists
-type prty              ty -> ty -> ty.  % Pairs
 type arr               ty -> ty -> ty.  % Functional arrow type
-type utm               ty.              % untyped lambda terms
+type bigarr            ty -> ty -> ty.  % Higherarity arrow type
+%type utm               ty.              % untyped lambda terms
 
 type typeof            tm -> ty -> prop.  % Top-level predicate
 
-type typematch         ty -> list rulex -> ty -> prop.
-type typematchrulex     ty -> rulex      -> ty -> prop.
-
-
-% 
-
-typeof (app M N) A :-
-    typeof M (arr B A),
-    typeof N B',
-       (B = B', !; err_wrong_type N B B' (app M N), fail).
-
-% 
-
-typeof (if_then_else P Q R) A :-
-    typeof P B, typeof Q A, typeof R A',
-       ( B = bool, !; err_wrong_type P (bool) B (if_then_else  P Q R), fail),
-       (A = A', !; err_wrong_type R A A' (if_then_else  P Q R), fail).
-
-typeof (lam M) (arr A B)  :- pi x\ typeof x A => typeof (M x) B.
-typeof (fix M) A        :- pi x\ typeof x A => typeof (M x) A',
-       (A = A', !; err_wrong_type (M x) A A' (fix M), fail).
-typeof (let M R) A        :- typeof M B, pi x\ typeof x B => typeof (R x) A.
-
-%typeof (cns X Y) (lst A)    :- typeof X A, typeof Y A',
-%       (A' = lst A, !; err_wrong_type Y (lst A') A' (cns X Y), fail).
-			       
-%typeof (pr X Y)  (prty A B) :- typeof X A, typeof Y B.
-
-% Backslash and arobase
-
-typeof
+type type_match         ty -> list clause -> ty -> prop.
+type type_match_rule     ty -> clause      -> ty -> prop.
 
 % Literals
 
 typeof (lit (i _I)) int.
 typeof (lit (b _B)) bool.
 typeof (lit (s _S)) string.
+
+
+% Builtins constr
+
+type_constr pair (sum _A _B).
+
+
+% Control flow
+
+typeof (if_then_else P Q R) A :-
+    typeof P bool,
+    typeof Q A,
+    typeof R A.
+
+
+typeof (fix M) A :- pi x\ typeof x A => typeof (M x) A',
+       (A = A', !; err_wrong_type (M x) A A' (fix M), fail).
+       
+typeof (let M R) A :- typeof M B, pi x\ typeof x B => typeof (R x) A.
+
+typeof (new R) A :- pi x\ typeof x B_ => typeof (R x) A.
+
+
+% Abstractions and applications
+
+typeof (lam M) (arr A B)  :- pi x\ typeof x A => typeof (M x) B.
+
+typeof (backslash M) (bigarr A B) :- pi x\ typeof x A => typeof (M x) B.
+
+typeof (app M N) A :-
+    typeof M (arr B A),
+    typeof N B',
+       (B = B', !; err_wrong_type N B B' (app M N), fail).
+       
+typeof (arobase M N) A :-
+    typeof M (bigarr B A),
+    typeof N B',
+       (B = B', !; err_wrong_type N B B' (arobase M N), fail).
+
 
 % Specials
 
@@ -67,38 +78,43 @@ typeof (special Spec Args) B :-
        type_spec Spec A,
        type_args A Args B.
 
-% Variants
+% Variants TODO
+
+type_sum [E] A :- typeof E A.
+
+type_sum [E|TL] (sum A B) :-
+    typeof E A, type_sum TL B. 
+
+typeof (variant Constr Args) A :-
+    type_constr Constr A,
+    type_sum Args A.
 
 
-%
+% Patterns
 
-%typeof null  (lst A)             & typeof cons  (arr A (arr (lst A) (lst A))).
-%typeof car   (arr (lst A) A)     & typeof cdr   (arr (lst A) (lst A)).
-%typeof consp (arr (lst A) bool)  & typeof nullp (arr (lst A) bool).
-%typeof pair  (arr A (arr B (prty A B))).
+type_pat pany _A.
+type_pat (plit I) A :- typeof (lit I) A.
+type_pat (pvar T) A :- typeof T A.
+type_pat (pnom N) A :- typeof N A.
+type_pat (pbackslash R) (bigarr A B) :- 
+    pi x\ typeof x A => type_pat (R x) B.
+type_pat (parobase P T) B :-
+    type_pat P (bigarr A B),
+    typeof T A.
 
-%typeof (i I) int                        & typeof zerop   (arr int bool).
-%typeof greater (arr int (arr int bool)) & typeof minus   (arr int (arr int int)).
-%typeof sum     (arr int (arr int int))  & typeof times   (arr int (arr int int)).
+%todo pvariant
 
-%typeof app     (arr utm (arr utm utm)).
+% Matching
 
-%%%% New features to MLTS
+typeof (match Exp Rules) B :- typeof Exp A, type_match A Rules B.
 
-% Below, typing of new and nab allows for introducing a new nominal of any type.
-%%typeof (new R) A     :- pi x\ typeof x B   => typeof (R x) A.
-%typeof (abt R) utm   :- pi x\ typeof x utm => typeof (R x) utm.
-%typeof (ab  R) utm   :- pi x\ typeof x utm => typeof (R x) utm.
-%typeof (ap M N) utm  :- typeof M utm, typeof N utm.
+type_match _A [] _B.
+type_match A (R::Rs) B :-
+    type_match_rule A R B, type_match A Rs B.
 
-%typeof (match Exp Rules) B :- typeof Exp A, typematch A Rules B.
+type_match_rule A (arr Pat Result) B :- type_pat Pat A, typeof Result B.
+type_match_rule A (nab   R) B :- pi x\ typeof x C_ => type_match_rule A (R x) B.
+type_match_rule A (all   R) B :- pi x\ typeof x C_ => type_match_rule A (R x) B.
 
-%typematch A (R::Rs) B :- typematchrulex A R B, typematch A Rs B',
-%	  (B = B', !; err_wrong_type (Rs) B B' "matching", fail).
-%typematch A []      B.
 
-%typematchrulex A (Exp ==> Result) B :- typeof Exp A, typeof Result B.
-%typematchrulex A (nab   R) B :- pi x\ typeof x C                           => typematchrulex A (R x) B.
-%typematchrulex A (all   R) B :- pi x\ typeof x C                           => typematchrulex A (R x) B.
-%typematchrulex A (all'  R) B :- pi x\ (pi u\ typeof (x u) C :- typeof u D) => typematchrulex A (R x) B.
-%typematchrulex A (all'' R) B :- pi x\ (pi u\ pi v\ typeof (x u v) C :- typeof u D, typeof v E) => typematchrulex A (R x) B.
+
