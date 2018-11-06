@@ -36,7 +36,18 @@
       
   let n_val s =
       ("v_" ^ s)
-  
+
+
+  let builtin =
+    let h = Hashtbl.create 17 in
+    List.iter (fun (s, k) -> Hashtbl.add h s k)
+      [ "List.hd",     "list_hd";
+        "List.tl",     "list_tl";
+      ] ;
+    fun s ->
+      try  Hashtbl.find h s
+      with Not_found -> s
+      
 %}
 
 %token <int> CONST_INT
@@ -166,12 +177,14 @@ expr:
 	                                { EApp(se, a) }
 | expr; infix_op; expr 			{ EInfix($1, $2, $3) }
 | e1 = expr; DCOLON;
-     e2 = expr				{ EInfix(e1, ListCons, e2) }
+     e2 = expr				{(* EInfix(e1, ListCons, e2)*)
+     	  				    EConstr("list_cons", [e1; e2])}
 | i = constr_name; BACKSLASH; e = expr
       %prec BACKSLASH			{ EBind(i, e) }
       
 | c = constr_path;
   args = constr_expr_args               { EConstr(c, args) }
+| LBRACK; RBRACK			{ EConstr("list_empty", []) }
 ;
 
 constr_expr_args:
@@ -227,6 +240,7 @@ pattern:
 					
 | p1 = pattern; DCOLON; p2 = pattern	{ PListCons(p1, p2) }
 | c = constr_path; l = constr_pat_args  { PConstr(c, l) }
+| LBRACK; RBRACK			{ PConstr("list_empty", []) }
 ;
 
 constr_pat_args:
@@ -251,7 +265,6 @@ constant:
 | CONST_INT				{ Int($1) }
 | CONST_BOOL				{ Bool($1) }
 | STRING				{ String($1) }	
-| LBRACK; RBRACK			{ EmptyList }
 ;
 
 argument:
@@ -260,7 +273,7 @@ argument:
 
 value_path:
 | value_name				{ $1 }
-| m = module_name; DOT; v = value_name	{ m ^ "." ^ v }
+| m = module_name; DOT; v = IDENT	{ builtin (m ^ "." ^ v) }
 
 /* TODO, long modulepath 
 module_path:

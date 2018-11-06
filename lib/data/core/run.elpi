@@ -1,6 +1,7 @@
 accumulate errors.
 accumulate typing.
 accumulate deprime.
+accumulate builtins.
 accumulate progs.
 
 run Name Prog Value Type :-

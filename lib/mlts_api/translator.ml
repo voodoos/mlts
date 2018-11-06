@@ -65,8 +65,8 @@ type tdef = { kind: k;  name: string; body: P.term; env: env }
 (* PROGRAM TRANSLATION *)
 let mlts_to_prolog p =
   let ctx = { nb_expr = 0;
-              global_vars = [];
-              global_constrs = ["pair"; "list_cons"];
+              global_vars = ["list_hd"; "list_tl"];
+              global_constrs = ["pair"; "list_empty"; "list_cons"];
               actual_def = { name = "Begining"; pos = Lexing.dummy_pos }
             }
   in
@@ -156,7 +156,10 @@ let mlts_to_prolog p =
       let constructors =  List.map (fun decl ->
            let c, typ = match decl with
                           | Simple(c) -> c, P.List []
-                          | Of(c, typ) -> c, t_typ typ
+                          | Of(c, typ) -> c,
+                                          match typ with (* todo hideous hack *)
+                                          | Sum(_, _) -> t_typ typ
+                                          | _ -> P.List [t_typ typ]
            in
            add_constr c;
            [P.Declaration({
@@ -304,7 +307,7 @@ let mlts_to_prolog p =
     | Int(i) -> P.make_int ~is_pat i
     | Bool(b) -> P.make_bool b
     | String(s) -> P.make_string s 
-    | EmptyList -> failwith "Not implemented: EmptyList"
+    | EmptyList -> failwith "Should not happen anymore (emptylist)"
 
   and t_rule envIn = function
     | RSimple(pat, e) -> t_rule envIn (RNa([], pat, e))

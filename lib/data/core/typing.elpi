@@ -3,7 +3,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 kind ty                type.
 type int, bool, string ty.
-type sum               ty -> ty -> ty.  % Sum types '*'
+%type sum               ty -> ty -> ty.  % Sum types '*'
 type lst               ty -> ty.        % Lists
 type arr               ty -> ty -> ty.  % Functional arrow type
 type bigarr            ty -> ty -> ty.  % Higherarity arrow type
@@ -76,9 +76,19 @@ typeof (special Spec Args) B :-
        type_spec Spec A,
        type_args A Args B.
 
-% Variants TODO
+
+% Variants
+% todo : clean polymorphism: type t_pair ty -> ty -> ty.
 type t_pair ty.
+type pair constructor.
 type_constr pair [_A,_B] t_pair.
+
+% todo : clean polymorphism: type t_list ty -> ty.
+type t_list ty.
+type list_cons constructor.
+type list_empty constructor.
+type_constr list_empty [] t_list.
+type_constr list_cons [_A, t_list] t_list.
 
 type_check [] [].
 type_check [E|TL] [Ty|TyL] :-
@@ -110,6 +120,7 @@ type_checkp [P|TL] [Ty|TyL] :-
 type_pat (pvariant Constr Pats) A :-
     type_constr Constr Typs A,
     type_checkp Pats Typs.
+
 
 % Matching
 

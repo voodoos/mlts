@@ -346,8 +346,6 @@ test_match_nom :-
         [(nab y \ arr (pnom y) (lit (i 3)))])
       (lit (i 3)).
 
-type pair constructor.
-
 test_match_pair :-
     eval
       (match (variant pair [(lit (i 0)), (lit (i 1))])

@@ -51,7 +51,7 @@ type prog = clause list
 let infix_to_string =
   let open MltsAst in
   function
-  | Mult -> "times" | Neq -> "nequal"
+  | Mult -> "mul" | Neq -> "nequal"
   | Lt -> "lt" | Le -> "le"
   | And -> "and" | Or -> "or"
   | Add -> "add" | Minus -> "sub"
