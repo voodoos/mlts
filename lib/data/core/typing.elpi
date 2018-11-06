@@ -11,8 +11,9 @@ type bigarr            ty -> ty -> ty.  % Higherarity arrow type
 
 type typeof            tm -> ty -> prop.  % Top-level predicate
 
-type type_match         ty -> list clause -> ty -> prop.
-type type_match_rule     ty -> clause      -> ty -> prop.
+type type_constr       constructor -> list ty -> ty -> prop.
+type type_match        ty -> list clause -> ty -> prop.
+type type_match_rule   ty -> clause      -> ty -> prop.
 
 % Literals
 
@@ -21,9 +22,6 @@ typeof (lit (b _B)) bool.
 typeof (lit (s _S)) string.
 
 
-% Builtins constr
-
-type_constr pair (sum _A _B).
 
 
 % Control flow
@@ -34,8 +32,8 @@ typeof (if_then_else P Q R) A :-
     typeof R A.
 
 
-typeof (fix M) A :- pi x\ typeof x A => typeof (M x) A',
-       (A = A', !; err_wrong_type (M x) A A' (fix M), fail).
+typeof (fix M) A :- pi x\ typeof x A => typeof (M x) A2,
+       (A = A2, !; err_wrong_type (M x) A A2 (fix M), fail).
        
 typeof (let M R) A :- typeof M B, pi x\ typeof x B => typeof (R x) A.
 
@@ -50,13 +48,13 @@ typeof (backslash M) (bigarr A B) :- pi x\ typeof x A => typeof (M x) B.
 
 typeof (app M N) A :-
     typeof M (arr B A),
-    typeof N B',
-       (B = B', !; err_wrong_type N B B' (app M N), fail).
+    typeof N B2,
+       (B = B2, !; err_wrong_type N B B2 (app M N), fail).
        
 typeof (arobase M N) A :-
     typeof M (bigarr B A),
-    typeof N B',
-       (B = B', !; err_wrong_type N B B' (arobase M N), fail).
+    typeof N B2,
+       (B = B2, !; err_wrong_type N B B2 (arobase M N), fail).
 
 
 % Specials
@@ -79,15 +77,17 @@ typeof (special Spec Args) B :-
        type_args A Args B.
 
 % Variants TODO
+type t_pair ty.
+type_constr pair [_A,_B] t_pair.
 
-type_sum [E] A :- typeof E A.
-
-type_sum [E|TL] (sum A B) :-
-    typeof E A, type_sum TL B. 
+type_check [] [].
+type_check [E|TL] [Ty|TyL] :-
+    typeof E Ty,
+    type_check TL TyL. 
 
 typeof (variant Constr Args) A :-
-    type_constr Constr A,
-    type_sum Args A.
+    type_constr Constr Typs A,
+    type_check Args Typs.
 
 
 % Patterns
@@ -102,7 +102,14 @@ type_pat (parobase P T) B :-
     type_pat P (bigarr A B),
     typeof T A.
 
-%todo pvariant
+type_checkp [] [].
+type_checkp [P|TL] [Ty|TyL] :-
+    type_pat P Ty,
+    type_checkp TL TyL.
+
+type_pat (pvariant Constr Pats) A :-
+    type_constr Constr Typs A,
+    type_checkp Pats Typs.
 
 % Matching
 

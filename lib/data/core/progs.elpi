@@ -1,2 +1,0 @@
-prog "val_0" (special add [lit (i 3), lit (i 4)]).
-prog "val_0" (special equal [lit (i 3), lit (i 3)]).
