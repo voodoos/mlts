@@ -264,8 +264,9 @@ let mlts_to_prolog p =
          with Not_found -> (* Non-local must be global *)
            if (List.mem v ctx.global_vars) then
              let v2 = String.capitalize_ascii v in
-             print_endline ("Debug: found freevar " ^ v);
-             P.make_global v2, { envIn with free_vars = v::envIn.free_vars }
+             let env = if List.mem v envIn.free_vars then envIn
+                       else { envIn with free_vars = v::envIn.free_vars }
+             in P.make_global v2, env
            else raise (make_exception
                ("Unbound value '" ^ v ^ "'.")
                (List.hd ctx.actual_def)
