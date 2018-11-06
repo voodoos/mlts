@@ -132,6 +132,7 @@ let_binding:
 
 constr_expr:
 | c = constr_path                       { EConstr(c, []) }
+| LBRACK; RBRACK			{ EConstr("list_empty", []) }
 ;
 
 trivial_expr_noconstr:
@@ -184,7 +185,6 @@ expr:
       
 | c = constr_path;
   args = constr_expr_args               { EConstr(c, args) }
-| LBRACK; RBRACK			{ EConstr("list_empty", []) }
 ;
 
 constr_expr_args:
