@@ -5,7 +5,7 @@ accumulate builtins.
 accumulate progs.
 
 run Name Prog Value Type :-
-	prog Name P, 
+	prog Name P,
 	term_to_string P Prog,
 	if (typeof P T)
 	   (term_to_string T Type)
