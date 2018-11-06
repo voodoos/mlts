@@ -11,7 +11,7 @@ and definition =
 
 and constr_decl =
   | Simple of constr_path
-  | Of of constr_path * aritytypexpr
+  | Of of constr_path * typexpr
 
 and let_binding =
   | LBVal of value_name * param list * expr
@@ -33,15 +33,13 @@ and expr =
   | EFun of (value_name list) * expr
   | ENew of value_name * expr
                            
-                  
-
-and aritytypexpr = typexpr * int
+                 
 and typexpr =
   | Cons of constr_path
-  | Sum of aritytypexpr * aritytypexpr
-  | Arrow of aritytypexpr * aritytypexpr
-  | Bind of aritytypexpr * aritytypexpr
-  | List of aritytypexpr
+  | Sum of typexpr * typexpr
+  | Arrow of typexpr * typexpr
+  | Bind of typexpr * typexpr
+  | List of typexpr
 
 and pattern_matching = rule list
 

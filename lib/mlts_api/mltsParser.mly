@@ -111,8 +111,8 @@ definition:
 
 constr_decl:
 | VBAR; nc = constr_name		{ Simple(nc) }
-| VBAR; nc = constr_name; OF; tya = arityp_expr
-					{ Of(nc, tya) }
+| VBAR; nc = constr_name; OF; ty = typ_expr
+					{ Of(nc, ty) }
 ;
 
 let_binding:
@@ -181,28 +181,21 @@ constr_expr_args:
 
 
 expr_list:
-| expr	{ [$1] }
-| expr; COMMA; expr_list { $1::$3 }
+| expr					{ [$1] }
+| expr; COMMA; expr_list 		{ $1::$3 }
 
-arityp_expr:
-| BEGIN; arityp_expr; END;		{ $2 }
-| typeconstr_name			{ Cons($1), 0 }
-| tya1 = arityp_expr;
-  STAR; tya2 = arityp_expr		{ let _ty1, a1 = tya1
-   	   	  			  and _ty2, a2 = tya2   in
-  	       				      Sum(tya1, tya2), max a1 a2 }
+typ_expr:
+| BEGIN; typ_expr; END			{ $2 }
+| typeconstr_name 			{ Cons($1) }
+| tya1 = typ_expr;
+  STAR; tya2 = typ_expr			{ Sum(tya1, tya2) }
 					      
-| tya1 = arityp_expr;
-  ARROW; tya2 = arityp_expr		{ let _ty1, a1 = tya1
-   	   	  			  and _ty2, a2 = tya2   in
-  	       				      Arrow(tya1, tya2), max a1 a2 }
+| tya1 = typ_expr;
+  ARROW; tya2 = typ_expr		{ Arrow(tya1, tya2) }
 					      
-|  tya1 = arityp_expr;
-   DARROW;  tya2 = arityp_expr		{ let _ty1, a1 = tya1
-   	   	  			  and _ty2, a2 = tya2   in
-   	   	  	 		  Bind(tya1, tya2),
-					  1 + (max a1 a2)  }
-| tya = arityp_expr; LIST;		{ List(tya), (snd tya)  }
+|  tya1 = typ_expr;
+   DARROW;  tya2 = typ_expr		{ Bind(tya1, tya2) }
+| tya = typ_expr; LIST;		{ List(tya)  }
 ;
 
 match_arms:
