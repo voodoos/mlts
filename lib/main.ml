@@ -1,4 +1,3 @@
-     
 exception Query_failed
 exception No_kernel
 
@@ -19,7 +18,7 @@ let consoleError ?pref:(p = "") (str : string) =
 let compile header code =
   try
     (* First mlts => lprolog *)
-    let lpcode =
+    let lpcode, defs =
       Mlts_API.prologify code in
 
     (* updating the pseudo files *)
@@ -36,10 +35,8 @@ let compile header code =
     kernel := Some(Elpi_API.Compile.program header [parsed]);
 
     (* We return the lprolog code for reference *)
-    Js.string (lpcode)
-              (* ^ "%%% Datatypes/sig." ^ typsig
-               ^  "%%% Datatypes/mod." ^ typmod)*),
-    Array.of_list [](* defs *) , 0, 0, true
+    Js.string (lpcode),
+    Array.of_list defs(* defs *) , 0, 0, true
   with Mlts_API.Error(s, line, char)
        -> (Js.string s, [||], line, char,  false)
   | e -> Js.string ("Unexpected error: " ^ (Printexc.to_string e)), [||], 0, 0, false

@@ -151,12 +151,18 @@ let make_bind ?(pattern=false) name tm =
     (if pattern then "pbackslash" else "backslash")
     [Abs(name, tm)]
 
+let make_fix name body =
+  make_app "fix" [Abs(name, body)]
 
 let make_letin name expr body =
   make_app
     "let"
     [expr; Abs(name, body)]
 
+let make_letrecin name expr body =
+  make_app
+    "let"
+    [make_fix name expr; Abs(name, body)]
 
 
 let make_constr ?(pattern=false) name tms =
@@ -164,5 +170,3 @@ let make_constr ?(pattern=false) name tms =
     (if pattern then "pvariant" else "variant")
     [make_global name; List tms]
 
-let make_fix name body =
-  make_app "fix" [Abs(name, body)]

@@ -28,9 +28,9 @@ let parse_and_translate mlts_prog =
 let pp_prog = PrologPrinter.pp_prog
 
 let prologify prog =
-  let prolog = parse_and_translate prog in
+  let prolog, defs = parse_and_translate prog in
   let f = pp_prog (Format.str_formatter) prolog in
-  Format.flush_str_formatter f
+  Format.flush_str_formatter f, defs
 
   (*
 let _ =
@@ -41,6 +41,7 @@ let _ =
 
   Format.printf "%a@."
     pp_prog (Translator.mlts_to_prolog p)
+   
    
    
    *)

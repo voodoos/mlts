@@ -20,7 +20,7 @@ type context = {
     mutable nb_expr: int;
     mutable global_vars : string list;
     mutable global_constrs : string list;
-    actual_def: def;
+    mutable actual_def: def list;
   }
 let incr_expr c = c.nb_expr <- c.nb_expr + 1
 
@@ -67,17 +67,16 @@ let mlts_to_prolog p =
   let ctx = { nb_expr = 0;
               global_vars = ["list_hd"; "list_tl"];
               global_constrs = ["pair"; "list_empty"; "list_cons"];
-              actual_def = { name = "Begining"; pos = Lexing.dummy_pos }
+              actual_def = []
             }
   in
   let add_global v = ctx.global_vars <- v::ctx.global_vars in
   let add_constr c = ctx.global_constrs <- c::ctx.global_constrs in
   let set_actual_name n =
-    ctx.actual_def.name <- n;
+    (List.hd (ctx.actual_def)).name <- n;
   in
-  let set_actual_def n pos =
-    set_actual_name n;
-    ctx.actual_def.pos <- pos;
+  let set_actual_def name pos =
+    ctx.actual_def <- { name; pos } :: ctx.actual_def;
   in
   
 
@@ -203,7 +202,12 @@ let mlts_to_prolog p =
     (* Removing it *)
        P.make_letin lname exprtm bodytm, revert_locals envIn env
                                                 
-    | ELetRecin(_, _) -> failwith "Not implemented: ELetRecin"
+    | ELetRecin(LBVal(name, params, e), body) ->
+       let ln, env = add_to_env name envIn in
+       (*let name = ((fst ln) ^ "_" ^ (string_of_int (snd ln))) in*)
+       let letbody, env = make_lam env params e in
+       let body, env =t_expr env body in
+       P.make_letrecin ln letbody body, revert_locals envIn env
                        
     | EMatch(e, rules) ->
        let e, env = t_expr envIn e in
@@ -252,7 +256,7 @@ let mlts_to_prolog p =
              P.make_global v2, { envIn with free_vars = v::envIn.free_vars }
            else raise (make_exception
                ("Unbound value '" ^ v ^ "'.")
-               ctx.actual_def
+               (List.hd ctx.actual_def)
                None)
        end
     | EPair(e1, e2) ->
@@ -269,7 +273,7 @@ let mlts_to_prolog p =
              P.make_nom name i, envIn
            else raise (make_exception
                ("Nominals cannot have arguments. (" ^ name ^ ")")
-               ctx.actual_def
+               (List.hd ctx.actual_def)
                None)
          with
            Not_found ->
@@ -283,7 +287,7 @@ let mlts_to_prolog p =
            else
              raise (make_exception
                ("Unknown constructor " ^ name)
-               ctx.actual_def
+               (List.hd ctx.actual_def)
                None)
                
        end
@@ -385,7 +389,7 @@ let mlts_to_prolog p =
   and make_lam env params e =
     (* 
         fun f x y -> body
-          => lam ar11 ar12 (x\ lam ar21 ar22 (y\ body))
+          => lam (x\ lam (y\ body))
      *)
     let envInitial = env in
     let rec aux env params e =
@@ -399,7 +403,10 @@ let mlts_to_prolog p =
     let tm, env = aux envInitial params e in
     tm, revert_locals envInitial env
   in
-  t_items p
+  let make_death_list (l : def list) : (string * int) list =
+    List.map (fun (d : def) -> (d.name, d.pos.pos_lnum)) l
+  in
+  t_items p, make_death_list ctx.actual_def
 
 
 
