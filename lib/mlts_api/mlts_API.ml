@@ -40,8 +40,8 @@ let _ =
   close_in c;
 
   Format.printf "%a@."
-    pp_prog (Translator.mlts_to_prolog p)
+    pp_prog (fst (Translator.mlts_to_prolog p))
+  *)
    
    
    
-   *)

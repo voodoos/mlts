@@ -133,6 +133,8 @@ let mlts_to_prolog p =
        let body, env = make_lam env params e in
        add_global name;
        
+       print_endline ("Debug: end freevars found: " ^
+                        (List.fold_left (^) "" env.free_vars));
        [P.Definition({
              name = "prog";
              args = [P.Lit(P.String(name));
@@ -211,9 +213,17 @@ let mlts_to_prolog p =
                        
     | EMatch(e, rules) ->
        let e, env = t_expr envIn e in
-       let rules = List.map (t_rule env) rules in
+       let rules, env = List.fold_left (
+                            fun (rules, env) rule ->
+                            let r, env = t_rule env rule in
+                            (r::rules, env)
+                          ) ([], env) rules in
+       
+       
+       print_endline ("Debug: freevars found " ^
+                        (List.fold_left (^) "" env.free_vars));
        (* todo warning escaping local vars !*)
-       P.make_match e (List.map (fst) rules), env
+       P.make_match e rules, env
        
     | EIf(e1, e2, e3) ->
        let tm1, env = t_expr envIn e1 in
@@ -237,6 +247,7 @@ let mlts_to_prolog p =
                            let ta, env = t_expr env e in
                            ta::args, env
                          ) ([], env) args in
+       
        P.make_nom_appt te (List.rev args), env
                         
     | EInfix(e1, op, e2) -> 
@@ -253,6 +264,7 @@ let mlts_to_prolog p =
          with Not_found -> (* Non-local must be global *)
            if (List.mem v ctx.global_vars) then
              let v2 = String.capitalize_ascii v in
+             print_endline ("Debug: found freevar " ^ v);
              P.make_global v2, { envIn with free_vars = v::envIn.free_vars }
            else raise (make_exception
                ("Unbound value '" ^ v ^ "'.")

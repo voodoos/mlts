@@ -1,21 +1,38 @@
+type tm =
+  | App of tm * tm
+  | Abs of tm => tm;;
+
+let rec subst t x u = match (x,t) with
+  | nab X   in (X,X) -> u
+  | nab X Y in (X,Y) -> Y
+  ;;
+
+let rec beta t = match t with
+  | App(m, n)  ->
+    let m = beta m in let n = beta n in
+    begin 
+        match m with
+        | Abs r -> new X in beta (subst (r @ X) X n)
+ 
+	end;;
+
+(*
+
+
+let f x =
+ let rec aux y =
+ if y = 0 then 42 else aux (y - 1)
+in
+ aux x;;
+f 3;;
+
+
 List.hd (2::[]);;
 
 
 type ipair =
 | Pair of int * int;; 
 
-
-
-
-(*let rec size t =
-  match t with
-  | nab X in X -> 1;;
-new X in size X;;
-
-let size2 t =
-  match t with
-  | nab X in X -> 1;;
-new X in size2 X;;*)
 
 new X in (match X with | nab X in X -> 1);;
 
@@ -86,4 +103,5 @@ let rec trans gamma term = match term with
     let p = trans ((X,Y)::gamma) (m @ X) in
      In(U, V\ p @ V)))
   | nab X in X -> U\ Out(assoc X gamma, U, Null);;
+*)
 *)
