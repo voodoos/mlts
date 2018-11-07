@@ -230,7 +230,10 @@ not_in (bind _X Y :: Subst) Z :-
 subst_val _Subst (lam T) (lam T).
 subst_val _Subst (lit L) (lit L).
 
-subst_val Subst X Y :- nom X, nom Y, binds Subst X Y.
+subst_val Subst Xout Xin :-
+    nom Xout,
+    nom Xin,
+    binds Subst Xin Xout.
 
 subst_val Subst (variant C V1s) (variant C V2s) :-
     foreach2 (subst_val Subst) V1s V2s.
@@ -247,7 +250,6 @@ matches Subst Xout (pnom Xin) :-
 
 matches Subst (variant C Ts) (pvariant C Ps) :-
     foreach2 (matches Subst) Ts Ps.
-
 
 eval (fix F) V :- eval (F (fix F)) V.
 eval_row (rowfix F) VR :- eval_row (F (rowfix F)) VR.
@@ -301,7 +303,7 @@ test_matches_nom :-
     pin xin \
     with_subst [xin] Subst \
     matches Subst xout (pnom xin),
-    subst_val Subst xin xout.
+    subst_val Subst xout xin.
 
 test_match_lit :-
     eval
@@ -417,6 +419,11 @@ test_rowfix :-
        (variant test_pair [app Even (lit (i 8)), app Even (lit (i 13))]))
       (variant test_pair [lit (b btrue), lit (b bfalse)]).
 
+test_ulysse :-
+    eval
+      (backslash X \
+        match X [nab Y \ arr (pnom Y) Y])
+      (backslash X \ X).
 
 main :-
     test_app_id, !,
@@ -440,5 +447,6 @@ main :-
     test_select, !,
     test_fix, !,
     test_rowfix, !,
+    test_ulysse, !,
     true
 .
