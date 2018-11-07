@@ -248,7 +248,7 @@ matches _Subst (lit L) (plit L).
 
 matches _Subst _X pany.
 
-matches _Subst X (pvar X).
+matches Subst X (pvar Y) :- subst_val Subst X Y.
 
 matches Subst Xout (pnom Xin) :-
     nom Xin, nom Xout,
@@ -470,7 +470,7 @@ main :-
     test_fix, !,
     test_rowfix, !,
     test_ulysse, !,
-    %% test_quantifier_alternation_ok, !,
-    %% test_quantifier_alternation_no, !,
+    test_quantifier_alternation_ok, !,
+    test_quantifier_alternation_no, !,
     true
 .
