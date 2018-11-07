@@ -346,38 +346,40 @@ test_match_nom :-
         [(nab y \ arr (pnom y) (lit (i 3)))])
       (lit (i 3)).
 
+type test_pair constructor.
+
 test_match_pair :-
     eval
-      (match (variant pair [(lit (i 0)), (lit (i 1))])
+      (match (variant test_pair [(lit (i 0)), (lit (i 1))])
         [(all x \ all y \
-          arr (pvariant pair [pvar x, pvar y]) (variant pair [y, x]))])
-      (variant pair [lit (i 1), lit (i 0)]).
+          arr (pvariant test_pair [pvar x, pvar y]) (variant test_pair [y, x]))])
+      (variant test_pair [lit (i 1), lit (i 0)]).
 
 test_match_wrong_nab :-
     not (eval
-      (backslash X \ (match (variant pair [X, X])
+      (backslash X \ (match (variant test_pair [X, X])
         [(nab x \ nab y \
-         arr (pvariant pair [pnom x, pnom y]) (variant pair [y, x]))]))
-      (backslash X \ variant pair [X, X])).
+         arr (pvariant test_pair [pnom x, pnom y]) (variant test_pair [y, x]))]))
+      (backslash X \ variant test_pair [X, X])).
 
 test_match_nom_distinct_ok :-
     eval
-      (new x \ new y \ match (variant pair [x, y])
-        [(nab x \ nab y \ arr (pvariant pair [pnom x, pnom y]) (lit (b btrue))),
+      (new x \ new y \ match (variant test_pair [x, y])
+        [(nab x \ nab y \ arr (pvariant test_pair [pnom x, pnom y]) (lit (b btrue))),
          (arr pany (lit (b bfalse)))])
       (lit (b btrue)).
 
 test_match_nom_distinct_no :-
     eval
-      (new x \ match (variant pair [x, x])
-        [(nab x \ nab y \ arr (pvariant pair [pnom x, pnom y]) (lit (b btrue))),
+      (new x \ match (variant test_pair [x, x])
+        [(nab x \ nab y \ arr (pvariant test_pair [pnom x, pnom y]) (lit (b btrue))),
          (arr pany (lit (b bfalse)))])
       (lit (b bfalse)).
 
 test_match_nom_distinct_another_no :-
     eval
-      (new x \ new y \ match (variant pair [x, y])
-        [(nab x \ arr (pvariant pair [pnom x, pnom x]) (lit (b btrue))),
+      (new x \ new y \ match (variant test_pair [x, y])
+        [(nab x \ arr (pvariant test_pair [pnom x, pnom x]) (lit (b btrue))),
          (arr pany (lit (b bfalse)))])
       (lit (b bfalse)).
 
@@ -412,8 +414,9 @@ test_rowfix :-
        EvenOdd \
        let (select 0 EvenOdd) Even \
        let (select 1 EvenOdd) Odd \
-       (variant pair [app Even (lit (i 8)), app Even (lit (i 13))]))
-      (variant pair [lit (b btrue), lit (b bfalse)]).
+       (variant test_pair [app Even (lit (i 8)), app Even (lit (i 13))]))
+      (variant test_pair [lit (b btrue), lit (b bfalse)]).
+
 
 main :-
     test_app_id, !,
