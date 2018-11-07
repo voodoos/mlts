@@ -201,22 +201,16 @@ eval_clauses VL (Cl::Cls) VR :-
       (true)
       (eval_clauses VL Cls VR).
 
-type eval_clause tm -> list tm -> clause -> tm -> prop.
-eval_clause L Dom (all RCl) R :-
-  sigma X \ eval_clause L Dom (RCl X) R.
-eval_clause L Dom (nab RCl) R :-
-  pin x \ eval_clause L (x::Dom) (RCl x) R.
-eval_clause Lout Dom (arr Pin Rin) Vout :-
-    with_subst Dom Subst \
+type eval_clause tm -> list binding -> clause -> tm -> prop.
+eval_clause L Subst (all RCl) R :-
+  sigma X \ eval_clause L Subst (RCl X) R.
+eval_clause L Subst (nab RCl) R :-
+  pin x \ sigma Y \ eval_clause L (bind x Y :: Subst) (RCl x) R.
+eval_clause Lout Subst (arr Pin Rin) Vout :-
     matches Subst Lout Pin,
     injective Subst,
     eval Rin Vin,
     subst_val Subst Vout Vin.
-
-type with_subst list tm -> (list binding -> prop) -> prop.
-with_subst Dom K :- with_subst_acc Dom [] K.
-with_subst_acc [] Acc K :- K Acc.
-with_subst_acc (X::Dom) Acc K :- sigma Y \ with_subst_acc Dom (bind X Y :: Acc) K.
 
 injective [].
 injective (bind _X Y :: Subst) :-
@@ -307,7 +301,7 @@ test_matches_data :-
 test_matches_nom :-
     pin xout \
     pin xin \
-    with_subst [xin] Subst \
+    sigma Subst \
     matches Subst xout (pnom xin),
     subst_val Subst xout xin.
 
