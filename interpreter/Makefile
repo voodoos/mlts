@@ -8,4 +8,4 @@ run:
 	${RLWRAP} ${ELPI} src/run.elpi #-exec "run N P V T."
 
 test:
-	${ELPI} -test src/tests.mod
+	${ELPI} -test src/tests.elpi
