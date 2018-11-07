@@ -431,6 +431,22 @@ test_ulysse :-
         match X [nab Y \ arr (pnom Y) Y])
       (backslash X \ X).
 
+test_quantifier_alternation_ok :-
+    % nabla Y. forall y. (y, Y) = (X, X)
+    eval
+      (backslash X \
+        match (variant test_pair [X, X])
+          [nab Y \ all y \ arr (pvariant test_pair [pnom Y, pvar y]) y])
+      (backslash X \ X).
+
+test_quantifier_alternation_no :-
+    % not (forall y. nabla Y. (y, Y) = (X, X))
+    not (eval
+      (backslash X \
+        match (variant test_pair [X, X])
+          [all y \ nab Y \ arr (pvariant test_pair [pnom Y, pvar y]) y])
+    _).
+
 main :-
     test_app_id, !,
     test_higher_arity, !,
@@ -454,5 +470,7 @@ main :-
     test_fix, !,
     test_rowfix, !,
     test_ulysse, !,
+    %% test_quantifier_alternation_ok, !,
+    %% test_quantifier_alternation_no, !,
     true
 .
