@@ -53,8 +53,6 @@ type arr                 pat -> tm -> clause.
 type all                 (tm -> clause) -> clause.
 type nab                 (tm -> clause) -> clause.
 
-type arityof             tm -> prop.
-
 type val                 tm -> prop.
 type eval                tm -> tm -> prop.
 type eval_spec           spec -> list tm -> tm -> prop.
@@ -210,7 +208,7 @@ eval_clause Lout Subst (arr Pin Rin) Vout :-
     matches Subst Lout Pin,
     injective Subst,
     eval Rin Vin,
-    subst_val Subst Vout Vin.
+    subst_val Subst Vin Vout.
 
 injective [].
 injective (bind _X Y :: Subst) :-
@@ -227,22 +225,64 @@ not_in (bind _X Y :: Subst) Z :-
     not (Y = Z),
     not_in Subst Z.
 
-subst_val _Subst (lam T) (lam T).
-subst_val _Subst (lit L) (lit L).
+subst_val [] Vin Vout :- copy Vin Vout.
+subst_val (bind Xin Xout :: Subst) Vin Vout :-
+    copy_nom Xin Xout => subst_val Subst Vin Vout.
 
-subst_val Subst Xout Xin :-
-    nom Xout,
-    nom Xin,
-    binds Subst Xin Xout.
+type copy         tm -> tm -> prop.
+type copy_nom     tm -> tm -> prop.
+type copy_clause  clause -> clause -> prop.
+type copy_pat     pat -> pat -> prop.
+type copy_row     tmrow -> tmrow -> prop.
 
-subst_val Subst (variant C V1s) (variant C V2s) :-
-    foreach2 (subst_val Subst) V1s V2s.
+type underv    (A -> A -> prop) -> ((tm -> A) -> (tm -> A) -> prop).
+type undern    (A -> A -> prop) -> ((tm -> A) -> (tm -> A) -> prop).
+type under_row (A -> A -> prop) -> ((tmrow -> A) -> (tmrow -> A) -> prop).
+
+copy (lit L1) (lit L2) :- L1 = L2.
+copy V V :- abstract_value V.
+copy N1 N2 :-
+    nom N1,
+    copy_nom N1 N2.
+% TODO: there are cases of N1 outside the Subst domain
+
+underv Copy R1 R2 :- piv x \ Copy (R1 x) (R2 x).
+undern Copy R1 R2 :- pin x \ copy_nom x x => Copy (R1 x) (R2 x).
+
+copy (lam R1) (lam R2) :- underv copy R1 R2.
+copy (app M1 N1) (app M2 N2) :- copy M1 M2, copy N1 N2.
+copy (let M1 R1) (let M2 R2) :- copy M1 M2, underv copy R1 R2.
+copy (backslash R1) (backslash R2) :- undern copy R1 R2.
+copy (arobase M1 X1) (arobase M2 X2) :- copy M1 M2, copy_nom X1 X2.
+
+copy (new R1) (new R2) :- undern copy R1 R2.
+copy (special Sp T1s) (special Sp T2s) :- foreach2 copy T1s T2s.
+copy (if_then_else P1 T1 E1) (if_then_else P2 T2 E2) :-
+    copy P1 P2, copy T1 T2, copy E1 E2.
+
+copy (variant C T1s) (variant C T2s) :- foreach2 copy T1s T2s.
+copy (match M1 Cl1s) (match M2 Cl2s) :-
+    copy M1 M2, foreach2 copy_clause Cl1s Cl2s.
+
+copy_clause (arr P1 T1) (arr P2 T2) :- copy_pat P1 P2, copy T1 T2.
+copy_clause (all C1) (all C2) :- underv copy_clause C1 C2.
+copy_clause (nab C1) (nab C2) :- undern copy_clause C1 C2.
+
+copy (fix F1) (fix F2) :- underv copy F1 F2.
+
+under_row Copy R1 R2 :- pi x \ copy_row x x => Copy (R1 x) (R2 x).
+
+copy_row (row R1) (row R2) :- foreach2 copy R1 R2.
+copy (select N R1) (select N R2) :- copy_row R1 R2.
+copy_row (rowfix F1) (rowfix F2) :- under_row copy_row F1 F2.
+copy (letrow R1 B1) (letrow R2 B2) :-
+    copy_row R1 R2, under_row copy B1 B2.
 
 matches _Subst (lit L) (plit L).
 
 matches _Subst _X pany.
 
-matches Subst X (pvar Y) :- subst_val Subst X Y.
+matches Subst X (pvar Y) :- subst_val Subst Y X.
 
 matches Subst Xout (pnom Xin) :-
     nom Xin, nom Xout,
