@@ -19,7 +19,7 @@ kind constructor type.
 kind tm                  type.
 
 type nom                 tm -> prop.
-type val                 tm -> prop.
+type abstract_value      tm -> prop.
 
 type lam                 (tm -> tm) -> tm.
 type app                 tm -> tm -> tm.
@@ -55,6 +55,7 @@ type nab                 (tm -> clause) -> clause.
 
 type arityof             tm -> prop.
 
+type val                 tm -> prop.
 type eval                tm -> tm -> prop.
 type eval_spec           spec -> list tm -> tm -> prop.
 
@@ -86,6 +87,7 @@ val (lam _).
 val (lit L) :- val_lit L.
 
 val N :- nom N.
+val A :- abstract_value A.
 
 val_lit (i _). % TODO: ?
 val_lit (s _). % TODO: ?
@@ -95,9 +97,13 @@ val_lit (b bfalse).
 val (variant _C Vs) :- foreach val Vs.
 
 pin G :- pi x \ nom x => G x.
-piv G :- pi x \ val x => G x.
+piv G :- pi x \ abstract_value x => G x.
 
-eval V V :- val V.
+eval (lam R) (lam R).
+eval (lit L) (lit L) :- val_lit L.
+
+eval N N :- nom N.
+eval A A :- abstract_value A.
 
 eval (app T U) V :-
     eval T (lam R),
