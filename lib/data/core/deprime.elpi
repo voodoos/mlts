@@ -244,10 +244,16 @@ not_in (bind _X Y :: Subst) Z :-
     not (Y = Z),
     not_in Subst Z.
 
-subst_val [] Vin Vout :- copy Vin Vout.
-subst_val (bind Xin Xout :: Subst) Vin Vout :-
-    copy_nom Xin Xout => subst_val Subst Vin Vout.
+subst_val Subst Vin Vout :-
+    if (current_subst _)
+      (print "assert failure in subst_val", !, false)
+      (current_subst Subst => copy Vin Vout).
+copy_nom N1 N2 :-
+    nom N1,
+    current_subst Subst,
+    if (binds Subst N1 N2) (true) (N1 = N2).
 
+type current_subst list binding -> prop.
 type copy         tm -> tm -> prop.
 type copy_nom     tm -> tm -> prop.
 type copy_clause  clause -> clause -> prop.
