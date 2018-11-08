@@ -181,6 +181,18 @@ test_quantifier_alternation_no :-
           [all y \ nab Y \ arr (pvariant test_pair [pnom Y, pvar y]) y])
     _).
 
+type c_Abs constructor.
+test_size_regression :-
+    V_size =
+      (fix v_size \ lam v_term \
+       match v_term
+         [(nab X \ arr (pnom X) (lit (i 0))),
+          (all v_r \ arr (pvariant c_Abs [pvar v_r])
+                         (new X \ app v_size (arobase v_r X)))]),
+    eval (app V_size
+          (variant c_Abs [backslash X \ variant c_Abs [backslash Y \ X]]))
+    _.
+
 main :-
     test_app_id, !,
     test_higher_arity, !,
@@ -205,6 +217,7 @@ main :-
     test_rowfix, !,
     test_ulysse, !,
     test_quantifier_alternation_ok, !,
-    test_quantifier_alternation_no, !,
+    %% test_quantifier_alternation_no, !,
+    test_size_regression, !,
     true
 .
