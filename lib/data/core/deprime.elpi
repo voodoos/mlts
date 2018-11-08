@@ -93,9 +93,13 @@ val_lit (b btrue).
 val_lit (b bfalse).
 
 val (variant _C Vs) :- foreach val Vs.
+val (backslash R) :- pin x \ val (R x).
 
 pin G :- pi x \ nom x => G x.
 piv G :- pi x \ abstract_value x => G x.
+
+% This is merely an optimization, and it makes debug traces easier to read.
+eval V V :- val V, !.
 
 eval (lam R) (lam R).
 eval (lit L) (lit L) :- val_lit L.
