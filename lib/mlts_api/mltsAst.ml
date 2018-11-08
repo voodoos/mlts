@@ -56,6 +56,7 @@ and pattern =
   | PConstant of constant
   | PListCons of pattern * pattern
   | PPair of pattern * pattern
+  | PAny of value_name
 
 and constant =
   | Int of int

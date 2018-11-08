@@ -56,6 +56,7 @@
 %token AND OR
 %token EQUAL NEQ LT LE
 %token <string> IDENT
+%token <string> ANYIDENT
 %token <string> UPIDENT
 %token <string> STRING
 %token BEGIN END
@@ -259,6 +260,7 @@ trivial_pattern:
 | constr_path   			{ PConstr($1, []) }
 | constant				{ PConstant($1) }
 | value_path				{ PVal($1) }
+| ANYIDENT                              { PAny($1) }
 ;
 
 constant:

@@ -352,7 +352,9 @@ let mlts_to_prolog p =
            P.make_pvar (fst lvar) (snd lvar),
            { env with pattern_vars = lvar::env.pattern_vars }
        end
-      
+
+    | PAny(_name) -> P.make_app "pany" [], envIn
+       
     | PBind(name,pat) ->
        let lname, env = add_nom_to_env name envIn in
        let tm, env = t_pattern env pat in

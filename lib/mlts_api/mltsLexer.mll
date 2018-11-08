@@ -50,7 +50,8 @@ let alphadigit = alpha | '_' | '\'' | digit
 let blank = [' ' '\t']+
 let newline = ('\r'* '\n')
 
-let lowercaseIdent = ['a'-'z' '_'] alphadigit*
+let anyIdent =  ['_'] alphadigit*
+let lowercaseIdent = ['a'-'z'] alphadigit*
 let uppercaseIdent = ['A'-'Z'] alphadigit*  
 
 rule token = parse
@@ -62,6 +63,8 @@ rule token = parse
       { comment lexbuf; token lexbuf }
   | digit+
       { CONST_INT (int_of_string (lexeme lexbuf)) }
+   | anyIdent
+      { ANYIDENT (lexeme lexbuf) }
   | lowercaseIdent
       { id_or_keyword (lexeme lexbuf) }
   | uppercaseIdent
