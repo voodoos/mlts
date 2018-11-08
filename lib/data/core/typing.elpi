@@ -66,8 +66,8 @@ type_spec mul (arr int (arr int int)).
 type_spec sub (arr int (arr int int)).
 
 type_spec equal (arr A (arr A bool)).
-%type_spec and (arr bool (arr bool bool)).
-%type_spec or (arr bool (arr bool bool)).
+type_spec and (arr bool (arr bool bool)).
+type_spec or (arr bool (arr bool bool)).
 
 type_args B [] B.
 type_args (arr A B) [E|TL] C :-

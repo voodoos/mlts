@@ -134,6 +134,8 @@ type equal spec.
 type add   spec.
 type sub   spec.
 type mul   spec.
+type and   spec.
+type or    spec.
 
 is_int (lit (i N)) N.
 is_bool (lit (b B)) B.
@@ -160,6 +162,19 @@ eval_spec sub [E1, E2] V3 :-
     int_op E1 E2 V3
      (N1 \ N2 \ N3 \
       N3 is N1 - N2).
+
+
+eval_spec or [E1, E2] V3 :-
+    eval E1 V1,
+    if (V1 = (lit (b btrue)))
+       (V3 is lit (b btrue))
+       (eval E2 V3).
+
+eval_spec and [E1, E2] V3 :-
+    eval E1 V1,
+    if (V1 = (lit (b btrue)))
+       (eval E2 V3)
+       (V3 is lit (b bfalse)).
 
 if P Q _R :- P, !, Q.
 if _P _Q R :- R.
