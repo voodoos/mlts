@@ -224,8 +224,8 @@ let mlts_to_prolog p =
                                                 
     | ELetRecin(LBVal(name, params, e), body) ->
        (*let name = ((fst ln) ^ "_" ^ (string_of_int (snd ln))) in*)
-       let letbody, env = make_lam envIn params e in
-       let ln, env = add_to_env name env in
+       let ln, env = add_to_env name envIn in
+       let letbody, env = make_lam env params e in
        let body, env =t_expr env body in
        P.make_letrecin ln letbody body, revert_locals envIn env
                        
