@@ -45,13 +45,31 @@ let add_nom_to_env v env =
 let first_in_env v env =
   try List.assoc v env.pattern_vars with
     Not_found -> List.assoc v env.local_vars
-    
+
+let string_of_env env = 
+  String.concat "\n"
+    [
+      "local_vars: " ^ (List.fold_left
+                          (fun s (v, i) -> "(" ^ v ^ ", " ^ (string_of_int i) ^ ")" ^ s)
+                          "" env.local_vars);
+      "free_vars: " ^ (List.fold_left (^) "" env.free_vars);
+      "pattern_vars: " ^(List.fold_left
+                          (fun s (v, i) -> "(" ^ v ^ ", " ^ (string_of_int i) ^ ")" ^ s)
+                          "" env.pattern_vars);
+      "local_noms: " ^ (List.fold_left
+                          (fun s (v, i) -> "(" ^ v ^ ", " ^ (string_of_int i) ^ ")" ^ s)
+                          "" env.local_noms);
+    ]
+let print_env env = print_endline (string_of_env env)     
 
 (* env are used to pass is used to carry different kind of information. Some, such as local variables should be erased when leaving scope, some like the list of "free variables" needed by an expr should not.
 
  This may be bad design (todo ?) but for now the revert_locals function can be use to strip newly declared locals using an "Original" environement without the new locals and the  "deeper" env with maybe new locals and infos *)
 let revert_locals envBefore envAfter = {
     envAfter with local_vars = envBefore.local_vars
+  }
+let revert_noms envBefore envAfter = {
+    envAfter with local_noms = envBefore.local_noms
   }
 let revert_patterns envBefore envAfter = {
     envAfter with pattern_vars = envBefore.pattern_vars
@@ -205,9 +223,9 @@ let mlts_to_prolog p =
        P.make_letin lname exprtm bodytm, revert_locals envIn env
                                                 
     | ELetRecin(LBVal(name, params, e), body) ->
-       let ln, env = add_to_env name envIn in
        (*let name = ((fst ln) ^ "_" ^ (string_of_int (snd ln))) in*)
-       let letbody, env = make_lam env params e in
+       let letbody, env = make_lam envIn params e in
+       let ln, env = add_to_env name env in
        let body, env =t_expr env body in
        P.make_letrecin ln letbody body, revert_locals envIn env
                        
@@ -220,9 +238,7 @@ let mlts_to_prolog p =
                           ) ([], env) rules in
        
        
-       print_endline ("Debug: freevars found " ^
-                        (List.fold_left (^) "" env.free_vars));
-       (* todo warning escaping local vars !*)
+      
        P.make_match e rules, env
        
     | EIf(e1, e2, e3) ->
@@ -252,7 +268,7 @@ let mlts_to_prolog p =
                         
     | EInfix(e1, op, e2) -> 
        let te1, env = t_expr envIn e1 in
-       let te2, env = t_expr (revert_locals envIn env) e2 in
+       let te2, env = t_expr env e2 in
        P.make_spec op [te1; te2],
        env
        
@@ -260,6 +276,7 @@ let mlts_to_prolog p =
                  
     | EVal(v) -> 
        begin
+         print_env envIn;
          try P.make_local v (first_in_env v envIn), envIn
          with Not_found -> (* Non-local must be global *)
            if (List.mem v ctx.global_vars) then
@@ -309,7 +326,7 @@ let mlts_to_prolog p =
     | EBind(name, body) -> 
        let lname, env = add_nom_to_env name envIn in
        let tm, env = t_expr env body in
-       P.make_bind lname tm, revert_locals envIn env
+       P.make_bind lname tm, revert_noms envIn env
        
     | EFun(params, body) ->
        let tm, env = make_lam envIn params body in
@@ -318,7 +335,7 @@ let mlts_to_prolog p =
     | ENew(name, body) ->
        let lname, env = add_nom_to_env name envIn in
        let tm, env = t_expr env body in
-       P.make_new lname tm, revert_locals envIn env
+       P.make_new lname tm, revert_noms envIn env
 
   and t_constant ?(is_pat = false) = function
     | Int(i) -> P.make_int ~is_pat i
@@ -336,10 +353,12 @@ let mlts_to_prolog p =
            env, n::pns
          ) (envIn, []) names in
        let pat, env = t_pattern env pat in
+       let pattern_vars = env.pattern_vars in
+       let env = { env with pattern_vars = [] } in
        let body, env = t_expr env e in
        
-       P.make_rule  (List.rev pat_noms) env.pattern_vars pat body,
-       revert_patterns envIn (revert_locals envIn env)
+       P.make_rule  (List.rev pat_noms) pattern_vars pat body,
+       revert_noms envIn (revert_patterns envIn (revert_locals envIn env))
 
   and t_pattern envIn = function
     | PVal(name) -> 
@@ -358,7 +377,7 @@ let mlts_to_prolog p =
     | PBind(name,pat) ->
        let lname, env = add_nom_to_env name envIn in
        let tm, env = t_pattern env pat in
-       P.make_bind ~pattern:true lname tm, revert_locals envIn env
+       P.make_bind ~pattern:true lname tm, revert_noms envIn env
        
     | PApp(_name,_pats) -> failwith "Not implemented: PApp"
                          
@@ -413,7 +432,7 @@ let mlts_to_prolog p =
       | p::ptl -> 
          let lvar, env = add_to_env p env in
          let inner, env = aux env ptl e in
-         P.make_lam 0 0 lvar inner, env
+         P.make_lam lvar inner, env
     in
     let tm, env = aux envInitial params e in
     tm, revert_locals envInitial env

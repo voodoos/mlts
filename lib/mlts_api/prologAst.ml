@@ -86,7 +86,7 @@ let make_spec s args =
       [make_global (infix_to_string s);
       List(args)])
 
-let make_lam _a1 _a2 lvar inner =
+let make_lam lvar inner =
   App(Global("lam"),
       [Abs(lvar, inner)])
 
@@ -123,8 +123,8 @@ let make_deps fvs =
 
 let rec make_rule nabs vars pat body =
   match nabs, vars with
-  | n::ntl, _ -> make_app "nab" [Abs(n, make_rule ntl vars pat body)]
-  | [], v::vtl -> make_app "all" [Abs(v, make_rule nabs vtl pat body)]
+  | _, v::vtl -> make_app "all" [Abs(v, make_rule nabs vtl pat body)]
+  | n::ntl, [] -> make_app "nab" [Abs(n, make_rule ntl vars pat body)]
   | [], [] -> make_app "arr" [pat; body]
 
 let make_match tm rules =
