@@ -1,6 +1,6 @@
 .PHONY: translator data main.byte js core core-sync
 
-PYTHON ?= python3.6
+PYTHON ?= python3
 
 all: data js
 
