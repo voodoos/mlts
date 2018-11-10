@@ -32,6 +32,8 @@ type env = {
     local_noms: P.local_name list;
   }
          
+let flip f = (fun y x -> f x y)
+
 let add_to_env v env = 
   match List.assoc_opt v env.local_vars with
   | None -> (v, 0), { env with local_vars = (v, 0)::env.local_vars }
@@ -46,20 +48,15 @@ let first_in_env v env =
   try List.assoc v env.pattern_vars with
     Not_found -> List.assoc v env.local_vars
 
-let string_of_env env = 
-  String.concat "\n"
-    [
-      "local_vars: " ^ (List.fold_left
-                          (fun s (v, i) -> "(" ^ v ^ ", " ^ (string_of_int i) ^ ")" ^ s)
-                          "" env.local_vars);
-      "free_vars: " ^ (List.fold_left (^) "" env.free_vars);
-      "pattern_vars: " ^(List.fold_left
-                          (fun s (v, i) -> "(" ^ v ^ ", " ^ (string_of_int i) ^ ")" ^ s)
-                          "" env.pattern_vars);
-      "local_noms: " ^ (List.fold_left
-                          (fun s (v, i) -> "(" ^ v ^ ", " ^ (string_of_int i) ^ ")" ^ s)
-                          "" env.local_noms);
-    ]
+let string_of_env env =
+  let string_of_var (v, i) = Printf.sprintf "(%s, %d)" v i in
+  let section name to_string li = [ name; ": " ] @ List.map to_string li @ [ "\n" ] in
+  String.concat "" ([]
+    @ section "local_vars" string_of_var env.local_vars
+    @ section "free_vars" (fun s -> s) env.free_vars
+    @ section "pattern_vars" string_of_var env.pattern_vars
+    @ section "local_noms" string_of_var env.local_noms
+   )
 let print_env env = print_endline (string_of_env env)     
 
 (* env are used to pass is used to carry different kind of information. Some, such as local variables should be erased when leaving scope, some like the list of "free variables" needed by an expr should not.
@@ -75,7 +72,12 @@ let revert_patterns envBefore envAfter = {
     envAfter with pattern_vars = envBefore.pattern_vars
   }
                                      
-                                     
+let map_with_env f env li =
+  let accumulate (acc, env) input =
+    let (output, env) = f env input in
+    (output::acc, env) in
+  let rev_results, env = List.fold_left accumulate ([], env) li in
+  List.rev rev_results, env
     
 type k = Decl | Def
 type tdef = { kind: k;  name: string; body: P.term; env: env }
@@ -151,8 +153,8 @@ let mlts_to_prolog p =
        let body, env = make_lam env params e in
        add_global name;
        
-       print_endline ("Debug: end freevars found: " ^
-                        (List.fold_left (^) "" env.free_vars));
+       print_endline ("Debug: end freevars found: "
+                      ^ String.concat "" env.free_vars);
        [P.Definition({
              name = "prog";
              args = [P.Lit(P.String(name));
@@ -213,11 +215,8 @@ let mlts_to_prolog p =
     | ELetin(LBVal(name, params, expr), body) ->
        (* let f x y = x + y in f 2 3;; *)
        (* Add params to env for expr *)
-       let env =
-         List.fold_left (
-             fun env p ->
-             snd (add_to_env p env)
-           ) envIn params in
+       let _params, env =
+         map_with_env (flip add_to_env) envIn params in
        let exprtm, env = t_expr env expr in
     (* Removing params from env (but keeping freevars) *)
        let env = revert_locals envIn env in
@@ -236,15 +235,8 @@ let mlts_to_prolog p =
                        
     | EMatch(e, rules) ->
        let e, env = t_expr envIn e in
-       let rules, env = List.fold_left (
-                            fun (rules, env) rule ->
-                            let r, env = t_rule env rule in
-                            (r::rules, env)
-                          ) ([], env) rules in
-       
-       
-      
-       P.make_match e (List.rev rules), env
+       let rules, env = map_with_env t_rule env rules in
+       P.make_match e rules, env
        
     | EIf(e1, e2, e3) ->
        let tm1, env = t_expr envIn e1 in
@@ -254,22 +246,13 @@ let mlts_to_prolog p =
        
     | EApp(e, args) -> 
        let te, env = t_expr envIn e in
-       let args, env = List.fold_left (
-                           fun (args, env) e ->
-                           let ta, env = t_expr env e in
-                           ta::args, env
-                         ) ([], env) args in
-       P.make_appt te (List.rev args), env
+       let args, env = map_with_env t_expr env args in
+       P.make_appt te args, env
        
     | EBApp(e, args) ->
        let te, env = t_expr envIn e in
-       let args, env = List.fold_left (
-                           fun (args, env) e ->
-                           let ta, env = t_expr env e in
-                           ta::args, env
-                         ) ([], env) args in
-       
-       P.make_nom_appt te (List.rev args), env
+       let args, env = map_with_env t_expr env args in
+       P.make_nom_appt te args, env
                         
     | EInfix(e1, op, e2) -> 
        let te1, env = t_expr envIn e1 in
@@ -313,12 +296,8 @@ let mlts_to_prolog p =
          with
            Not_found ->
            if List.mem name ctx.global_constrs then
-             let tms, env = List.fold_left (
-                                fun (tms, env) e ->
-                                let tm, env = t_expr env e in
-                                (tm::tms, env)
-                              ) ([], envIn) exprs in
-             P.make_constr name  (List.rev tms), env
+             let tms, env = map_with_env t_expr envIn exprs in
+             P.make_constr name tms, env
            else
              raise (make_exception
                ("Unknown constructor " ^ name)
@@ -351,18 +330,13 @@ let mlts_to_prolog p =
   and t_rule envIn = function
     | RSimple(pat, e) -> t_rule envIn (RNa([], pat, e))
     | RNa(names, pat, e) ->
-       let env, pat_noms = List.fold_left (
-           fun (env, pns) n ->
-           (* todo: nabs are constructors not local vars *)
-           let n, env = add_nom_to_env n env in
-           env, n::pns
-         ) (envIn, []) names in
+       let pat_noms, env = map_with_env (flip add_nom_to_env) envIn names in
        let pat, env = t_pattern env pat in
        let pattern_vars = env.pattern_vars in
        let env = { env with pattern_vars = [] } in
        let body, env = t_expr env e in
        
-       P.make_rule  (List.rev pat_noms) pattern_vars pat body,
+       P.make_rule pat_noms pattern_vars pat body,
        revert_noms envIn (revert_patterns envIn (revert_locals envIn env))
 
   and t_pattern envIn = function
@@ -389,12 +363,8 @@ let mlts_to_prolog p =
     | PBApp(name, pats) ->
        (* todo: maybe the parser should accept more than just names ? *)
        let var, env = t_pattern envIn (PVal(name)) in
-       let tms, env = List.fold_left (
-                           fun (tms, env) pat ->
-                           let tm, env = t_pattern env pat in
-                           tm::tms, env
-                       ) ([], env) pats
-       in P.make_appt ~nom:true ~pattern:true var tms, env
+       let tms, env = map_with_env t_pattern env pats in
+       P.make_appt ~nom:true ~pattern:true var tms, env
                            
     | PConstr(name, pats) ->
        (* A constructor is either 
@@ -409,12 +379,8 @@ let mlts_to_prolog p =
          with
            Not_found ->
            if List.mem name ctx.global_constrs then
-             let tms, env = List.fold_left (
-                                fun (tms, env) p ->
-                                let tm, env = t_pattern env p in
-                                (tm::tms, env)
-                              ) ([], envIn) pats in
-             P.make_constr ~pattern:true name (List.rev tms), env
+             let tms, env = map_with_env t_pattern envIn pats in
+             P.make_constr ~pattern:true name tms, env
            else
              failwith ("Unknown constructor " ^ name)
        end
