@@ -240,9 +240,12 @@ eval_clause L Subst (nab RCl) R :-
   pin x \ sigma Y \ eval_clause L (bind x Y :: Subst) (RCl x) R.
 eval_clause Lout Subst (arr Pin Rin) Vout :-
     matches Subst Lout Pin,
+    if debug (print "eval_clause matches" Subst Lout Pin) true,
     injective Subst,
-    eval Rin Vin,
-    subst_val Subst Vin Vout.
+    if debug (print "eval_clause before-subst" Subst Rin) true,
+    subst Subst Rin Rout,
+    if debug (print "eval_clause subst" Subst Rin Rout) true,
+    eval Rout Vout.
 
 injective [].
 injective (bind _X Y :: Subst) :-
@@ -260,14 +263,15 @@ not_in (bind _X Y :: Subst) Z :-
     not (Y = Z),
     not_in Subst Z.
 
-subst_val Subst Vin Vout :-
+subst Subst Tin Tout :-
     if (current_subst _)
-      (print "assert failure in subst_val", !, false)
-      (current_subst Subst => copy Vin Vout).
+      (print "assert failure in subst", !, false)
+      (current_subst Subst => copy Tin Tout).
+
 copy_nom N1 N2 :-
     nom N1,
     current_subst Subst,
-    if (binds Subst N1 N2) (true) (N1 = N2).
+    binds Subst N1 N2.
 
 type current_subst list binding -> prop.
 type copy         tm -> tm -> prop.
@@ -322,6 +326,13 @@ copy_clause (arr P1 T1) (arr P2 T2) :- copy_pat P1 P2, copy T1 T2.
 copy_clause (all C1) (all C2) :- underv copy_clause C1 C2.
 copy_clause (nab C1) (nab C2) :- undern copy_clause C1 C2.
 
+copy_pat (plit L1) (plit L2) :- L1 = L2.
+copy_pat (pvar X1) (pvar X2) :- copy X1 X2.
+copy_pat (pnom N1) (pnom N2) :- copy_nom N1 N2.
+copy_pat (pbackslash R1) (pbackslash R2) :- undern copy_pat R1 R2.
+copy_pat (parobase P1 X1) (parobase P2 X2) :- copy_pat P1 P2, copy_nom X1 X2.
+copy_pat (pvariant C P1s) (pvariant C P2s) :- foreach2 copy_pat P1s P2s.
+
 copy (fix F1) (fix F2) :- underv copy F1 F2.
 
 under_row Copy R1 R2 :- pi x \ copy_row x x => Copy (R1 x) (R2 x).
@@ -336,7 +347,7 @@ matches _Subst (lit L) (plit L).
 
 matches _Subst _X pany.
 
-matches Subst X (pvar Y) :- subst_val Subst Y X.
+matches Subst X (pvar Y) :- subst Subst Y X.
 
 matches Subst Xout (pnom Xin) :-
     nom Xin, nom Xout,

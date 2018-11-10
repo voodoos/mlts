@@ -43,7 +43,7 @@ test_matches_nom :-
     pin xin \
     sigma Subst \
     matches Subst xout (pnom xin),
-    subst_val Subst xout xin.
+    subst Subst xout xin.
 
 test_match_lit :-
     eval
@@ -193,14 +193,15 @@ test_size_regression :-
           (variant c_Abs [backslash X \ variant c_Abs [backslash Y \ X]]))
     _.
 
-  test_bad_eval1 :-
-    V_simple = (new (c_X_4_0 \ match c_X_4_0 [arr (pnom c_X_4_0) (lit (i 42))])),
-    eval V_simple V, print V.
-
+test_bad_eval1 :-
+  V_simple = (new (X \ match X [arr (pnom X) (lit (i 42))])),
+  eval V_simple (lit (i 42)).
 
 test_bad_eval2 :-
-  V_simple = (lam (v_var_0 \ match v_var_0 [nab (c_X_4_0 \ arr (pnom c_X_4_0) ( match c_X_4_0 [ arr (pnom c_X_4_0) ( lit (i 43))]))])),
-  eval (new cY \ app V_simple cY) V, print V.
+  V_simple = (lam var \ match var
+              [nab (X \ arr (pnom X) (match X
+                                      [arr (pnom X) (lit (i 43))]))]),
+  eval (new cY \ app V_simple cY) (lit (i 43)).
 
 test_lookup :-
     V_lookup = (lam n \ match n
@@ -208,8 +209,7 @@ test_lookup :-
                  (match n [arr (pnom Y) (lit (i 42))])]),
     eval
       (backslash c_X_0 \ app V_lookup c_X_0)
-      _.
-
+      (backslash X \ lit (i 42)).
 
 main :-
     test_app_id, !,
@@ -238,6 +238,7 @@ main :-
     %% test_quantifier_alternation_no, !,
     test_size_regression, !,
     test_bad_eval1, !,
-    debug => test_lookup, !,
+    test_bad_eval2, !,
+    test_lookup, !,
     true
 .
