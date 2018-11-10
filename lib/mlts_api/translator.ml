@@ -136,7 +136,7 @@ let mlts_to_prolog p =
   and t_def env =
     function
     | DLet(LBVal(name, params, e)) ->
-       set_actual_name name;
+      set_actual_name name;
        let body, env = make_lam env params e in
        add_global name;
        [P.Definition({
@@ -145,7 +145,7 @@ let mlts_to_prolog p =
              body = P.make_deps (env.free_vars);
        })]
     | DLetrec(LBVal(name, params, e)) ->
-       set_actual_name name;
+      set_actual_name name;
        let ln, env = add_to_env name env in
        (*let name = ((fst ln) ^ "_" ^ (string_of_int (snd ln))) in*)
        let body, env = make_lam env params e in
@@ -165,44 +165,49 @@ let mlts_to_prolog p =
        let d = t_def env2 (DLet l) in
        { d with env = revert_locals env d.env }*)
     | DType(name, decls) -> 
-       set_actual_name name;
-       let type_decl =
-         P.Declaration({
-                 sort = Type;
-                 name =  name;
-                 ty = P.Name "ty"
-             }) in
-      let constructors =  List.map (fun decl ->
-           let c, typ = match decl with
-                          | Simple(c) -> c, P.List []
-                          | Of(c, typ) -> c,
-                                          match typ with (* todo hideous hack *)
-                                          | Sum(_, _) -> t_typ typ
-                                          | _ -> P.List [t_typ typ]
-           in
-           add_constr c;
-           [P.Declaration({
-                 sort = Type;
-                 name =  c;
-                 ty = P.Name "constructor"
-              });
-            P.Definition({
-                 name =  "type_constr";
-                 args = [P.make_global c;
-                         typ;
-                         P.make_global name];
-                 body = None
-              });
-           ]
-                            ) decls in
+    set_actual_name name;
+    let rec list_of_sum ty = 
+      let rec t_typ = function
+        | Cons(c) -> P.make_global c
+        | Sum(_, _) as s -> P.List (List.rev (list_of_sum s))
+        | Arrow(ty1, ty2) -> P.make_app "arr" [t_typ ty1; t_typ ty2]
+        | Bind(ty1, ty2) -> P.make_app "bigarr" [t_typ ty1; t_typ ty2]
+        | List(_t) -> failwith "List (type) not implemented"
+      in
+      match ty with
+      | Sum(ty1, ty2) -> (t_typ ty2)::(list_of_sum ty1)
+      | _ -> [t_typ ty]
+    in
+    let type_decl =
+      P.Declaration({
+              sort = Type;
+              name =  name;
+              ty = P.Name "ty"
+          })
+    in
+    let constructors =  List.map (fun decl ->
+      let c, typ = match decl with
+                  | Simple(c) -> c, P.List []
+                  | Of(c, typ) -> c, P.List (List.rev (list_of_sum typ))
+      in
+      add_constr c;
+      [P.Declaration({
+            sort = Type;
+             name =  c;
+             ty = P.Name "constructor"
+          });
+       P.Definition({
+             name =  "type_constr";
+             args = [P.make_global c;
+                     typ;
+                     P.make_global name];
+             body = None
+          });
+       ]
+      ) decls in
       type_decl::(List.flatten constructors)
 
-  and t_typ = function
-    | Cons(c) -> P.make_global c
-    | Sum(ty1, ty2) -> P.List [t_typ ty1; t_typ ty2]
-    | Arrow(ty1, ty2) -> P.make_app "arr" [t_typ ty1; t_typ ty2]
-    | Bind(ty1, ty2) -> P.make_app "bigarr" [t_typ ty1; t_typ ty2]
-    | List(_t) -> failwith "List (type) not implemented"
+  
       
   and t_expr envIn = function
     | ELetin(LBVal(name, params, expr), body) ->
