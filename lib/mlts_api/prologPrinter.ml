@@ -34,8 +34,13 @@ let pp_literal ppf = function
   | String s -> fprintf ppf "%S" s
   | Bool b -> fprintf ppf "b%b" b
 
+let pp_abs self ppf (n, t) =
+  fprintf ppf "%a \\@ %a"
+    pp_local_name n
+    self t
+
 let rec pp_term ppf t =
-  fprintf ppf "@[%a@]"
+  fprintf ppf "@[<2>%a@]"
     pp_term_seq t
 and pp_term_seq ppf = function
   | Seq [] -> fprintf ppf "true"
@@ -49,9 +54,7 @@ and pp_term_below_seq ppf =
   let self = pp_term_below_seq in
   function
   | Abs (n, t) ->
-    fprintf ppf "%a \\@ %a"
-      pp_local_name n
-      self t
+    pp_abs self ppf (n, t)
   | Hyp (t, u) ->
     fprintf ppf "%a => %a"
       pp_term_app t
@@ -71,10 +74,27 @@ and pp_term_cons ppf = function
     pp_term_app ppf below
 and pp_term_app ppf = function
   | App (head, args) ->
-    let pp_sep ppf () = fprintf ppf " " in
-    fprintf ppf "%a %a"
-      pp_atom head
-      (pp_print_list ~pp_sep pp_term_simple) args 
+    let pp_spaced_list printer =
+      let pp_sep ppf () = fprintf ppf "@ " in
+      pp_print_list ~pp_sep printer in
+    (* if the last arguments of an atom is an abstraction,
+       we print (foo bar baz X \ ...) instead of (foo bar baz (X \ ...)),
+       following the usual lambdaProlog binder convention. *)
+    begin match List.rev args with
+    | [] -> pp_atom ppf head
+    | (Abs (n, t)) :: rev_rest ->
+      let args_but_last = List.rev rev_rest in
+      fprintf ppf "%a %a%t%a"
+        pp_atom head
+        (pp_spaced_list pp_term_simple) args_but_last
+        (fun ppf -> if args_but_last = [] then ()
+          else fprintf ppf " ")
+        (pp_abs pp_term_app) (n, t)
+    | _ ->
+      fprintf ppf "%a %a"
+        pp_atom head
+        (pp_spaced_list pp_term_simple) args
+    end
   | below ->
     pp_term_simple ppf below
 and pp_term_simple ppf = function
@@ -82,10 +102,11 @@ and pp_term_simple ppf = function
     pp_atom ppf atom
   | Lit lit ->
     pp_literal ppf lit
-  | List terms -> 
+  | List [term] -> fprintf ppf "[@[%a@]]" pp_term term
+  | List terms ->
     let pp_sep ppf () = fprintf ppf ",@ " in
     fprintf ppf "[@[%a@]]"
-      (pp_print_list ~pp_sep pp_term_app) terms
+      (pp_print_list ~pp_sep pp_term_simple) terms
   | (Seq _ | Abs _ | Hyp _ | Eq _ | Cons _ | App (_, _::_)) as above ->
     with_parens pp_term ppf above
 
