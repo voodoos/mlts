@@ -55,8 +55,8 @@ test_match_easydata :-
       (match (variant zero []) [arr (pvariant zero []) (lit (i 0))])
       (lit (i 0)).
 
-test_eval_clause :-
-    eval_clause
+test_select_clause :-
+    select_clause
       (lit (i 0))
       [] (arr (plit (i 0)) (lit (i 3)))
       (lit (i 3)).
@@ -220,7 +220,7 @@ main :-
     test_matches_lit, !,
     test_matches_data, !,
     test_matches_nom, !,
-    test_eval_clause, !,
+    test_select_clause, !,
     test_match_data, !,
     test_match_all, !,
     test_match_nab, !,

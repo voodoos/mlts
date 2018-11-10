@@ -217,35 +217,35 @@ eval (letrow RowDef Body) V :-
 
 eval (match T Cls) V :-
     eval T VT,
-    eval_clauses VT Cls V.
+    select_clauses VT Cls TCl,
+    eval TCl V.
 
-type eval_clauses tm -> list clause -> tm -> prop.
-eval_clauses _VL [] _VR :- false.
-eval_clauses VL (Cl::Cls) VR :-
-    if (eval_clause VL [] Cl VR)
+type select_clauses tm -> list clause -> tm -> prop.
+select_clauses _VL [] _VR :- false.
+select_clauses VL (Cl::Cls) VR :-
+    if (select_clause VL [] Cl VR)
       (true)
-      (eval_clauses VL Cls VR).
+      (select_clauses VL Cls VR).
 
-type seen-by-eval_clause clause -> prop.
-eval_clause L Subst Cl R :-
+type seen-by-select_clause clause -> prop.
+select_clause L Subst Cl R :-
   debug,
-  not (seen-by-eval_clause Cl), !,
-  print eval_clause L Subst Cl R,
-  seen-by-eval_clause Cl => eval_clause L Subst Cl R.
+  not (seen-by-select_clause Cl), !,
+  print select_clause L Subst Cl R,
+  seen-by-select_clause Cl => select_clause L Subst Cl R.
 
-type eval_clause tm -> list binding -> clause -> tm -> prop.
-eval_clause L Subst (all RCl) R :-
-  sigma X \ eval_clause L Subst (RCl X) R.
-eval_clause L Subst (nab RCl) R :-
-  pin x \ sigma Y \ eval_clause L (bind x Y :: Subst) (RCl x) R.
-eval_clause Lout Subst (arr Pin Rin) Vout :-
+type select_clause tm -> list binding -> clause -> tm -> prop.
+select_clause L Subst (all RCl) R :-
+  sigma X \ select_clause L Subst (RCl X) R.
+select_clause L Subst (nab RCl) R :-
+  pin x \ sigma Y \ select_clause L (bind x Y :: Subst) (RCl x) R.
+select_clause Lout Subst (arr Pin Rin) Rout :-
     matches Subst Lout Pin,
-    if debug (print "eval_clause matches" Subst Lout Pin) true,
+    if debug (print "select_clause matches" Subst Lout Pin) true,
     injective Subst,
-    if debug (print "eval_clause before-subst" Subst Rin) true,
+    if debug (print "select_clause before-subst" Subst Rin) true,
     subst Subst Rin Rout,
-    if debug (print "eval_clause subst" Subst Rin Rout) true,
-    eval Rout Vout.
+    if debug (print "select_clause subst" Subst Rin Rout) true.
 
 injective [].
 injective (bind _X Y :: Subst) :-
