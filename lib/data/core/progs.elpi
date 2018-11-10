@@ -1,0 +1,7 @@
+prog "v_lookup"
+(lam v_n_0 \ match v_n_0
+   [nab c_Y_0 \ arr (pnom c_Y_0)
+      (match v_n_0 [arr (pnom c_Y_0) (lit (i 42))])]).
+
+prog "val_0"
+(backslash c_X_0 \ app V_lookup c_X_0) :- prog "v_lookup" V_lookup.
