@@ -244,7 +244,7 @@ let mlts_to_prolog p =
        
        
       
-       P.make_match e rules, env
+       P.make_match e (List.rev rules), env
        
     | EIf(e1, e2, e3) ->
        let tm1, env = t_expr envIn e1 in
