@@ -285,10 +285,16 @@ copy V V :- abstract_value V.
 copy N1 N2 :-
     nom N1,
     copy_nom N1 N2.
-% TODO: there are cases of N1 outside the Subst domain
 
 underv Copy R1 R2 :- piv x \ Copy (R1 x) (R2 x).
 undern Copy R1 R2 :- pin x \ copy_nom x x => Copy (R1 x) (R2 x).
+
+%% type seen-by-copy tm -> prop.
+%% copy T1 T2 :-
+%%     debug,
+%%     not (seen-by-copy T1), !,
+%%     print "copy" T1 T2,
+%%     seen-by-copy T1 => copy T1 T2.
 
 copy (lam R1) (lam R2) :- underv copy R1 R2.
 copy (app M1 N1) (app M2 N2) :- copy M1 M2, copy N1 N2.
@@ -304,6 +310,13 @@ copy (if_then_else P1 T1 E1) (if_then_else P2 T2 E2) :-
 copy (variant C T1s) (variant C T2s) :- foreach2 copy T1s T2s.
 copy (match M1 Cl1s) (match M2 Cl2s) :-
     copy M1 M2, foreach2 copy_clause Cl1s Cl2s.
+
+%% type seen-by-copy_clause clause -> prop.
+%% copy_clause Cl1 Cl2 :-
+%%     debug,
+%%     not (seen-by-copy_clause Cl1), !,
+%%     print "copy_clause" Cl1 Cl2,
+%%     seen-by-copy_clause Cl1 => copy_clause Cl1 Cl2.
 
 copy_clause (arr P1 T1) (arr P2 T2) :- copy_pat P1 P2, copy T1 T2.
 copy_clause (all C1) (all C2) :- underv copy_clause C1 C2.
