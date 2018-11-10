@@ -193,6 +193,15 @@ test_size_regression :-
           (variant c_Abs [backslash X \ variant c_Abs [backslash Y \ X]]))
     _.
 
+  test_bad_eval1 :-
+    V_simple = (new (c_X_4_0 \ match c_X_4_0 [arr (pnom c_X_4_0) (lit (i 42))])),
+    eval V_simple V, print V.
+
+
+test_bad_eval2 :-
+  V_simple = (lam (v_var_0 \ match v_var_0 [nab (c_X_4_0 \ arr (pnom c_X_4_0) ( match c_X_4_0 [ arr (pnom c_X_4_0) ( lit (i 43))]))])),
+  eval (new cY \ app V_simple cY) V, print V.
+
 main :-
     test_app_id, !,
     test_higher_arity, !,
@@ -219,5 +228,6 @@ main :-
     test_quantifier_alternation_ok, !,
     %% test_quantifier_alternation_no, !,
     test_size_regression, !,
+    test_bad_eval1, !,
     true
 .
