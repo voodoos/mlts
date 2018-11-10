@@ -234,6 +234,7 @@ injective (bind _X Y :: Subst) :-
     not_in Subst Y,
     injective Subst.
 
+binds [] X2 Y2 :- X2 = Y2.
 binds (bind X1 Y1 :: Subst) X2 Y2 :-
     if (X1 = X2)
        (Y1 = Y2)
