@@ -44,7 +44,7 @@ type plit                literal -> pat.
 type pvar                tm -> pat.
 type pnom                tm -> pat.
 type pbackslash          (tm -> pat) -> pat.
-type parobase            pat -> tm -> pat.
+type parobase            pat -> pat -> pat.
 type pvariant            constructor -> list pat -> pat.
 
 kind clause              type.
@@ -319,7 +319,7 @@ matches Subst Xout (pnom Xin) :-
     binds Subst Xin Xout.
 
 matches Subst (variant C Ts) (pvariant C Ps) :-
-    print "matches" Subst (variant C Ts) (pvariant C Ps),
+    print matches Subst (variant C Ts) (pvariant C Ps),
     foreach2 (matches Subst) Ts Ps.
 
 eval (fix F) V :- eval (F (fix F)) V.
@@ -331,5 +331,6 @@ foreach P (X::Xs) :- P X, foreach P Xs.
 
 type foreach2 (A -> B -> prop) -> list A -> list B -> prop.
 foreach2 _P [] [].
-foreach2 P (X::Xs) (Y::Ys) :- P X Y, foreach2 P Xs Ys.
+foreach2 P (X::Xs) (Y::Ys) :-
+    print for P X Y, P X Y, foreach2 P Xs Ys.
 

@@ -1,7 +1,20 @@
-prog "v_lookup"
-(lam v_n_0 \ match v_n_0
-   [nab c_Y_0 \ arr (pnom c_Y_0)
-      (match v_n_0 [arr (pnom c_Y_0) (lit (i 42))])]).
+type t_tm ty.
+type c_App constructor.
+type_constr c_App [t_tm, t_tm] t_tm.
+type c_Abs constructor.
+type_constr c_Abs [bigarr t_tm t_tm] t_tm.
+prog "v_vacp1"
+(fix v_vacp1_0 \ lam v_t_0 \ match v_t_0
+   [(arr (pvariant c_Abs [pbackslash c_X_0 \ pnom c_X_0]) (lit (b bfalse))),
+    (all v_n_0 \ all v_m_0 \
+       arr (pvariant c_Abs
+              [pbackslash c_X_0 \ pvariant c_App
+                 [(parobase (pvar v_m_0) (pnom c_X_0)),
+                  (parobase (pvar v_n_0) (pnom c_X_0))]])
+       (special and
+          [(app v_vacp1_0 (variant c_Abs [v_m_0])),
+           (app v_vacp1_0 (variant c_Abs [v_n_0]))]))]).
 
-prog "val_0"
-(backslash c_X_0 \ app V_lookup c_X_0) :- prog "v_lookup" V_lookup.
+prog "val_1"
+(app V_vacp1 (variant c_Abs [backslash c_X_0 \ variant c_App [c_X_0, c_X_0]])) :- 
+prog "v_vacp1" V_vacp1.

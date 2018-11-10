@@ -1,3 +1,20 @@
+
+type tm =
+     | App of tm * tm
+     | Abs of tm => tm;;
+     
+let lookup sub var = match var with 
+  | nab X in X -> 
+    let rec aux s = match s with 
+                    | []         -> X
+                    | (X,t)::sub -> t
+                    | (y,t)::sub -> aux sub
+     in aux sub;;
+
+
+new X in new Y in lookup ((X,Abs(U\U))::(Y,Abs(U\ App(U,U)))::[]) X;;
+new X in new Y in lookup ((X,Abs(U\U))::(Y,Abs(U\ App(U,U)))::[]) Y;;
+(*
 type tm =
   | App of tm * tm
   | Abs of tm => tm;;
@@ -15,7 +32,7 @@ let rec beta t = match t with
         | Abs r -> new X in beta (subst (r @ X) X n)
  
 	end;;
-
+*)
 (*
 
 
