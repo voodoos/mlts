@@ -238,9 +238,8 @@ function show_resultas(results) {
 		      || (res.value.includes("failed"))) ? "red"
 		     : "black");
 
-	// If value is too long we hide it by default:
 	var td = $('<td></td>');
-	var p = $('<p></p>')
+	var code = $('<pre></pre>')
 	    .attr("id", "txt_" + name)
 	    .addClass("reslpl")
 	    .css('color', color)
@@ -263,16 +262,27 @@ function show_resultas(results) {
 		  .replace(/::\((.*::.*)\)/g, '::$1')
 		 )
 	
+	// If value is too long we hide it by default:
 	if(decodeURI(res.value).length > 80) {
-	    td.click(function(e) {$("#txt_" + name).show();
-				 $("#txtb_" + name).hide()});
+            short = true;
+	    td.click(function(e) {
+                if (short) {
+                    short = false;
+                    $("#txt_" + name).show();
+		    $("#txtb_" + name).hide()
+                } else {
+                    short = true;
+                    $("#txt_" + name).hide();
+		    $("#txtb_" + name).show()
+                }
+            });
 	    td.append($('<p></p>').attr("id", "txtb_" + name)
 		      .text('Click to show long value'));
-	    p.hide();
+	    code.hide();
 	}
 	
 	
-	row.append(td.append(p));
+	row.append(td.append(code));
 	$('#answer').append(row);
 	
     });
