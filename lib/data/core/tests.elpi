@@ -211,6 +211,20 @@ test_lookup :-
       (backslash c_X_0 \ app V_lookup c_X_0)
       (backslash X \ lit (i 42)).
 
+test_vacp3 :-
+    Vacp3 = (lam c0 \
+             match c0
+             [(all c1 \ arr
+               (pvariant Abs [pbackslash c2 \ pvar c1])
+               (lit (b btrue))),
+              (all c1 \ arr
+               (pvar c1)
+               (lit (b bfalse)))]),
+    eval
+      (app Vacp3
+       (variant Abs [backslash X \ variant Abs [backslash Y \ Y]]))
+      (lit (b btrue)).
+
 main :-
     test_app_id, !,
     test_higher_arity, !,
@@ -240,5 +254,6 @@ main :-
     test_bad_eval1, !,
     test_bad_eval2, !,
     test_lookup, !,
+    test_vacp3, !,
     true
 .

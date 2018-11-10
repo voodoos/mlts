@@ -343,6 +343,13 @@ copy_row (rowfix F1) (rowfix F2) :- under_row copy_row F1 F2.
 copy (letrow R1 B1) (letrow R2 B2) :-
     copy_row R1 R2, under_row copy B1 B2.
 
+type seen-by-matches tm -> pat -> prop.
+matches Subst Vout Pin :-
+    debug,
+    not (seen-by-matches Vout Pin), !,
+    print "matches" Subst Vout Pin,
+    seen-by-matches Vout Pin => matches Subst Vout Pin.
+
 matches _Subst (lit L) (plit L).
 
 matches _Subst _X pany.
@@ -355,6 +362,9 @@ matches Subst Xout (pnom Xin) :-
 
 matches Subst (variant C Ts) (pvariant C Ps) :-
     foreach2 (matches Subst) Ts Ps.
+
+matches Subst (backslash T) (pbackslash P) :-
+    pin x \ matches Subst (T x) (P x).
 
 eval (fix F) V :- eval (F (fix F)) V.
 eval_row (rowfix F) VR :- eval_row (F (rowfix F)) VR.
