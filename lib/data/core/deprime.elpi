@@ -101,6 +101,8 @@ piv G :- pi x \ abstract_value x => G x.
 % This is merely an optimization, and it makes debug traces easier to read.
 eval V V :- val V, !.
 
+type debug prop.
+type seen-by-eval tm -> prop.
 eval V R :-
      debug,
      not (seen-by-eval V), !,
@@ -224,6 +226,7 @@ eval_clauses VL (Cl::Cls) VR :-
       (true)
       (eval_clauses VL Cls VR).
 
+type seen-by-eval_clause clause -> prop.
 eval_clause L Subst Cl R :-
   debug,
   not (seen-by-eval_clause Cl), !,
