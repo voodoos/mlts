@@ -8,7 +8,7 @@
 	(fun acc (t,a) -> max acc a)
 	0*)
 
-  let unik =
+  (*let unik =
     let c = ref 0 in
     let known = Hashtbl.create 100 in
 
@@ -18,7 +18,7 @@
 	      -> let newname = c := !c + 1;
 	           s^"_"^(string_of_int !c) in
 	        Hashtbl.add known s newname; newname
-
+*)
   let n_type =
     let reserved = Hashtbl.create 5 in
     
@@ -29,10 +29,10 @@
     fun s ->
       try  Hashtbl.find reserved s
       with Not_found
-        -> unik ("t_" ^ s)
+        -> (*unik*) ("t_" ^ s)
 	    
   let n_constr s =
-      unik ("c_" ^ s)
+      (*unik*) ("c_" ^ s)
       
   let n_val s =
       ("v_" ^ s)
