@@ -202,6 +202,15 @@ test_bad_eval2 :-
   V_simple = (lam (v_var_0 \ match v_var_0 [nab (c_X_4_0 \ arr (pnom c_X_4_0) ( match c_X_4_0 [ arr (pnom c_X_4_0) ( lit (i 43))]))])),
   eval (new cY \ app V_simple cY) V, print V.
 
+test_lookup :-
+    V_lookup = (lam n \ match n
+                [nab Y \ arr (pnom Y)
+                 (match n [arr (pnom Y) (lit (i 42))])]),
+    eval
+      (backslash c_X_0 \ app V_lookup c_X_0)
+      _.
+
+
 main :-
     test_app_id, !,
     test_higher_arity, !,
@@ -229,5 +238,6 @@ main :-
     %% test_quantifier_alternation_no, !,
     test_size_regression, !,
     test_bad_eval1, !,
+    debug => test_lookup, !,
     true
 .
