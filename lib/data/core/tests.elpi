@@ -225,6 +225,17 @@ test_vacp3 :-
        (variant Abs [backslash X \ variant Abs [backslash Y \ Y]]))
       (lit (b btrue)).
 
+type c_Abs constructor.
+test_id_eta_expanded :-
+    V_id =
+      (fix id \ lam term \ match term
+         [(nab Y \ arr (pnom Y) Y),
+          (all r \ arr (pvariant c_Abs [pbackslash X \ parobase (pvar r) X])
+             (variant c_Abs [backslash X \ app id (arobase r X)]))]),
+    eval
+      (app V_id (variant c_Abs [backslash X \ X]))
+      (variant c_Abs [backslash X \ X]).
+
 main :-
     test_app_id, !,
     test_higher_arity, !,
@@ -255,5 +266,6 @@ main :-
     test_bad_eval2, !,
     test_lookup, !,
     test_vacp3, !,
+    test_id_eta_expanded, !,
     true
 .

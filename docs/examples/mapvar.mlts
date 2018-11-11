@@ -9,11 +9,13 @@ type tm =
      | Abs of tm => tm;;
 
 let rec maptm fapp fabs fvar term = match term with
-    | App(m,n) -> fapp (maptm fapp fabs fvar m) (maptm fapp fabs fvar n)
-    | Abs(r)   -> fabs (fun x -> maptm fapp fabs fvar (r @ x))
-    | nab X in X -> fvar X;;
-
-(*  Applications of maptm: mapvar and substitutions  *)
+    | App(m,n) ->
+      fapp (maptm fapp fabs fvar m) (maptm fapp fabs fvar n)
+    | Abs(r)   ->
+      fabs (fun x -> match x with
+                   | nab X in X -> maptm fapp fabs fvar (r @ X))
+    | nab X in X ->
+      fvar X;;
 
 let mapvar fvar term = 
     maptm (fun m -> fun n -> App(m, n)) (fun r -> Abs(X\ r X))

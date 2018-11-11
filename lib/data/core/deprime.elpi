@@ -366,6 +366,10 @@ matches Subst (variant C Ts) (pvariant C Ps) :-
 matches Subst (backslash T) (pbackslash P) :-
     pin x \ matches Subst (T x) (P x).
 
+matches Subst T (parobase P X) :-
+    (pin x \ subst [bind X x] T (ToverX x)),
+    matches Subst (backslash ToverX) P.
+
 eval (fix F) V :- eval (F (fix F)) V.
 eval_row (rowfix F) VR :- eval_row (F (rowfix F)) VR.
 

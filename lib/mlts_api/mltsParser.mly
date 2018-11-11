@@ -172,10 +172,10 @@ expr:
 | NEW; i = constr_name; IN; e = expr
 	%prec IN			{ ENew(i, e) }
 | se = simple_expr_noconstr;  AT;
-  	a = nonempty_list(argument)
+  a = nonempty_list(constr_name)
 	                                { EBApp(se, a) }
 | se = simple_expr_noconstr;
-  	a = nonempty_list(argument)
+  a = nonempty_list(argument)
 	                                { EApp(se, a) }
 | expr; infix_op; expr 			{ EInfix($1, $2, $3) }
 | e1 = expr; DCOLON;
@@ -233,10 +233,10 @@ pattern:
 | i = constr_name; BACKSLASH; p = pattern
 					{ PBind(i, p) }
 | v = value_path; AT;
-    l = nonempty_list(simple_pattern)
+  l = nonempty_list(constr_name)
       				        { PBApp(v, l) }
 | v = value_path; 
-    l = nonempty_list(simple_pattern)
+  l = nonempty_list(simple_pattern)
       				        { PApp(v, l) }
 					
 | p1 = pattern; DCOLON; p2 = pattern	{ PListCons(p1, p2) }

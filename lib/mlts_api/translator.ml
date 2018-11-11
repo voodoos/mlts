@@ -251,7 +251,7 @@ let mlts_to_prolog p =
        
     | EBApp(e, args) ->
        let te, env = t_expr envIn e in
-       let args, env = map_with_env t_expr env args in
+       let args, env = map_with_env t_nom env args in
        P.make_nom_appt te args, env
                         
     | EInfix(e1, op, e2) -> 
@@ -339,6 +339,9 @@ let mlts_to_prolog p =
        P.make_rule pat_noms pattern_vars pat body,
        revert_noms envIn (revert_patterns envIn (revert_locals envIn env))
 
+  and t_nom env nom =
+    P.make_nom nom (List.assoc nom env.local_noms), env
+
   and t_pattern envIn = function
     | PVal(name) -> 
        (* todo: can also be a nominal *)
@@ -360,11 +363,11 @@ let mlts_to_prolog p =
        
     | PApp(_name,_pats) -> failwith "Not implemented: PApp"
                          
-    | PBApp(name, pats) ->
+    | PBApp(name, args) ->
        (* todo: maybe the parser should accept more than just names ? *)
        let var, env = t_pattern envIn (PVal(name)) in
-       let tms, env = map_with_env t_pattern env pats in
-       P.make_appt ~nom:true ~pattern:true var tms, env
+       let noms, env = map_with_env t_nom env args in
+       P.make_appt ~nom:true ~pattern:true var noms, env
                            
     | PConstr(name, pats) ->
        (* A constructor is either 

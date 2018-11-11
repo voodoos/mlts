@@ -21,23 +21,18 @@ type tm =
      | App of tm * tm
      | Abs of tm => tm;;
 
-type located =
-     | Loc of name => proc;;
-
 let rec trans gamma term = match term with
   | App(m, n) -> 
-    begin
-      match (trans gamma m, trans gamma n) with 
-          | (Loc p, Loc q) ->
-                Loc(U\ Nu(V\ Par(p @ V,
-                    Nu(X\ Out(V, X, Out(V, U, Bang(In(X, q))))))))
-    end
-  | Abs(m) -> new X in Loc(U\ In(U, Y\
-    begin
-      match (trans ((X,Y)::gamma) (m @ X)) with
-          | Loc p -> In(U, V\ p @ V)
-     end))
-  | nab X in X -> Loc(U\ Out(assoc X gamma, U, Null));;
+    let p = trans gamma m in
+    let q = trans gamma n in
+    (U\ Nu(V\ Par(p @ V,
+                  Nu(X\ Out(V, X, Out(V, U, Bang(In(X, q))))))))
+  | Abs(m) ->
+    new X in (U\ In(U, Y\
+      let p = trans ((X, Y) :: gamma) (m @ X) in
+      In(U, V\ p @ V)))
+  | nab X in X ->
+    (U\ Out(assoc X gamma, U, Null));;
 
 trans [] (Abs(X\X));;
 

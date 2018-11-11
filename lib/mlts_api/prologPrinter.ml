@@ -91,7 +91,7 @@ and pp_term_app ppf = function
           else fprintf ppf " ")
         (pp_abs pp_term_app) (n, t)
     | _ ->
-      fprintf ppf "%a %a"
+      fprintf ppf "@[%a@ %a@]"
         pp_atom head
         (pp_spaced_list pp_term_simple) args
     end
