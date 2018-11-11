@@ -89,7 +89,7 @@ type_constr pair [A, B] (t_pair A B).
 type t_list ty -> ty.
 type list_cons constructor.
 type list_empty constructor.
-type_constr list_empty [] (t_list _).
+type_constr list_empty [] (t_list A_).
 type_constr list_cons [A, (t_list A)] (t_list A).
 
 type_check [] [].
@@ -104,7 +104,7 @@ typeof (variant Constr Args) A :-
 
 % Patterns
 
-type_pat pany _A.
+type_pat pany A_.
 type_pat (plit I) A :- typeof (lit I) A.
 type_pat (pvar T) A :- typeof T A.
 type_pat (pnom N) A :- typeof N A.
