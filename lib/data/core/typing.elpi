@@ -110,6 +110,7 @@ type_pat (pvar T) A :- typeof T A.
 type_pat (pnom N) A :- typeof N A.
 type_pat (pbackslash R) (bigarr A B) :- 
     pi x\ typeof x A => type_pat (R x) B.
+
 type_pat (parobase P T) B :-
     type_pat P (bigarr A B),
     typeof T A.

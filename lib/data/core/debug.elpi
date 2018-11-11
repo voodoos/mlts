@@ -1,0 +1,37 @@
+
+type debug prop.
+type seen-by-eval tm -> prop.
+type seen-by-select_clause clause -> prop.
+type seen-by-copy tm -> prop.
+type seen-by-copy_clause clause -> prop.
+type seen-by-matches tm -> pat -> prop.
+
+eval V R :-
+    debug,
+    not (seen-by-eval V), !,
+    print eval V,
+    seen-by-eval V => eval V R.
+    
+select_clause L Subst Cl R :-
+    debug,
+    not (seen-by-select_clause Cl), !,
+    print select_clause L Subst Cl R,
+    seen-by-select_clause Cl => select_clause L Subst Cl R.
+
+copy T1 T2 :-
+    debug,
+    not (seen-by-copy T1), !,
+    print "copy" T1 T2,
+    seen-by-copy T1 => copy T1 T2.
+
+copy_clause Cl1 Cl2 :-
+    debug,
+    not (seen-by-copy_clause Cl1), !,
+    print "copy_clause" Cl1 Cl2,
+    seen-by-copy_clause Cl1 => copy_clause Cl1 Cl2.
+
+matches Subst Vout Pin :-
+   debug,
+   not (seen-by-matches Vout Pin), !,
+   print "matches" Subst Vout Pin,
+   seen-by-matches Vout Pin => matches Subst Vout Pin.
