@@ -29,6 +29,8 @@ onmessage = function(event) {
     console.log('[Elpi-worker] ' + "Compiling code");
     var lplcode = compile(code);
     
+    console.log(lplcode[2]);
+
     sendLpl(lplcode[1], lplcode[2]);
 
     if(lplcode[5] == 1) {
