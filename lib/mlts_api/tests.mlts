@@ -1,4 +1,3 @@
-
 type tm =
      | App of tm * tm
      | Abs of tm => tm;;
@@ -25,8 +24,8 @@ let rec subst t x u = match (x,t) with
   ;;
 
 let rec beta t = match t with
-  | App(m, n)  ->
-    let m = beta m in let n = beta n in
+  | m  ->
+    let m = beta m in 
     begin 
         match m with
         | Abs r -> new X in beta (subst (r @ X) X n)
@@ -105,7 +104,6 @@ let rec assoc x alist = match alist with
 type tm =
      | App of tm * tm
      | Abs of tm => tm;;
-
 type located = (name => proc);;
 
 let rec trans gamma term = match term with
@@ -122,3 +120,4 @@ let rec trans gamma term = match term with
   | nab X in X -> U\ Out(assoc X gamma, U, Null);;
 *)
 *)
+
