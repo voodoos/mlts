@@ -380,5 +380,5 @@ foreach P (X::Xs) :- P X, foreach P Xs.
 type foreach2 (A -> B -> prop) -> list A -> list B -> prop.
 foreach2 _P [] [].
 foreach2 P (X::Xs) (Y::Ys) :-
-    print for P X Y, P X Y, foreach2 P Xs Ys.
+    P X Y, foreach2 P Xs Ys.
 
