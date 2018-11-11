@@ -98,7 +98,7 @@ let compile_and_run header code =
   let lpcode = compile header (Js.to_string code) in
   lpcode, query ("run_all N.")
 
-let version = "0.1.12"
+let version = "0.2.0"
 
   
 let _ =
