@@ -110,8 +110,7 @@ type_pat (pvar T) A :- typeof T A.
 type_pat (pnom N) A :- typeof N A.
 type_pat (pbackslash R) (bigarr A B) :- 
     pi x\ typeof x A => type_pat (R x) B.
-type_pat (parobase P (pnom T)) B :-
-    print type_pat (parobase P (pnom T)) B,
+type_pat (parobase P T) B :-
     type_pat P (bigarr A B),
     typeof T A.
 
@@ -121,7 +120,6 @@ type_checkp [P|TL] [Ty|TyL] :-
     type_checkp TL TyL.
 
 type_pat (pvariant Constr Pats) A :-
-    print type_pat (pvariant Constr Pats) A
     type_constr Constr Typs A,
     type_checkp Pats Typs.
 
