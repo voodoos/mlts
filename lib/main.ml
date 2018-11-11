@@ -36,7 +36,7 @@ let compile header code =
 
     (* We return the lprolog code for reference *)
     Js.string (lpcode),
-    Array.of_list defs(* defs *) , 0, 0, true
+    Array.of_list defs, 0, 0, true
   with Mlts_API.Error(s, line, char)
        -> (Js.string s, [||], line, char,  false)
   | e -> Js.string ("Unexpected error: " ^ (Printexc.to_string e)), [||], 0, 0, false
