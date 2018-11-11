@@ -39,19 +39,19 @@ typeof (fix M) A :- pi x\ typeof x A => typeof (M x) A2,
        
 typeof (let M R) A :- typeof M B, pi x\ typeof x B => typeof (R x) A.
 
-typeof (new R) A :- pi x\ typeof x B_ => typeof (R x) A.
+typeof (new R) B :- pi x\ typeof x A_ => typeof (R x) B.
 
 
 % Abstractions and applications
 
-typeof (lam M) (arr A B)  :- pi x\ typeof x A => typeof (M x) B.
+typeof (lam R) (arr A B)  :- pi x\ typeof x A => typeof (R x) B.
 
-typeof (backslash M) (bigarr A B) :- pi x\ typeof x A => typeof (M x) B.
+typeof (backslash R) (bigarr A B) :- pi x\ typeof x A => typeof (R x) B.
 
-typeof (app M N) A :-
-    typeof M (arr B A),
-    typeof N B2,
-       (B = B2, !; err_wrong_type N B B2 (app M N), fail).
+typeof (app M N) B :-
+    typeof M (arr A B),
+    typeof N A2,
+       (A = A2, !; err_wrong_type N A A2 (app M N), fail).
        
 typeof (arobase M N) A :-
     typeof M (bigarr B A),
@@ -127,9 +127,9 @@ type_pat (pvariant Constr Pats) A :-
 
 % Matching
 
-typeof (match Exp Rules) B :- typeof Exp A, type_match A Rules B.
+typeof (match Exp Rules) A :- typeof Exp B, type_match B Rules A.
 
-type_match _A [] _B.
+type_match _ [] _.
 type_match A (R::Rs) B :-
     type_match_rule A R B, type_match A Rs B.
 
