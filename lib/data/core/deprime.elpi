@@ -101,6 +101,14 @@ piv G :- pi x \ abstract_value x => G x.
 % This is merely an optimization, and it makes debug traces easier to read.
 eval V V :- val V, !.
 
+type debug prop.
+type seen-by-eval tm -> prop.
+eval V R :-
+     debug,
+     not (seen-by-eval V), !,
+     print eval V,
+     seen-by-eval V => eval V R.
+
 eval (lam R) (lam R).
 eval (lit L) (lit L) :- val_lit L.
 
@@ -209,36 +217,43 @@ eval (letrow RowDef Body) V :-
 
 eval (match T Cls) V :-
     eval T VT,
-    eval_clauses VT Cls V.
+    select_clauses VT Cls TCl,
+    eval TCl V.
 
-type eval_clauses tm -> list clause -> tm -> prop.
-eval_clauses _VL [] _VR :- false.
-eval_clauses VL (Cl::Cls) VR :-
-    if (eval_clause VL [] Cl VR)
+type select_clauses tm -> list clause -> tm -> prop.
+select_clauses _VL [] _VR :- false.
+select_clauses VL (Cl::Cls) VR :-
+    if (select_clause VL [] Cl VR)
       (true)
-      (eval_clauses VL Cls VR).
+      (select_clauses VL Cls VR).
 
-type eval_clause tm -> list binding -> clause -> tm -> prop.
-eval_clause L Subst (all RCl) R :-
-  sigma X \ eval_clause L Subst (RCl X) R.
-eval_clause L Subst (nab RCl) R :-
-  print eval_clause L Subst (nab RCl) R,
-  pin x \ sigma Y \ eval_clause L (bind x Y :: Subst) (RCl x) R.
-eval_clause Lout Subst (arr Pin Rin) Vout :-
-    print eval_clause Lout Subst (arr Pin Rin) Vout,
+type seen-by-select_clause clause -> prop.
+select_clause L Subst Cl R :-
+  debug,
+  not (seen-by-select_clause Cl), !,
+  print select_clause L Subst Cl R,
+  seen-by-select_clause Cl => select_clause L Subst Cl R.
+
+type select_clause tm -> list binding -> clause -> tm -> prop.
+select_clause L Subst (all RCl) R :-
+  sigma X \ select_clause L Subst (RCl X) R.
+select_clause L Subst (nab RCl) R :-
+  pin x \ sigma Y \ select_clause L (bind x Y :: Subst) (RCl x) R.
+select_clause Lout Subst (arr Pin Rin) Rout :-
     matches Subst Lout Pin,
+    if debug (print "select_clause matches" Subst Lout Pin) true,
     injective Subst,
-    eval Rin Vin,
-    subst_val Subst Vin Vout.
+    if debug (print "select_clause before-subst" Subst Rin) true,
+    subst Subst Rin Rout,
+    if debug (print "select_clause subst" Subst Rin Rout) true.
 
 injective [].
 injective (bind _X Y :: Subst) :-
     not_in Subst Y,
     injective Subst.
 
-binds [] X1 Y1 :- print binds [] X1 Y1, X1 = Y1.
+binds [] X1 Y1 :- X1 = Y1.
 binds (bind X1 Y1 :: Subst) X2 Y2 :-
-    print binds (bind X1 Y1 :: Subst) X2 Y2,
     if (X1 = X2)
        (Y1 = Y2)
        (binds Subst X2 Y2).
@@ -248,14 +263,15 @@ not_in (bind _X Y :: Subst) Z :-
     not (Y = Z),
     not_in Subst Z.
 
-subst_val Subst Vin Vout :-
+subst Subst Tin Tout :-
     if (current_subst _)
-      (print "assert failure in subst_val", !, false)
-      (current_subst Subst => copy Vin Vout).
+      (print "assert failure in subst", !, false)
+      (current_subst Subst => copy Tin Tout).
+
 copy_nom N1 N2 :-
     nom N1,
     current_subst Subst,
-    if (binds Subst N1 N2) (true) (N1 = N2).
+    binds Subst N1 N2.
 
 type current_subst list binding -> prop.
 type copy         tm -> tm -> prop.
@@ -273,10 +289,16 @@ copy V V :- abstract_value V.
 copy N1 N2 :-
     nom N1,
     copy_nom N1 N2.
-% TODO: there are cases of N1 outside the Subst domain
 
 underv Copy R1 R2 :- piv x \ Copy (R1 x) (R2 x).
 undern Copy R1 R2 :- pin x \ copy_nom x x => Copy (R1 x) (R2 x).
+
+%% type seen-by-copy tm -> prop.
+%% copy T1 T2 :-
+%%     debug,
+%%     not (seen-by-copy T1), !,
+%%     print "copy" T1 T2,
+%%     seen-by-copy T1 => copy T1 T2.
 
 copy (lam R1) (lam R2) :- underv copy R1 R2.
 copy (app M1 N1) (app M2 N2) :- copy M1 M2, copy N1 N2.
@@ -293,9 +315,23 @@ copy (variant C T1s) (variant C T2s) :- foreach2 copy T1s T2s.
 copy (match M1 Cl1s) (match M2 Cl2s) :-
     copy M1 M2, foreach2 copy_clause Cl1s Cl2s.
 
+%% type seen-by-copy_clause clause -> prop.
+%% copy_clause Cl1 Cl2 :-
+%%     debug,
+%%     not (seen-by-copy_clause Cl1), !,
+%%     print "copy_clause" Cl1 Cl2,
+%%     seen-by-copy_clause Cl1 => copy_clause Cl1 Cl2.
+
 copy_clause (arr P1 T1) (arr P2 T2) :- copy_pat P1 P2, copy T1 T2.
 copy_clause (all C1) (all C2) :- underv copy_clause C1 C2.
 copy_clause (nab C1) (nab C2) :- undern copy_clause C1 C2.
+
+copy_pat (plit L1) (plit L2) :- L1 = L2.
+copy_pat (pvar X1) (pvar X2) :- copy X1 X2.
+copy_pat (pnom N1) (pnom N2) :- copy_nom N1 N2.
+copy_pat (pbackslash R1) (pbackslash R2) :- undern copy_pat R1 R2.
+copy_pat (parobase P1 X1) (parobase P2 X2) :- copy_pat P1 P2, copy_nom X1 X2.
+copy_pat (pvariant C P1s) (pvariant C P2s) :- foreach2 copy_pat P1s P2s.
 
 copy (fix F1) (fix F2) :- underv copy F1 F2.
 
@@ -307,20 +343,28 @@ copy_row (rowfix F1) (rowfix F2) :- under_row copy_row F1 F2.
 copy (letrow R1 B1) (letrow R2 B2) :-
     copy_row R1 R2, under_row copy B1 B2.
 
+type seen-by-matches tm -> pat -> prop.
+matches Subst Vout Pin :-
+    debug,
+    not (seen-by-matches Vout Pin), !,
+    print "matches" Subst Vout Pin,
+    seen-by-matches Vout Pin => matches Subst Vout Pin.
+
 matches _Subst (lit L) (plit L).
 
 matches _Subst _X pany.
 
-matches Subst X (pvar Y) :- subst_val Subst Y X.
+matches Subst X (pvar Y) :- subst Subst Y X.
 
 matches Subst Xout (pnom Xin) :-
-    print matches Subst Xout (pnom Xin),
     nom Xin, nom Xout,
     binds Subst Xin Xout.
 
 matches Subst (variant C Ts) (pvariant C Ps) :-
-    print matches Subst (variant C Ts) (pvariant C Ps),
     foreach2 (matches Subst) Ts Ps.
+
+matches Subst (backslash T) (pbackslash P) :-
+    pin x \ matches Subst (T x) (P x).
 
 eval (fix F) V :- eval (F (fix F)) V.
 eval_row (rowfix F) VR :- eval_row (F (rowfix F)) VR.
