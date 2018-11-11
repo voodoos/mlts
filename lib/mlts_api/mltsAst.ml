@@ -22,16 +22,16 @@ and expr =
   | EMatch of expr * pattern_matching
   | EIf of expr * expr * expr
   | EApp of expr * (argument list)
-  | EBApp of expr * (argument list)
+  | EBApp of expr * nominal list
   | EInfix of expr * infix_op * expr           
   | EConst of constant
   | EVal of value_path
   | EPair of expr * expr
   | EConstr of  constr_path * (expr list)
   | EPattern of pattern
-  | EBind of value_name * expr
+  | EBind of nominal * expr
   | EFun of (value_name list) * expr
-  | ENew of value_name * expr
+  | ENew of nominal * expr
                            
                  
 and typexpr =
@@ -51,7 +51,7 @@ and pattern =
   | PVal of value_name
   | PBind of value_name * pattern
   | PApp of value_name * (pattern list)
-  | PBApp of value_name * (pattern list)
+  | PBApp of value_name * nominal list
   | PConstr of  constr_path * (pattern list)
   | PConstant of constant
   | PListCons of pattern * pattern
@@ -77,13 +77,13 @@ and constr_name = string
 and constr_path = constr_name
 and value_name = string
 and value_path = value_name
-
+and nominal = value_name
                    
 type var =
   Global of value_name
 | Local of value_name
 | Param of value_name
-| Nominal of value_name
+| Nominal of nominal
 | MetaParam of value_name * int
 
 type env = (var * arity) list
