@@ -1,7 +1,7 @@
 accumulate typing.
+accumulate debug.
 accumulate deprime.
 accumulate builtins.
-accumulate debug.
 
 test_app_id :-
     piv x \ eval (app (lam (X \ X)) x) x.
