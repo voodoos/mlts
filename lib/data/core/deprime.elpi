@@ -209,8 +209,7 @@ eval (letrow RowDef Body) V :-
 
 eval (match T Cls) V :-
     eval T VT,
-    eval_clauses VT Cls TCl,
-    eval TCl V.
+    eval_clauses VT Cls V.
 
 type eval_clauses tm -> list clause -> tm -> prop.
 eval_clauses _VL [] _VR :- false.
