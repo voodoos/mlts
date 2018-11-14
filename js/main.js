@@ -215,22 +215,26 @@ function show_resultas(results) {
     $('#answer').html('');
     results.reverse().forEach(function(res, id) {
 	var name = unescape(res.name);
+	var type = unescape(res.type);
 	var row = $('<tr></tr>').addClass("clickable")
 	    .click(function(e) { goto_def(unescape(res.name)) });
 	row.append($('<td></td>').text(name));
 
 	
 	var colort = ((unescape(res.type).includes("error")
-		      || (unescape(res.type).includes("failed"))) ? "red"
-		     : "black");
+		       || (unescape(res.type).includes("failed"))) ? "red"
+		      : "black");
+	
+	try {
+	    type = types_parser.parse(type);
+	}
+	catch(error) {
+	    console.error(error);
+	}
 	
 	row.append($('<td></td>')
 		   .css('color', colort)
-		   .text(unescape(res.type)
-			 .replace(/_[0-9]+/g, '')
-			 //.replace(/arr (.*?) ((.*?))/g, '$1 -> $2')
-			 .replace(/c_/g, '')
-			 .replace(/t_/g, '')));
+		   .text(type));
 
 
 	// Some ugly-regex-magic-based pretty printing:
