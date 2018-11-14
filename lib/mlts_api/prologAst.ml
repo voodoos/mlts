@@ -109,14 +109,14 @@ let make_appt ?(nom=false)  ?(pattern=false) f args =
 let make_nom_appt ?(pattern=false) f args =
   make_appt ~nom:true ~pattern f args
   
-let make_prog name body =
-  App(Global("prog"),
+let make_dep name body =
+  App(Global("get_prog"),
       [Lit(String(name));
        body])
   
 let make_deps fvs = 
   let make_dep name =
-    make_prog name (make_global (String.capitalize_ascii name))
+    make_dep name (make_global (String.capitalize_ascii name))
   in match fvs with
      | [] -> None
      | _ -> Some(Seq (List.map make_dep fvs))

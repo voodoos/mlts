@@ -4,6 +4,8 @@ accumulate deprime.
 accumulate builtins.
 accumulate progs.
 
+get_prog Name Value :- prog Name Prog, eval Prog Value.
+
 run Name Prog Value Type :-
 	prog Name P,
 	term_to_string P Prog,
