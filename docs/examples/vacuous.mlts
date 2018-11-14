@@ -8,14 +8,14 @@ let rec vacp1 t =  match t with
     | (X\ App(m @ X, n @ X)) -> (vacp1 m) && (vacp1 n)
     | (X\ Abs(Y\ r @ X Y))   -> new Y in vacp1(X\ r @ X Y);;
 
-let rec vacp2 t r =
+let rec vacp2 t =
     new X in
     let rec aux term = match term with
         | X          -> false
         | nab Y in Y -> true
         | App(m, n)  -> (aux m) && (aux n)
         | Abs(u)     -> new Y in aux (u @ Y)
-    in aux (r @ X);;
+    in aux (t @ X);;
 
 let vacp3 t = match t with
     | X\s  -> true
