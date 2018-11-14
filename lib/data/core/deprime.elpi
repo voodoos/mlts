@@ -229,11 +229,24 @@ eval_clause Lout Subst (arr Pin Rin) Vout :-
     %if debug (print "eval_clause matches" Subst Lout Pin) true,
     injective Subst,
     %if debug (print "eval_clause before-subst" Subst Rin) true,
+    localize Subst _ \
+    %if debug (print "eval_clause localize" Subst) true,
     subst Subst Rin Rout,
     %if debug (print "eval_clause subst" Subst Rin Rout) true,
     eval Rout Vout,
     %if debug (print "eval_clause eval" Rout Vout) true,
     true.
+
+% localize is a non-logical hack to ensure that even under-determined
+% nabla-introduced variables are unified with a locally-scoped name,
+% to ensure that they do not escape in the result of the clause
+% right-hand-side.
+type localize list binding -> (unit -> prop) -> prop.
+localize ((bind X Y) :: Subst) K :-
+  if (X = Y) true true,
+  localize Subst K.
+
+localize [] K :- K unit.
 
 injective [].
 injective (bind _X Y :: Subst) :-

@@ -238,11 +238,18 @@ test_id_eta_expanded :-
       (variant c_Abs [backslash X \ X]).
 
 type c_Unit constructor.
-test_example_dale :-
+test_dale_unit :-
     eval
       (match (variant c_Unit [])
        [all r \ nab X \ arr (parobase (pvar r) X) (arobase r X)])
       (variant c_Unit []).
+test_dale_escape :-
+    not
+      (eval
+       (match (variant c_Unit [])
+        [nab X \ arr (pvariant c_Unit []) X])
+       R,
+       print R).
 
 main :-
     test_app_id, !,
@@ -275,6 +282,7 @@ main :-
     test_lookup, !,
     test_vacp3, !,
     test_id_eta_expanded, !,
-    test_example_dale, !,
+    test_dale_unit, !,
+    test_dale_escape, !,
     true
 .
