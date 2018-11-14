@@ -4,15 +4,14 @@ type tm =
 ;;
 
 
-let rec subst t x u =
-  match (x, t) with
-  | nab X in (X, X) -> u
-  | nab X Y in (X, Y) -> Y
-  | (x, App(m, n)) -> 
-      App(subst m x u, subst n x u)
-  | (x, Abs r) -> Abs(Y\ subst (r @ Y) x u)
+let subst r u =
+    new X in 
+    let rec aux t = match t with
+    | X -> u
+    | nab Y in Y -> Y
+    | App(u, v) -> App(aux u, aux v)
+    | Abs r -> Abs(Y\ aux (r @ Y))
+    in aux (r @ X)
 ;;
 
-new X in subst (Abs(Y\ (App(Y, X)))) X (Abs(Z\ Z));;
-
-new X in Abs(Y\ subst (App(X, X)) X (App(Y, Y)));;
+subst (X\ Abs(Y\ (App(Y, X)))) (Abs(Z\ Z));;

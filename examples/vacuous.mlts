@@ -22,6 +22,16 @@ let rec vacp2 t = match t with
 let vacp3 t = match t with
     | Abs(X\s)  -> true
     | t         -> false ;;
+    
+let vacuous r =
+    new X in
+    let rec aux term = match term with
+        | X          -> false
+        | nab Y in Y -> true
+        | App(m, n)  -> (aux m) && (aux n)
+        | Abs(u)     -> new Y in aux (u @ Y)
+    in aux (r @ X)
+;;
 
 vacp1 (Abs(X\X));;
 vacp1 (Abs(X\ App(X, X)));;
@@ -37,3 +47,8 @@ vacp3 (Abs(X\X));;
 vacp3 (Abs(X\ App(X, X)));;
 vacp3 (Abs(X\ Abs(Y\Y)));;	
 vacp3 (App(Abs(X\X),Abs(X\X)));;
+
+vacuous (X\X);;
+vacuous (X\ App(X, X));;
+vacuous (X\ Abs(Y\Y));;	
+vacuous (Abs(X\X),Abs(X\X));;
