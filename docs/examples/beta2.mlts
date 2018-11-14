@@ -2,15 +2,14 @@ type tm =
   | App of tm * tm
   | Abs of tm => tm;;
 
-let subst r u =
+let subst t u =
     new X in 
     let rec aux t = match t with
     | X -> u
     | nab Y in Y -> Y
     | App(u, v) -> App(aux u, aux v)
     | Abs r -> Abs(Y\ aux (r @ Y))
-    in aux (r @ X)
-;;
+    in aux (t @ X);;
 
 
 let rec beta t = match t with
