@@ -3,12 +3,24 @@ open MltsAst
 module P = PrologAst
 
 exception TranslatorError of string * (Lexing.position option)
+exception StaticCheckError of string * (Lexing.position option)
 
 type def = { name: string; pos: Lexing.position }
 
+let strip name = String.sub name 2 (String.length name - 2)
 
 let make_exception message def pos =
-  TranslatorError("In \"" ^ def.name ^ "\" (line "
+  TranslatorError("In \"" ^ (strip def.name) ^ "\" (line "
+                  ^ (string_of_int def.pos.pos_lnum)
+                  ^ ") : " ^ message,
+                  match pos with
+                    None -> Some(def.pos)
+                  | Some(_p) -> pos)
+
+  
+
+let make_sc_exception message def pos =
+  StaticCheckError("In \"" ^ (strip def.name) ^ "\" (line "
                   ^ (string_of_int def.pos.pos_lnum)
                   ^ ") : " ^ message,
                   match pos with
@@ -21,6 +33,7 @@ type context = {
     mutable global_vars : string list;
     mutable global_constrs : string list;
     mutable actual_def: def list;
+    mutable wanabeeRigidNoms: P.local_name list;
   }
 let incr_expr c = c.nb_expr <- c.nb_expr + 1
 
@@ -87,7 +100,8 @@ let mlts_to_prolog p =
   let ctx = { nb_expr = 0;
               global_vars = ["list_hd"; "list_tl"];
               global_constrs = ["pair"; "list_empty"; "list_cons"];
-              actual_def = []
+              actual_def = [];
+              wanabeeRigidNoms = []
             }
   in
   let add_global v = ctx.global_vars <- v::ctx.global_vars in
@@ -320,7 +334,18 @@ let mlts_to_prolog p =
     | RSimple(pat, e) -> t_rule envIn (RNa([], pat, e))
     | RNa(names, pat, e) ->
        let pat_noms, env = map_with_env (flip add_nom_to_env) envIn names in
+       ctx.wanabeeRigidNoms <- pat_noms;
        let pat, env = t_pattern env pat in
+
+       if ctx.wanabeeRigidNoms != [] then
+         raise (make_sc_exception
+                  (String.concat ""
+                     ["Nabla-bound nominal(s) ";
+                      (String.concat ", "
+                         (List.map (fun e -> e |> fst |> strip) ctx.wanabeeRigidNoms));
+                     " must have a rigid occurence in the pattern."])
+               (List.hd ctx.actual_def)
+               None);
        let pattern_vars = env.pattern_vars in
        let env = { env with pattern_vars = [] } in
        let body, env = t_expr env e in
@@ -366,12 +391,14 @@ let mlts_to_prolog p =
          try
            let i = List.assoc name envIn.local_noms in
            if pats = [] then
-             P.make_nom ~pattern:true name i, envIn
+             (ctx.wanabeeRigidNoms <-
+               List.remove_assoc name ctx.wanabeeRigidNoms;
+             P.make_nom ~pattern:true name i, envIn)
            else failwith "Hmm, nominal constr do not take arguments"
          with
            Not_found ->
            if List.mem name ctx.global_constrs then
-             let tms, env = map_with_env t_pattern envIn pats in
+             let tms, env = map_with_env t_pattern envIn  pats in
              P.make_constr ~pattern:true name tms, env
            else
              failwith ("Unknown constructor " ^ name)

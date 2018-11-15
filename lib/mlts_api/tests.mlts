@@ -3,7 +3,7 @@ type tm =
      | Abs of tm => tm;;
      
 let lookup sub var = match var with 
-  | nab X in X -> 
+  | nab X in (r @ X) -> 
     let rec aux s = match s with 
                     | []         -> X
                     | (X,t)::sub -> t
