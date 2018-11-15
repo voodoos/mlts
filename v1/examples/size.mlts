@@ -1,0 +1,23 @@
+type tm =
+     | App of tm * tm
+     | Abs of tm => tm ;;
+
+let rec size term =
+	match term with
+	| App(n, m)  -> 1 + (size n) + (size m)
+	| Abs(r)     -> 1 + (new X in size (r @ X))
+	| nab X in X -> 1;;
+
+size (Abs(X\ Abs(Y\ App(App(X,Y),App(Y,X)))));;
+size (Abs (X\ (Abs (Y\ (App(X,Y))))));;
+
+new X in 1 + (size (Abs (Y\ (App(X,Y)))));;
+new X in 1 + new Y in 1 + (size (App(X,Y)));;
+new X in 1 + new Y in 1 + 1 + (size X) + (size Y);;
+new X in 1 + new Y in 1 + 1 + 1 + 1;;
+
+
+size (Abs(X\X));;
+size (Abs(X\ App(X, X)));;
+size (Abs(X\ Abs(Y\Y)));;	
+size (App(Abs(X\X),Abs(X\X)));;

@@ -1,0 +1,83 @@
+(* -*- mode: tuareg -*- *)
+
+type tm =
+  | Abs of tm => tm
+  | App of tm * tm
+;;
+
+type sem =
+  (* function (should be unit) *)
+  | L of (int -> sem) -> sem
+  (* neutral *)
+  | N of neu
+;;
+
+type neu =
+  (* variables are nominals *)
+  (* neutral appn *)
+  | A of neu * sem
+;;
+
+let rec assoc l x =
+    match l with
+    | ((y, a)::l) -> if x = y then a
+        else assoc l x
+;;
+
+
+  
+(* reify sem -> tm *)
+let rec reify ctx s =
+       (* reifn neu -> tm *)
+  let rec reifn c neutral =
+    match neutral with
+    | nab X in X -> assoc c X
+    | A (n, s) ->
+        App(reifn c n, reify c s)
+  in
+  
+  match s with
+  | N n -> reifn ctx n
+  | L f -> new X in Abs(Y\ reify ((X,Y)::ctx) (f (fun i -> N X)))
+;;
+
+reify [] (L (fun v -> v 0));;
+reify [] (L (fun v -> L (fun v -> v 0)));;
+Abs(X\ new Y in reify ((Y, X)::[]) (L (fun v -> L (fun v -> (N (A (Y, L (fun v -> v 0))))))));;
+Abs(X\ new Y in reify ((Y, X)::[]) 
+                      (N (A (Y, L (fun v -> v 0)))));;
+                           
+(* evals: (neu *(unit -> sem)) list -> lam -> sem *)     
+let rec evals ctx l t =
+    match t with
+    | nab X in X ->
+        begin match l with
+        | [] -> N (assoc ctx X)
+        | (x, v)::tl -> if x = X 
+                         then v 0
+                         else evals ctx tl X
+        end
+    | Abs(r) ->
+        L (fun v -> new X in new Y in 
+                    evals ((X, Y)::ctx) ((X,v)::l) (r @ X))
+    | App(t1, t2) ->
+        begin match (evals ctx l t1) with
+        | L f -> f (fun i -> evals ctx l t2)
+        | N n -> N (A(n, evals ctx l t2))
+        end
+        ;;
+        
+let eval t = evals [] [] t;;
+
+let norm t = reify [] (eval t);;
+        
+        
+norm (Abs(X\X));;
+eval (Abs(X\Abs(Y\ Y)));;
+norm (Abs(X\Abs(Y\ Y)));;
+norm (App(Abs(X\X), Abs(X\X)));;  
+norm (Abs(Y\ App(Abs(X\ App(X, X)), Y)));;    
+norm (Abs(Y\ App(Abs(X\ App(X, Abs(Z\ Z))), Y)));;    
+eval (App(App(Abs(X\Abs(Y\Abs(Z\App(App(X,Z),App(Y,Z))))),
+              Abs(X\Abs(Y\X))),
+          Abs(X\Abs(Y\X))));;

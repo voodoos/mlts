@@ -1,0 +1,48 @@
+type tm =
+     | App of tm * tm
+     | Abs of tm => tm;;
+
+type deb =
+     | Dapp of deb * deb
+     | Dabs of deb
+     | Dvar of int;;
+
+let rec nth n l = match (n, l) with
+  | (0, x::k) -> x
+  | (c, x::k) -> nth (c - 1) k;;
+
+let index x l = 
+    let rec aux c x k = match (x, k) with
+          | nab X   in (X, X::(l @ X))   -> c
+          | nab X Y in (X, Y::(l @ X Y)) -> aux (c + 1) x (l @ X Y)
+     in aux 0 x l;;
+
+let rec trans prefix term = match term with
+  | App(m, n)  -> Dapp(trans prefix m, trans prefix n)
+  | Abs r      -> new X in Dabs(trans (X::prefix) (r @ X))
+  | nab Y in Y -> Dvar (index Y prefix);;
+
+let rec dtrans prefix term = match term with
+  | Dapp(m, n) -> App(dtrans prefix m, dtrans prefix n)
+  | Dabs r     -> Abs(X\ dtrans (X::prefix) r)
+  | Dvar c     -> nth c prefix;;
+
+new X in new Y in new Z in (index X (X::Y::Z::[]));;
+new X in new Y in new Z in (index Z (X::Y::Z::[]));;
+
+trans [] (Abs(X\X));;
+trans [] (Abs(X\ Abs(Y\ Abs(Z\Y))));;
+trans [] (Abs(X\ Abs(Y\ Abs(Z\ App(X,Z)))));;
+trans [] (Abs(X\ Abs(Y\ Abs(Z\ App(X, Abs(W\Z))))));;
+
+Abs(X\ Abs(Y\ Abs(Z\ nth 0 (X::Y::Z::[]))));;
+Abs(X\ Abs(Y\ Abs(Z\ nth 1 (X::Y::Z::[]))));;
+Abs(X\ Abs(Y\ Abs(Z\ nth 2 (X::Y::Z::[]))));;
+
+dtrans [] (Dabs (Dvar 0));;
+dtrans [] (Dabs (Dabs (Dvar 0)));;
+dtrans [] (Dabs (Dabs (Dvar 1)));;
+dtrans [] (Dabs (Dabs (Dapp(Dvar 0,Dvar 1))));;
+
+dtrans [] (trans  [] (Abs(X\ Abs(Y\ Abs(Z\ App(X, Abs(W\Z)))))));;
+trans  [] (dtrans [] (Dabs (Dabs (Dapp(Dvar 0,Dvar 1)))));;

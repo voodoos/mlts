@@ -1,0 +1,47 @@
+type utm =
+     | App of utm * utm
+     | Abt of utm => utm
+;;
+
+let rec mem x l = match l with
+| [] -> false
+| n::tl -> if n = x
+  	   then true
+  	   else mem x tl
+;;
+	   
+let rec union l k =
+    match l with
+    | [] -> k
+    | h::tl -> if mem h k
+      	       then  union tl k
+	       else h::(union tl k)
+;;
+     
+let rec rm x l =
+    match l with
+    | [] -> []
+    | h::tl -> if h = x
+      	      then rm x tl
+	      else h::(rm x tl)
+;;
+	      
+let rec maptm fapp fabs fvar term =
+	match term with
+	| App(m, n) -> fapp (maptm fapp fabs fvar m) (maptm fapp fabs fvar n)
+	| Abt(r)	-> fabs (fun x -> maptm fapp fabs fvar (r @ x))
+	| nab X in X -> fvar X
+;;
+
+(*  let fv term  = maptm join (fun r -> na x\ rm x (r x)) (fun x -> [x]) term;; *)
+let fv term = 
+	maptm	(fun n -> fun m -> union n m) 
+		(fun f -> new X in  rm X (f X))
+		(fun x -> x::[])
+		term
+;;
+	
+fv (Abt(X\ App(X, X)));;
+fv (Abt(X\ Abt(Y\ App(Y, App(X, Y)))));;
+fv (Abt(X\ App(App(X, X), App(X, X))));;
+(Abt(X\ fv (App(App(X, X), App(X, X)))));;

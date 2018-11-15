@@ -1,0 +1,177 @@
+(* General Utilities  *)
+
+(* List concatenation *)
+let rec concat l k =
+    match l with
+    | [] -> k
+    | h::tl -> h::(concat tl k);;
+
+(* ('a -> bool) * ('a list) -> bool *)
+let rec forsome args = match args with
+    | (pred,[])     -> false
+    | (pred,(x::l)) -> if (pred x) then true else (forsome(pred,l));;
+
+(* Specific first-order terms  *)
+type folterm = 
+    | A 
+    | B 
+    | H of folterm
+    | G of folterm * folterm;;
+
+(* subst x t s replaces x by t in s *) 
+let rec subst x t s = match (x, s) with
+     | nab X   in (X,X)  -> t
+     | nab X Y in (X,Y)  -> Y
+     | (x,A)             -> A
+     | (x,B)             -> B
+     | (x, H u)          -> H (subst x t u)
+     | (x, G(u,v))       -> G (subst x t u, subst x t v);;
+
+(* Unification problems 
+    are a list of "disagrement pairs" 
+    
+    unif = 
+        Coerce(disagrementPairs, substitutions)
+      | Some(X\ unif @ X)
+*)
+type unif = 
+   | Coerce of ((folterm * folterm) list) * ((folterm * folterm) list)
+   | Some   of (folterm => unif) ;;
+   
+(* Results are lists of substitutions *)
+type subst = 
+   | Subs of (folterm * folterm) list
+   | Var  of (folterm => subst) ;;
+   
+let rec getSubs uni =
+    match uni with 
+    | Some(X\ u @ X) -> Var(X\ getSubs (u @ X))
+    | Coerce(dpl, subl) -> Subs(subl)
+;;
+
+type result = 
+   | Fail
+   | Success of subst
+;;
+    
+(* The simpl function simplifies a list 
+  of disagrement pairs by removing not 
+  desagreing pairs or not disagreing heads *)
+let rec simpl dpairs = match dpairs with
+    | [] -> []
+    | nab X in (X, X)::(l @ X) -> simpl (l @ X)
+    | nab X in (t, X)::(l @ X) -> (X, t)::simpl (l @ X)
+    | (A, A)::l -> simpl l
+    | (B, B)::l -> simpl l
+    | (H x, H u)::l -> simpl ((x,u)::l)
+    | (G(x, y), G(u, v))::l -> simpl ((x, u)::(y, v)::l)
+    | dpair::l -> dpair::(simpl l);;
+    
+let rec simplify unif = match unif with
+  | (Some r)               -> (Some (X\ (simplify (r @ X))))
+  | (Coerce (dpairs, subs)) -> (Coerce (simpl dpairs, subs));;
+
+(* A term is rigid if it's not a nominal *)
+let rigidp term = match term with 
+           | nab X in X -> false
+           | y          -> true;;
+           
+(* occursp (nominal, term) checks if the 
+   nominal appears in theterm.
+   it's needed by the "variable elimination" phase *)
+let rec occursp p = match p with
+  | nab X in (X,X) -> true
+  | nab X in (X,A) -> false
+  | nab X in (X,B) -> false
+  | nab X in (X,H(t @ X)) -> occursp (X,(t @ X))
+  | nab X in (X,G((t @ X),(s @ X))) -> occursp (X,t @ X) || occursp (X,s @ X)
+  | x -> false;;
+
+(* a SIMPLIFIED list of disagrement pairs is failing
+   if one of the pairs contains two rigid terms
+   or if t appears in s or vice versa. *)
+let rec failuredp dpairs = match dpairs with
+  | [] -> false
+  | (t,s)::l -> 
+      if (rigidp t) && (rigidp s) then true 
+      else if (occursp (t,s)) || (occursp (s,t)) then true 
+           else (failuredp l);;
+
+let rec failurep unif = match unif with
+  | (Some r) -> (new X in (failurep (r @ X)))
+  | (Coerce (dps,subs)) -> (failuredp dps);;
+  
+let rec endp unif = match unif with
+  | (Some r) -> (new X in (endp (r @ X)))
+  | (Coerce (dps,subs)) -> 
+      match dps with
+      | [] -> true
+      | d -> false;;
+  
+let rec varElimFirst uni =
+    (* This auxilliary replace a var by a term
+        in all disagrement pairs *)
+    let rec aux_subst x t dpairs = 
+        match dpairs with
+        | [] -> []
+        | (lf, rf)::tl -> 
+            (subst x t lf, subst x t rf)::(aux_subst x t tl)
+    in
+    
+    let rec doFirst dpairs subs =
+            (* Because simpl and failure check are 
+            called before VarElim we can assume that: 
+               The dpair list is non-empty
+               We only have f / f or f / r dpairs
+             and in the later case f is not in r *)
+            match dpairs with
+            | nab X in (X, t)::(tl @ X) -> 
+                      Coerce(
+                        aux_subst X t (tl @ X),
+                        ((X, t)::(aux_subst X t subs))
+                      )
+    in 
+    match uni with
+    | Some r -> Some(X\ (varElimFirst (r @ X)))
+    | Coerce(dpl, subl) -> doFirst dpl subl
+;;
+
+
+(* We successively :
+    simplify
+    eliminate variables (todo)
+    check failure
+  until success or stale state *)
+let rec unify uni =
+    let simpleUni = simplify uni in
+    if (failurep simpleUni) 
+    then Fail
+    else if (endp simpleUni)
+         then Success(getSubs simpleUni)
+         else unify (varElimFirst simpleUni)
+;;
+
+let unif1 = Some (X\ Some (Y\ (Coerce 
+      (((G(H(X),G(H(Y),A)), G(H(Y),G(H(X),A)))::[]),[]))));;
+
+let unif2 = Some (X\ Some (Y\ (Coerce 
+      (((G(H(X),G(H(Y),B)), G(H(Y),G(H(X),A)))::[]),[]))));;
+
+let unif3 = Some (X\ Some (Y\ (Coerce 
+      (((G(H(X),G(H(Y),A)), G(H(Y),G(H(Y),A)))::[]),[]))));;
+      
+let unif4 = Some (X\ Some (Y\ (Coerce 
+      ((H(H(X)), H(Y))::[],[]))));;
+      
+let unif5 = Some (X\ Some (Y\ (Coerce 
+      ((G(H(X), X), G(Y, A))::[],[]))));;
+
+let unif6 = Some (X\ Some (Y\ (Coerce 
+      ((X, Y)::[],[]))));;
+      
+let res1 = unify unif1;;
+let res2 = unify unif2;;
+let res3 = unify unif3;;
+let res4 = unify unif4;; 
+let res5 = unify unif5;; 
+let res6 = unify unif6;; 

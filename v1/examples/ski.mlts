@@ -1,0 +1,31 @@
+type comb = 
+    | I 
+    | K 
+    | S 
+    | App of comb * comb
+    | Abs of comb => comb
+;;
+    
+
+let rec absElim tm = 
+    match tm with
+    | K -> K
+    | S -> S
+    | I -> I
+    | nab X in X -> X
+    | App(t1, t2) -> App(absElim t1, absElim t2)
+    | Abs(X\ t) -> App(K, absElim t)
+    | Abs(X\ X) -> I 
+    | Abs(X\ Abs(Y\ t @ X Y)) -> 
+        absElim (Abs(X\ absElim (Abs (Y\ t @ X Y)))) 
+    | Abs(X\ App(t1 @ X, t2 @ X)) -> 
+        App(App(S, 
+                absElim (Abs(X\ t1 @ X))), 
+                absElim (Abs(X\ t2 @ X)))
+    ;;
+    
+    
+absElim (Abs(X\ X));;
+absElim (Abs(X\ Abs(Y\ Y)));;
+absElim (Abs(X\ Abs(Y\ X)));;
+absElim (Abs(X\ Abs(Y\ App(Y, X))));;

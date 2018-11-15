@@ -1,0 +1,18 @@
+type tm =
+  | App of tm * tm
+  | Abs of tm => tm
+;;
+
+
+let rec subst t x u =
+  match (x, t) with
+  | nab X in (X, X) -> u
+  | nab X Y in (X, Y) -> Y
+  | (x, App(m, n)) -> 
+      App(subst m x u, subst n x u)
+  | (x, Abs r) -> Abs(Y\ subst (r @ Y) x u)
+;;
+
+new X in subst (Abs(Y\ (App(Y, X)))) X (Abs(Z\ Z));;
+
+new X in Abs(Y\ subst (App(X, X)) X (App(Y, Y)));;

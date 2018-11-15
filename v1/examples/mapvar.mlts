@@ -1,0 +1,93 @@
+let rec foldr f a lst = match lst with
+  | [] -> a
+  | x :: xs -> f x (foldr f a xs);;
+
+(* val foldr : ('a -> 'b -> 'b) -> 'b -> 'a list -> 'b = <fun>  *)
+
+type tm =
+     | App of tm * tm
+     | Abs of tm => tm;;
+
+let rec maptm fapp fabs fvar term = match term with
+    | App(m,n) -> fapp (maptm fapp fabs fvar m) (maptm fapp fabs fvar n)
+    | Abs(r)   -> fabs (fun x -> maptm fapp fabs fvar (r @ x))
+    | nab X in X -> fvar X;;
+
+(*  Applications of maptm: mapvar and substitutions  *)
+
+let mapvar fvar term = 
+    maptm (fun m -> fun n -> App(m, n)) (fun r -> Abs(X\ r X))
+          fvar term;;
+
+let lookup sub var = match var with 
+  | nab X in X -> 
+    let rec aux s = match s with 
+                    | []         -> X
+                    | (X,t)::sub -> t
+                    | (y,t)::sub -> aux sub
+     in aux sub;;
+
+let subst_tm sub = mapvar (lookup sub);;
+
+Abs(X\ (mapvar  (fun x -> X) (Abs(U\(Abs(V\ (App(U,V))))))));;
+new X in new Y in lookup ((X,Abs(U\U))::(Y,Abs(U\ App(U,U)))::[]) X;;
+new X in new Y in lookup ((X,Abs(U\U))::(Y,Abs(U\ App(U,U)))::[]) Y;;
+
+(*  Applications of maptm: fv, size, and terminals *)
+
+let rec mem x l = match l with
+    | [] -> false
+    | n::tl -> if n = x then true else mem x tl;;
+	   
+let rec union l k = match l with
+    | []    -> k
+    | h::tl -> if mem h k then union tl k else h::(union tl k);;
+     
+let rec remove x l = match l with
+    | []    -> []
+    | h::tl -> if h = x then remove x tl else h::(remove x tl);;
+	      
+let fv term = maptm union (fun r -> new X in remove X (r X))
+                          (fun x -> x::[]) term;;
+
+let size term = 
+    maptm (fun x -> fun y -> 1 + x + y)
+          (fun r -> new X in 1 + (r X)) (fun x -> 1) term;;
+
+let terminals term = 
+    maptm (fun x -> fun y -> x + y)
+          (fun r -> new X in (r X)) (fun x -> 1) term;;
+
+fv (Abs(X\ App(X, X)));;
+fv (Abs(X\ Abs(Y\ App(Y, App(X, Y)))));;
+fv (Abs(X\ App(App(X, X), App(X, X))));;
+new X in mem X (fv (Abs(Y\ App(X, Y))));;
+new X in mem X (fv (Abs(Y\ App(Y, Y))));;
+
+size (Abs(X\ X));;
+size (Abs(X\ App(X, X)));;
+size (Abs(X\ Abs(Y\ Y)));;	
+size (App(Abs(X\X),Abs(X\X)));;
+size (Abs(X\ Abs(Y\ App(App(X,Y),App(Y,X)))));;
+
+terminals (Abs(X\ X));;
+terminals (Abs(X\ App(X, X)));;
+terminals (Abs(X\ Abs(Y\ Y)));;	
+terminals (App(Abs(X\X),Abs(X\X)));;
+terminals (Abs(X\ Abs(Y\ App(App(X,Y),App(Y,X)))));;
+
+let rec seqsubstp subs = match subs with
+  | []                  -> true
+  | nab X in ((X,t)::l) -> seqsubstp l
+  | s                   -> false;;
+
+new X in new Y in new Z in (seqsubstp ((X,Z)::(Y,Z)::[]));;
+new X in new Y in new Z in (seqsubstp ((X,Y)::(Y,Z)::[]));;
+new X in new Y in new Z in (seqsubstp ((X,(Abs(U\U)))::(Y,Z)::[]));;
+new X in new Y in new Z in (seqsubstp ((X,(Abs(U\U)))::(Y,(Abs(U\ (App(U,U)))))::[]));;
+new X in new Y in new Z in (seqsubstp ((X,(Abs(U\U)))::(X,(Abs(U\ (App(U,U)))))::[]));;
+
+foldr (fun x -> fun y -> x + y) 0 (1::2::3::4::[]);;
+foldr (fun x -> fun y -> x * y) 1 (1::2::3::4::[]);;
+
+

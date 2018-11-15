@@ -1,0 +1,117 @@
+type lam =
+    | Lam of lam => lam
+    | App of lam * lam
+;;
+
+type sem =
+    | L of ((lam * sem) list) * (lam => lam)
+    | N of neu
+;;
+
+type neu =
+    | A of neu * sem
+;;
+
+
+let rec assoc x g =
+    match g with
+    | ((y, a)::tl) -> if x = y then a
+        else assoc x tl
+;;
+let rec rassoc x g =
+    match g with
+    | ((a, y)::tl) -> if x = y then a
+        else rassoc x tl
+;;
+
+
+let rec evals g env tm =
+    match tm with
+    | nab X in X ->
+        begin match env with
+        | [] -> N (rassoc X g)
+        | ((x, v)::tl) ->
+            if x = X then v 
+            else evals g tl X
+        end
+    | Lam r -> L(env, r)
+    | App(l, r) ->
+        begin match (evals g env l) with
+        | L (cenv, r2) -> 
+            new X in new Y in
+            evals ((Y, X)::g) ((X, evals ((Y, X)::g) env r)::cenv) (r2 @ X)
+        | N n -> N (A (n, evals g env r))
+        end
+;;
+(*
+evals [] [] (Lam(X\Lam(Y\Y)));;
+evals [] [] (Lam(X\Lam(Y\X)));;
+evals [] [] (Lam(X\App(X, X)));;
+evals [] [] (App(Lam(Y\Y), Lam(Y\Y)));;
+evals [] [] (App(App(Lam(Y\Y), Lam(Y\Y)), Lam(Y\Y)));;
+*)
+
+let rec reify g sem =
+    let rec reifyn neu =
+        match neu with
+        | nab X in X -> assoc X g
+        | A(n, s) -> App(reifyn n, reify g s)
+    in
+    
+    match sem with
+    | L(env, r) -> Lam(X\ new Y in 
+                          reify ((Y, X)::g) 
+                                (evals ((Y, X)::g)
+                                       ((X, N Y)::env)
+                                       (r @ X)
+                                )
+                      )
+    | N n -> reifyn n
+;;
+
+let eval t = evals [] [] t;;
+let norm t = reify [] (eval t);;
+
+
+
+norm (Lam(X\X));;
+norm (Lam(X\X));;
+norm (Lam(X\Lam(Y\Y)));;
+norm (Lam(X\Lam(Y\X)));;
+norm (Lam(Y\App(Lam(X\ App(X, X)), Y)));;
+norm (Lam(X\Lam(Y\Lam(Z\App(App(X,Z),App(Y,Z))))));;
+let lllaa = (Lam(X\Lam(Y\X)));;
+let ll = Lam(X\X);;
+eval (App(lllaa, Lam(X\X)));;
+reify [] (L([], (X \ App(Lam(Y\ Lam(Z \ Y)), X))));;
+norm (App(App(lllaa,
+              ll),
+          Lam(X\Lam(Y\X))));;
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          

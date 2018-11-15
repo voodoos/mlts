@@ -1,0 +1,57 @@
+type name =
+  | A
+  | B
+  | C;;
+
+type proc =
+  | Null
+  | Plus of proc * proc
+  | Par  of proc * proc
+  | In   of name * (name => proc)
+  | Out  of name * name * proc
+  | Eqn  of name * name * proc
+  | Taup of proc
+  | Bang of proc
+  | Nu   of name => proc;;
+		     
+let rec assoc x alist = match alist with
+  | (u,y)::alst -> if u = x then y else assoc x alst;;
+
+type tm =
+     | App of tm * tm
+     | Abs of tm => tm;;
+
+type located =
+     | Loc of name => proc;;
+
+let rec trans gamma term = match term with
+  | App(m, n) -> 
+    begin
+      match (trans gamma m, trans gamma n) with 
+          | (Loc p, Loc q) ->
+                Loc(U\ Nu(V\ Par(p @ V,
+                    Nu(X\ Out(V, X, Out(V, U, Bang(In(X, q))))))))
+    end
+  | Abs(m) -> new X in Loc(U\ In(U, Y\
+    begin
+      match (trans ((X,Y)::gamma) (m @ X)) with
+          | Loc p -> In(U, V\ p @ V)
+     end))
+  | nab X in X -> Loc(U\ Out(assoc X gamma, U, Null));;
+
+trans [] (Abs(X\X));;
+
+Par(In(B,(Y\ Null)),Out(B,A,Null));;
+Plus(In(B,(Y\ Out(B,A,Null))),Out(B,A,In(B,(Y\ Null))));;
+Nu(X\(Par(In(X,(Y\ Null)),Out(X,A,Null))));;
+Nu(X\(Out(A,X,Null)));;
+In(A,(Y\ Par(In(Y,(W\ Null)),Out(B,B,Null))));;
+In(A,(Y\ Plus(In(Y, W\ Out(B,B,Null)), Out(B,B,In(Y, W\ Null)))));;
+
+Nu(Y\ Out(A,Y,Par(In(Y, W\ Null),Out(B,B,Null))));;
+Nu(Y\ Out(A,Y,Plus(In(Y, W\ Out(B,B,Null)),Out(B,B,In(Y, W\ Null)))));;
+
+
+
+  
+

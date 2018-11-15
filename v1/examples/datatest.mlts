@@ -1,0 +1,17 @@
+type num = 
+| ONE 
+| TWO 
+| NUM of int
+;;
+
+let is_ONE o =
+    match o with
+        | ONE -> true
+        | NUM i -> i = 1
+        | TWO -> false
+;;
+
+is_ONE ONE;;
+is_ONE TWO;;
+is_ONE (NUM(2));;
+is_ONE (NUM(1));;

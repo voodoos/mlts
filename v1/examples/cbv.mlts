@@ -1,0 +1,36 @@
+(* -*- mode: tuareg -*- *)
+
+type tm =
+  | Abs of tm => tm
+  | App of tm * tm
+;;
+
+type sem =
+  | Lam of (sem => sem)
+  | Pair of sem * sem
+;;
+
+
+let rec assoc l x =
+    match l with
+    | ((y, a)::l) -> if x = y then a
+        else assoc l x
+;;
+
+let rec evals ctx t =
+    match t with
+    | nab X in X -> assoc ctx X
+    | Abs r -> Lam (Y\ new X in evals ((X, Y)::ctx) (r @ X))
+    | App(l, r) ->
+        begin match (evals ctx l) with
+        | Lam s -> s @ (evals ctx r) 
+        | s -> Pair(s, evals ctx r)
+        end
+;;
+
+evals [] (Abs(X\X));;
+evals [] (Abs(X\Abs(Y\X)));;
+evals [] (Abs(X\Abs(Y\Y)));;
+evals [] (Abs(X\App(X,X)));;
+evals [] (Abs(X\App(Abs(Y\Y),X)));;
+evals [] (Abs(X\App(Abs(Y\ App(Y, Y)), X)));;

@@ -1,0 +1,39 @@
+type tm =
+  | App of tm * tm
+  | Abs of tm => tm;;
+
+let rec subst t x u = match (x,t) with
+  | nab X   in (X,X) -> u
+  | nab X Y in (X,Y) -> Y
+  | (x, Abs r)       -> Abs(Y\ subst (r @ Y) x u)
+  | (x, App(m,n))    -> App(subst m x u, subst n x u);;
+
+let rec beta t = match t with
+  | Abs r      -> Abs(Y\ beta (r @ Y))
+  | nab X in X -> X
+  | App(m, n)  ->
+    let m = beta m in let n = beta n in
+    begin 
+        match m with
+        | Abs r -> new X in beta (subst (r @ X) X n)
+        | w -> App(m, n)
+    end ;;
+
+let two   = Abs(F\ Abs(X\ App(F, App(F, X))));;
+let plus  = Abs(M\ Abs(N\ Abs(F\ Abs(X\ 
+                            App(App(M, F), App(App(N, F),X))))));;
+let times = Abs(M\ Abs(N\ Abs(F\ Abs(X\ 
+                            App(App(M, App(N, F)), X)))));;
+
+beta (App(App(plus, two), two));;
+beta (App(App(times,two), two));;
+
+
+new X in Abs(Y\ subst (App(X, X)) X (App(Y, Y)));;
+beta (Abs(X\ X));;
+beta (Abs(X\ Abs(Y\ App(X, Y))));;
+beta (App(Abs(X\ X), Abs(Y\ App(Y, Y))));;
+beta (App(Abs(X\ Abs(Y\ App(Y, X))), Abs(X\ X)));;
+beta (App(App(Abs(X\Abs(Y\Abs(Z\App(App(X,Z),App(Y,Z))))),
+              Abs(X\Abs(Y\X))),
+          Abs(X\Abs(Y\X))));;
