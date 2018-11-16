@@ -3,52 +3,35 @@ type tm =
      | Abs of tm => tm ;;
 
 let rec vacp1 t =  match t with
-    | Abs(X\X)                  -> false
-    | nab Y in Abs(X\Y)         -> true
-    | Abs(X\ App(m @ X, n @ X)) -> (vacp1 (Abs m)) && (vacp1 (Abs n))
-    | Abs(X\ Abs(Y\ r @ X Y))   -> new Y in vacp1(Abs(X\ r @ X Y))
-    | t                         -> false ;;
+    | X\X                  -> false
+    | nab Y in X\ Y        -> true
+    | X\ App(m @ X, n @ X) -> vacp1 m && vacp1 n
+    | X\ Abs(Y\ r @ X Y)   -> new Y in vacp1 (X\ r @ X Y);;
 
-let rec vacp2 t = match t with
-    | Abs(r) -> new X in
-                 let rec aux term = match term with
-                       | X          -> false
-                       | nab Y in Y -> true
-                       | App(m, n)  -> (aux m) && (aux n)
-                       | Abs(u)     -> new Y in aux (u @ Y)
-                  in aux (r @ X)
-    | t      -> false;;
-
-let vacp3 t = match t with
-    | Abs(X\s)  -> true
-    | t         -> false ;;
-    
-let vacuous r =
+let rec vacp2 t =
     new X in
     let rec aux term = match term with
         | X          -> false
         | nab Y in Y -> true
-        | App(m, n)  -> (aux m) && (aux n)
+        | App(m, n)  -> aux m && aux n
         | Abs(u)     -> new Y in aux (u @ Y)
-    in aux (r @ X)
-;;
+    in aux (t @ X);;
 
-vacp1 (Abs(X\X));;
-vacp1 (Abs(X\ App(X, X)));;
-vacp1 (Abs(X\ Abs(Y\Y)));;	
-vacp1 (App(Abs(X\X),Abs(X\X)));;
+let vacp3 t = match t with
+    | X\s  -> true
+    | _ -> false;;
 
-vacp2 (Abs(X\X));;
-vacp2 (Abs(X\ App(X, X)));;
-vacp2 (Abs(X\ Abs(Y\Y)));;	
-vacp2 (App(Abs(X\X),Abs(X\X)));;
+vacp1 (X\X);;
+vacp1 (X\ App(X, X));;
+vacp1 (X\ Abs(Y\Y));;	
+vacp1 (X\ App(Abs(Y\Y),Abs(Y\Y)));;
 
-vacp3 (Abs(X\X));;
-vacp3 (Abs(X\ App(X, X)));;
-vacp3 (Abs(X\ Abs(Y\Y)));;	
-vacp3 (App(Abs(X\X),Abs(X\X)));;
+vacp2 (X\X);;
+vacp2 (X\ App(X, X));;
+vacp2 (X\ Abs(Y\Y));;	
+vacp2 (X\ App(Abs(Y\Y),Abs(Y\Y)));;
 
-vacuous (X\X);;
-vacuous (X\ App(X, X));;
-vacuous (X\ Abs(Y\Y));;	
-vacuous (Abs(X\X),Abs(X\X));;
+vacp3 (X\X);;
+vacp3 (X\ App(X, X));;
+vacp3 (X\ Abs(Y\Y));;	
+vacp3 (X \ App(Abs(Y\Y),Abs(Y\Y)));;

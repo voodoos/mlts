@@ -3,17 +3,17 @@ type tm =
      | Abs of tm => tm;;
 
 let rec assoc x alist = match alist with
-  | ((u,y)::alst) -> if (u = x) then y else (assoc x alst);;
+  | (u, y)::alst -> if (u = x) then y else assoc x alst;;
 
 type tm' =
      | App' of tm' * tm'
      | Abs' of tm' => tm';;
 
 let rec id gamma term = match term with
-  | App(m,n)   -> App'(id gamma m,id gamma n)
-  | Abs(r)     -> new X in Abs'(Y\ (id ((X,Y)::gamma) (r @ X)))
+  | App(m, n)  -> App'(id gamma m, id gamma n)
+  | Abs(r)     -> new X in Abs'(Y\ id ((X, Y)::gamma) (r @ X))
   | nab X in X -> assoc X gamma;;
 
-id [] (Abs(X\ (App(X,X))));;
-id [] (Abs(X\ (Abs(Y\ (App(X,Y))))));;
+id [] (Abs(X\ App(X,X)));;
+id [] (Abs(X\ Abs(Y\ App(X,Y))));;
 
