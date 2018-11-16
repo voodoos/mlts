@@ -1,8 +1,9 @@
 # TryMLTS
 A web application designed to try and play with the MLTS programming language.
-The source is hosted on [GitHub](https://github.com/voodoos/mlts){target="_blank"} as is the [demo](http://voodoos.github.io/mlts/){target="_blank"}. You can also check the [latest draft](http://voodoos.github.io/mlts/mlts-paper.pdf){target="_blank"} of the paper describing MLTS.
 
 ## Sources
+The source is hosted on [GitHub](https://github.com/voodoos/mlts){target="_blank"} as is the [demo](http://voodoos.github.io/mlts/){target="_blank"}.
+
 Our prototype interpreter is written in λProlog. Its source is located in the [lib/data/core folder](https://github.com/voodoos/mlts/tree/master/lib/data/core){target="_blank"}. The more interesting parts are:
 
 - The [type checking algorithm](https://github.com/voodoos/mlts/blob/master/lib/data/core/typing.elpi){target="_blank"} 
