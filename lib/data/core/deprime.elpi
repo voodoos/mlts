@@ -314,6 +314,7 @@ copy_clause (arr P1 T1) (arr P2 T2) :- copy_pat P1 P2, copy T1 T2.
 copy_clause (all C1) (all C2) :- underv copy_clause C1 C2.
 copy_clause (nab C1) (nab C2) :- undern copy_clause C1 C2.
 
+copy_pat pany pany.
 copy_pat (plit L1) (plit L2) :- L1 = L2.
 copy_pat (pvar X1) (pvar X2) :- copy X1 X2.
 copy_pat (pnom N1) (pnom N2) :- copy_nom N1 N2.

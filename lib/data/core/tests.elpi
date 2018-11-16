@@ -251,6 +251,23 @@ test_dale_escape :-
        R,
        print R).
 
+type c_App constructor.
+type c_Abs constructor.
+test_notbeta :-
+   NotBeta = (fix notbeta \ lam t \
+     match t
+     [(all r \
+         arr (pvariant c_Abs [pvar r])
+         (variant c_Abs
+          [backslash Y \ app notbeta (arobase r Y)])),
+      (nab X \ arr (pnom X) X),
+      (all n \ all m \
+         arr (pvariant c_App [(pvar m), (pvar n)])
+         (match m [arr pany (variant c_App [m, n])]))]),
+   eval
+     (app NotBeta (variant c_Abs [backslash X \ X]))
+     (variant c_Abs [backslash X \ X]).
+
 main :-
     test_app_id, !,
     test_higher_arity, !,
@@ -284,5 +301,6 @@ main :-
     test_id_eta_expanded, !,
     test_dale_unit, !,
     test_dale_escape, !,
+    test_notbeta, !,
     true
 .
