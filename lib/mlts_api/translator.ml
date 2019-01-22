@@ -17,7 +17,7 @@ let make_exception message def pos =
                     None -> Some(def.pos)
                   | Some(_p) -> pos)
 
-  
+
 
 let make_sc_exception message def pos =
   StaticCheckError("In \"" ^ (strip def.name) ^ "\" (line "
@@ -44,19 +44,19 @@ type env = {
     pattern_vars: P.local_name list;
     local_noms: P.local_name list;
   }
-         
+
 let flip f = (fun y x -> f x y)
 
-let add_to_env v env = 
+let add_to_env v env =
   match List.assoc_opt v env.local_vars with
   | None -> (v, 0), { env with local_vars = (v, 0)::env.local_vars }
   | Some(i) -> (v, i + 1), { env with local_vars = (v, i + 1)::env.local_vars }
-             
-let add_nom_to_env v env = 
+
+let add_nom_to_env v env =
   match List.assoc_opt v env.local_noms with
   | None -> (v, 0), { env with local_noms = (v, 0)::env.local_noms }
   | Some(i) -> (v, i + 1), { env with local_noms = (v, i + 1)::env.local_noms }
-             
+
 let first_in_env v env =
   try List.assoc v env.pattern_vars with
     Not_found -> List.assoc v env.local_vars
@@ -70,7 +70,7 @@ let string_of_env env =
     @ section "pattern_vars" string_of_var env.pattern_vars
     @ section "local_noms" string_of_var env.local_noms
    )
-let print_env env = print_endline (string_of_env env)     
+let print_env env = print_endline (string_of_env env)
 
 (* env are used to pass is used to carry different kind of information. Some, such as local variables should be erased when leaving scope, some like the list of "free variables" needed by an expr should not.
 
@@ -84,14 +84,14 @@ let revert_noms envBefore envAfter = {
 let revert_patterns envBefore envAfter = {
     envAfter with pattern_vars = envBefore.pattern_vars
   }
-                                     
+
 let map_with_env f env li =
   let accumulate (acc, env) input =
     let (output, env) = f env input in
     (output::acc, env) in
   let rev_results, env = List.fold_left accumulate ([], env) li in
   List.rev rev_results, env
-    
+
 type k = Decl | Def
 type tdef = { kind: k;  name: string; body: P.term; env: env }
 
@@ -109,12 +109,12 @@ let mlts_to_prolog p =
   let set_actual_def ctx name pos =
     ctx.actual_def <- { name; pos } :: ctx.actual_def
   in
-  
 
-  
+
+
   let rec t_items = function
     | [] -> []
-    | item::tl -> 
+    | item::tl ->
        let titem = t_item item in
        titem@(t_items tl)
 
@@ -135,11 +135,11 @@ let mlts_to_prolog p =
     | IExpr(expr, pos) ->
        let name = "val_" ^ (string_of_int (ctx.nb_expr)) in
        set_actual_def ctx name pos;
-       incr_expr ctx; 
+       incr_expr ctx;
        let texpr, env = t_expr env expr in
        [P.Definition({
          name = "prog";
-         args = [P.Lit(P.String(name)); 
+         args = [P.Lit(P.String(name));
                  texpr];
          (* Some programs may depend on others! *)
          body = P.make_deps (env.free_vars)
@@ -169,15 +169,15 @@ let mlts_to_prolog p =
              body = P.make_deps (env.free_vars);
        })]
 
-    | DType(name, decls) -> 
+    | DType(name, decls) ->
        set_actual_def ctx name pos;
-      let rec list_of_sum ty = 
+      let rec list_of_sum ty =
         let rec t_typ = function
           | Cons(c) -> P.make_global c
           | Sum(_, _) as s -> P.List (List.rev (list_of_sum s))
           | Arrow(ty1, ty2) -> P.make_app "arr" [t_typ ty1; t_typ ty2]
           | Bind(ty1, ty2) -> P.make_app "bigarr" [t_typ ty1; t_typ ty2]
-          | List(_t) -> failwith "List (type) not implemented"
+          | List(ty) -> P.make_app "t_list" [t_typ ty](*failwith "List (type) not implemented"*)
         in
         match ty with
         | Sum(ty1, ty2) -> (t_typ ty2)::(list_of_sum ty1)
@@ -212,8 +212,8 @@ let mlts_to_prolog p =
         ) decls in
         type_decl::(List.flatten constructors)
 
-  
-      
+
+
   and t_expr envIn = function
     | ELetin(LBVal(name, params, expr), body) ->
        (* let f x y = x + y in f 2 3;; *)
@@ -228,44 +228,44 @@ let mlts_to_prolog p =
        let bodytm, env = t_expr env body in
     (* Removing it *)
        P.make_letin lname exprtm bodytm, revert_locals envIn env
-                                                
+
     | ELetRecin(LBVal(name, params, e), body) ->
        (*let name = ((fst ln) ^ "_" ^ (string_of_int (snd ln))) in*)
        let ln, env = add_to_env name envIn in
        let letbody, env = make_lam env params e in
        let body, env =t_expr env body in
        P.make_letrecin ln letbody body, revert_locals envIn env
-                       
+
     | EMatch(e, rules) ->
        let e, env = t_expr envIn e in
        let rules, env = map_with_env t_rule env rules in
        P.make_match e rules, env
-       
+
     | EIf(e1, e2, e3) ->
        let tm1, env = t_expr envIn e1 in
        let tm2, env = t_expr env e2 in
        let tm3, env = t_expr env e3 in
        P.make_ite tm1 tm2 tm3, env
-       
-    | EApp(e, args) -> 
+
+    | EApp(e, args) ->
        let te, env = t_expr envIn e in
        let args, env = map_with_env t_expr env args in
        P.make_appt te args, env
-       
+
     | EBApp(e, args) ->
        let te, env = t_expr envIn e in
        let args, env = map_with_env t_nom env args in
        P.make_nom_appt te args, env
-                        
-    | EInfix(e1, op, e2) -> 
+
+    | EInfix(e1, op, e2) ->
        let te1, env = t_expr envIn e1 in
        let te2, env = t_expr env e2 in
        P.make_spec op [te1; te2],
        env
-       
+
     | EConst(c) -> t_constant c, envIn
-                 
-    | EVal(v) -> 
+
+    | EVal(v) ->
        begin
          (* print_env envIn; *)
          try P.make_local v (first_in_env v envIn), envIn
@@ -282,10 +282,10 @@ let mlts_to_prolog p =
        end
     | EPair(e1, e2) ->
        t_expr envIn (EConstr("pair", [e1; e2]))
-                   
-    | EConstr(name, exprs) -> 
-       (* A constructor is either 
-          a global datatype constructor 
+
+    | EConstr(name, exprs) ->
+       (* A constructor is either
+          a global datatype constructor
          or a localnominal *)
        begin
          try
@@ -306,19 +306,19 @@ let mlts_to_prolog p =
                ("Unknown constructor " ^ name)
                (List.hd ctx.actual_def)
                None)
-               
+
        end
     | EPattern(_) -> failwith "Not implemented: EPattern"
-                   
-    | EBind(name, body) -> 
+
+    | EBind(name, body) ->
        let lname, env = add_nom_to_env name envIn in
        let tm, env = t_expr env body in
        P.make_bind lname tm, revert_noms envIn env
-       
+
     | EFun(params, body) ->
        let tm, env = make_lam envIn params body in
        tm, env
-                  
+
     | ENew(name, body) ->
        let lname, env = add_nom_to_env name envIn in
        let tm, env = t_expr env body in
@@ -327,7 +327,7 @@ let mlts_to_prolog p =
   and t_constant ?(is_pat = false) = function
     | Int(i) -> P.make_int ~is_pat i
     | Bool(b) -> P.make_bool b
-    | String(s) -> P.make_string s 
+    | String(s) -> P.make_string s
     | EmptyList -> failwith "Should not happen anymore (emptylist)"
 
   and t_rule envIn = function
@@ -349,7 +349,7 @@ let mlts_to_prolog p =
        let pattern_vars = env.pattern_vars in
        let env = { env with pattern_vars = [] } in
        let body, env = t_expr env e in
-       
+
        P.make_rule pat_noms pattern_vars pat body,
        revert_noms envIn (revert_patterns envIn (revert_locals envIn env))
 
@@ -357,10 +357,10 @@ let mlts_to_prolog p =
     P.make_nom nom (List.assoc nom env.local_noms), env
 
   and t_pattern envIn = function
-    | PVal(name) -> 
+    | PVal(name) ->
        (* todo: can also be a nominal *)
        begin
-         try  
+         try
            P.make_pvar name (List.assoc name envIn.pattern_vars), envIn
          with Not_found ->
            let lvar, env = add_to_env name envIn in
@@ -369,23 +369,23 @@ let mlts_to_prolog p =
        end
 
     | PAny(_name) -> P.make_app "pany" [], envIn
-       
+
     | PBind(name,pat) ->
        let lname, env = add_nom_to_env name envIn in
        let tm, env = t_pattern env pat in
        P.make_bind ~pattern:true lname tm, revert_noms envIn env
-       
+
     | PApp(_name,_pats) -> failwith "Not implemented: PApp"
-                         
+
     | PBApp(name, args) ->
        (* todo: maybe the parser should accept more than just names ? *)
        let var, env = t_pattern envIn (PVal(name)) in
        let noms, env = map_with_env t_nom env args in
        P.make_appt ~nom:true ~pattern:true var noms, env
-                           
+
     | PConstr(name, pats) ->
-       (* A constructor is either 
-          a global datatype constructor 
+       (* A constructor is either
+          a global datatype constructor
          or a localnominal *)
        begin
          try
@@ -403,7 +403,7 @@ let mlts_to_prolog p =
            else
              failwith ("Unknown constructor " ^ name)
        end
-      
+
     | PConstant(c) -> t_constant ~is_pat:true c, envIn
     | PListCons(pat1, pat2) ->
        (* todo : not in the interpreter *)
@@ -411,7 +411,7 @@ let mlts_to_prolog p =
     | PPair(pat1, pat2) ->
        t_pattern envIn (PConstr("pair", [pat1; pat2]))
   and make_lam env params e =
-    (* 
+    (*
         fun f x y -> body
           => lam (x\ lam (y\ body))
      *)
@@ -419,7 +419,7 @@ let mlts_to_prolog p =
     let rec aux env params e =
       match params with
       | [] -> t_expr env e
-      | p::ptl -> 
+      | p::ptl ->
          let lvar, env = add_to_env p env in
          let inner, env = aux env ptl e in
          P.make_lam lvar inner, env
@@ -427,10 +427,10 @@ let mlts_to_prolog p =
     let tm, env = aux envInitial params e in
     tm, revert_locals envInitial env
   in
-  let make_death_list (l : def list) : (string * int) list =    
+  let make_death_list (l : def list) : (string * int) list =
     List.map (fun (d : def) -> (d.name, d.pos.pos_lnum)) l
   in
-        
+
   let items = t_items p in
   let defs = make_death_list ctx.actual_def in
 
