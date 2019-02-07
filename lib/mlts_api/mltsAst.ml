@@ -23,7 +23,7 @@ and expr =
   | EIf of expr * expr * expr
   | EApp of expr * (argument list)
   | EBApp of expr * nominal list
-  | EInfix of expr * infix_op * expr           
+  | EInfix of expr * infix_op * expr
   | EConst of constant
   | EVal of value_path
   | EPair of expr * expr
@@ -32,10 +32,11 @@ and expr =
   | EBind of nominal * expr
   | EFun of (value_name list) * expr
   | ENew of nominal * expr
-                           
-                 
+
+
 and typexpr =
   | Cons of constr_path
+  | Pair of typexpr * typexpr
   | Sum of typexpr * typexpr
   | Arrow of typexpr * typexpr
   | Bind of typexpr * typexpr
@@ -46,7 +47,7 @@ and pattern_matching = rule list
 and rule =
   | RSimple of pattern * expr
   | RNa of (value_name list) * pattern * expr
-                          
+
 and pattern =
   | PVal of value_name
   | PBind of value_name * pattern
@@ -78,7 +79,7 @@ and constr_path = constr_name
 and value_name = string
 and value_path = value_name
 and nominal = value_name
-                   
+
 type var =
   Global of value_name
 | Local of value_name
@@ -101,8 +102,8 @@ let rec params_to_env env  = function
 let rec metaparams_to_env env  = function
     [] -> env
   | (p, a)::pl -> metaparams_to_env ((MetaParam(p, a))::env) pl
-  
-let rec arityMP name = function 
+
+let rec arityMP name = function
   | [] -> -1
   | MetaParam(n, a)::_ when n = name -> a
   | _::tl -> arityMP name tl
@@ -119,7 +120,7 @@ let rec arityMP name = function
 
 
 
-                                       
-       
 
- 
+
+
+

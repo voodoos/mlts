@@ -183,7 +183,7 @@ expr:
      	  				    EConstr("list_cons", [e1; e2])}
 | i = constr_name; BACKSLASH; e = expr
       %prec BACKSLASH			{ EBind(i, e) }
-      
+
 | c = constr_path;
   args = constr_expr_args               { EConstr(c, args) }
 ;
@@ -199,17 +199,19 @@ expr_list:
 | expr; COMMA; expr_list 		{ $1::$3 }
 
 typ_expr:
-| BEGIN; typ_expr; END			{ $2 }
 | typeconstr_name 			{ Cons($1) }
+| BEGIN; tya1 = typ_expr;
+  STAR; tya2 = typ_expr; END			{ Pair(tya1, tya2) }
 | tya1 = typ_expr;
   STAR; tya2 = typ_expr			{ Sum(tya1, tya2) }
-					      
+
 | tya1 = typ_expr;
   ARROW; tya2 = typ_expr		{ Arrow(tya1, tya2) }
-					      
+
 |  tya1 = typ_expr;
    DARROW;  tya2 = typ_expr		{ Bind(tya1, tya2) }
 | tya = typ_expr; LIST;		{ List(tya)  }
+| BEGIN; typ_expr; END			{ $2 }
 ;
 
 match_arms:
@@ -220,7 +222,7 @@ match_arms:
 rule:
 | pe = pattern_arrow			{ let p, e = pe in RSimple(p, e) }
 | NA; i = nonempty_list(constr_name);
-  	IN; pe = pattern_arrow 
+  	IN; pe = pattern_arrow
       	       	 	  	     	{  let p, e = pe in RNa(i, p, e) }
 ;
 
@@ -235,10 +237,10 @@ pattern:
 | v = value_path; AT;
   l = nonempty_list(constr_name)
       				        { PBApp(v, l) }
-| v = value_path; 
+| v = value_path;
   l = nonempty_list(simple_pattern)
       				        { PApp(v, l) }
-					
+
 | p1 = pattern; DCOLON; p2 = pattern	{ PListCons(p1, p2) }
 | c = constr_path; l = constr_pat_args  { PConstr(c, l) }
 | LBRACK; RBRACK			{ PConstr("list_empty", []) }
@@ -266,7 +268,7 @@ trivial_pattern:
 constant:
 | CONST_INT				{ Int($1) }
 | CONST_BOOL				{ Bool($1) }
-| STRING				{ String($1) }	
+| STRING				{ String($1) }
 ;
 
 argument:
@@ -277,7 +279,7 @@ value_path:
 | value_name				{ $1 }
 | m = module_name; DOT; v = IDENT	{ builtin (m ^ "." ^ v) }
 
-/* TODO, long modulepath 
+/* TODO, long modulepath
 module_path:
 | module_name				{ $1 }
 | m = module_name; DOT; mp = module_path
@@ -313,5 +315,5 @@ typeconstr_name:
 | LT     { Lt   }
 | LE     { Le   }
 | AND    { And  }
-| OR     { Or   } 
+| OR     { Or   }
 ;

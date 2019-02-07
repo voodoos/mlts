@@ -174,6 +174,7 @@ let mlts_to_prolog p =
       let rec list_of_sum ty =
         let rec t_typ = function
           | Cons(c) -> P.make_global c
+          | Pair(ty1, ty2) -> P.make_app "t_pair" [t_typ ty1; t_typ ty2]
           | Sum(_, _) as s -> P.List (List.rev (list_of_sum s))
           | Arrow(ty1, ty2) -> P.make_app "arr" [t_typ ty1; t_typ ty2]
           | Bind(ty1, ty2) -> P.make_app "bigarr" [t_typ ty1; t_typ ty2]
