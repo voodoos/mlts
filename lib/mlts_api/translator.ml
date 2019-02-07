@@ -169,9 +169,15 @@ let mlts_to_prolog p =
              body = P.make_deps (env.free_vars);
        })]
 
-    | DLetrec(mutuals) -> failwith "Mutual rec not implemented"
+    | DLetrec(mutuals) ->
+        set_actual_def ctx "mutual function" pos;
+        let name = List.fold_left (
+          fun acc (LBVal(name, _, _)) -> acc ^ name
+          ) "m_" mutuals in
+        failwith "Mutual rec not implemented"
+
     | DType(name, decls) ->
-       set_actual_def ctx name pos;
+      set_actual_def ctx name pos;
       let rec list_of_sum ty =
         let rec t_typ = function
           | Cons(c) -> P.make_global c
