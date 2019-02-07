@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	<meta http-equiv="Content-Security-Policy" content="script-src 'self' 
+	<meta http-equiv="Content-Security-Policy" content="script-src 'self'
 							'unsafe-inline'
 							'unsafe-eval'">
 	<title>TryMLTS</title>
@@ -44,8 +44,8 @@
 					<!-- Navbar content -->
 					<div class="btn-group" role="group" aria-label="Main commands">
 						<div class="btn-group">
-							<button type="button" class="btn 
-			       my-2 my-md-0 my-sm-0 
+							<button type="button" class="btn
+			       my-2 my-md-0 my-sm-0
 			       btn-outline-info dropdown-toggle"
 							 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 								<span class="oi oi-folder"></span>
@@ -78,6 +78,7 @@
 									<a class="dropdown-item" href="#lists" onClick="load('lists');">Lists</a>
 									<!--a class="dropdown-item" href="#freevars" onClick="load('freevars');">Free vars</a-->
 									<a class="dropdown-item" href="#ski" onClick="load('ski');">SKI Combinators</a>
+									<a class="dropdown-item" href="#ski" onClick="load('unification');">Unification(slow)</a>
 									<!--a class="dropdown-item" href="#cbv"
 		     onClick="load('cbv');">Call by value</a-->
 								</div>
@@ -90,25 +91,25 @@
 			  title="New (erase)">
 		    <span class="oi oi-document"></span>
 		  </button-->
-						<button class="btn 
-				 my-2 my-md-0 my-sm-0 
+						<button class="btn
+				 my-2 my-md-0 my-sm-0
 				 btn-outline-info" onClick="restart();" data-toggle="tooltip"
 						 data-placement="bottom" title="Restart kernel">
 							<span class="oi oi-loop-square"></span>
 						</button>
-						<button class="btn 
-				 my-2 my-md-0 my-sm-0 
+						<button class="btn
+				 my-2 my-md-0 my-sm-0
 				 btn-outline-info" onClick="save();" data-toggle="tooltip"
 						 data-placement="bottom" title="Save file to disk">
 							<span class="oi oi-data-transfer-download"></span>
 						</button>
-						<button class="btn btn-outline-success 
+						<button class="btn btn-outline-success
 				 my-2 my-md-0 my-sm-0 disabled" disabled id="run_btn" onClick="run();"
 						 data-toggle="tooltip" data-placement="bottom" title="Ctrl + b / Cmd + b">
-							<span class="exec_btn_text 
+							<span class="exec_btn_text
 				 d-none d-lg-inline">Starting kernel</span>
 							<span class="oi oi-loop-circular gear"></span>
-							<span class="oi oi-media-play play 
+							<span class="oi oi-media-play play
 				 d-md-inline d-lg-none" style="display:none;"></span>
 						</button>
 					</div>
