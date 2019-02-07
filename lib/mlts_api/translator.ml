@@ -157,7 +157,7 @@ let mlts_to_prolog p =
              body = P.make_deps (env.free_vars);
        })]
 
-    | DLetrec(LBVal(name, params, e)) ->
+    | DLetrec([LBVal(name, params, e)]) ->
        set_actual_def ctx name pos;
        let ln, env = add_to_env name env in
        let body, env = make_lam env params e in
@@ -169,6 +169,7 @@ let mlts_to_prolog p =
              body = P.make_deps (env.free_vars);
        })]
 
+    | DLetrec(mutuals) -> failwith "Mutual rec not implemented"
     | DType(name, decls) ->
        set_actual_def ctx name pos;
       let rec list_of_sum ty =

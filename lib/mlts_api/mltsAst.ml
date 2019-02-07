@@ -6,7 +6,7 @@ and module_item =
 
 and definition =
   | DLet of let_binding
-  | DLetrec of let_binding
+  | DLetrec of let_binding list
   | DType of typeconstr_name * (constr_decl list)
 
 and constr_decl =
@@ -89,8 +89,10 @@ type var =
 
 type env = (var * arity) list
 
+(*)
 let rec getDefName = function
-  | DLetrec(lb) | DLet(lb)-> getLetBindingName lb
+  | DLetrec(lb)
+  | DLet(lb)-> getLetBindingName lb
   | DType(n, _) -> n
 and getLetBindingName = function
   | LBVal(n, _, _) -> n
@@ -108,14 +110,7 @@ let rec arityMP name = function
   | MetaParam(n, a)::_ when n = name -> a
   | _::tl -> arityMP name tl
 
-
-
-
-
-
-
-
-
+*)
 
 
 

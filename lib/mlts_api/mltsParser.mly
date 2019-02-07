@@ -53,6 +53,7 @@
 %token <int> CONST_INT
 %token PLUS MINUS STAR
 %token <bool> CONST_BOOL
+%token MUTUAL
 %token AND OR
 %token EQUAL NEQ LT LE
 %token <string> IDENT
@@ -116,7 +117,8 @@ module_item:
 
 definition:
 | LET;	 b = let_binding		{ DLet(b) }
-| LET; REC; b = let_binding		{ DLetrec(b) }
+| LET; REC; mutuals=separated_nonempty_list(MUTUAL, let_binding)
+  { DLetrec(mutuals) }
 | TYPE; n = typeconstr_name; EQUAL; ltc = nonempty_list(constr_decl)
 					{ DType(n, ltc) }
 ;

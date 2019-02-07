@@ -143,6 +143,13 @@ test_fix :-
           (lit (i 8)))
           (lit (i 0)).
 
+% let rec even n =
+%   if (n = 0) then true
+%   else odd (n - 1)
+% and odd n =
+%   if (n = 0) then false
+%   else even (n - 1)
+
 test_rowfix :-
     eval
       (letrow (rowfix EvenOdd \ row [
@@ -153,7 +160,8 @@ test_rowfix :-
         (lam n \
           if_then_else (special equal [n, lit (i 0)])
             (lit (b bfalse))
-            (app (select 0 EvenOdd) (special sub [n, lit (i 1)]))) ])
+            (app (select 0 EvenOdd) (special sub [n, lit (i 1)])))
+            ])
        EvenOdd \
        let (select 0 EvenOdd) Even \
        let (select 1 EvenOdd) Odd \

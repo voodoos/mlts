@@ -19,7 +19,7 @@
 	"else",     ELSE;
 	"match",    MATCH;
 	"with",     WITH;
-	"and",	    AND;
+	"and",	    MUTUAL;
 	"type",	    TYPE;
 	"nab",	    NA;
 	"fun",	    FUN;
@@ -53,7 +53,7 @@ let newline = ('\r'* '\n')
 
 let anyIdent =  ['_'] alphadigit*
 let lowercaseIdent = ['a'-'z'] alphadigit*
-let uppercaseIdent = ['A'-'Z'] alphadigit*  
+let uppercaseIdent = ['A'-'Z'] alphadigit*
 
 rule token = parse
   | newline
@@ -89,7 +89,7 @@ rule token = parse
   | ","
       { COMMA }
   | "\\"
-      { BACKSLASH }  
+      { BACKSLASH }
   | "->"
       { ARROW }
   | "=>"
@@ -123,23 +123,23 @@ rule token = parse
 
 
 and string buf = parse
-  | [^'"' '\n' '\\']+  
+  | [^'"' '\n' '\\']+
       { B.add_string buf @@ lexeme lexbuf
       ; string buf lexbuf }
   | '\n'
       { B.add_string buf @@ lexeme lexbuf
             ; Lexing.new_line lexbuf
             ; string buf lexbuf }
-  | '\\' '"'  
+  | '\\' '"'
       { B.add_char buf '"' ; string buf lexbuf }
   | '\\'
       { B.add_char buf '\\'; string buf lexbuf }
-    
+
   | '"'
       { B.contents buf }
-  | eof       
+  | eof
       { lexing_error lexbuf }
-  | _         
+  | _
       { lexing_error lexbuf }
 
 and comment = parse
@@ -147,7 +147,7 @@ and comment = parse
       { comment lexbuf; comment lexbuf }
   | "*)"
       { () }
-      
+
   | newline
       { Lexing.new_line lexbuf; comment lexbuf }
   | _
