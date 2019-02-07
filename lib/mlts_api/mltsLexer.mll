@@ -19,6 +19,7 @@
 	"else",     ELSE;
 	"match",    MATCH;
 	"with",     WITH;
+	"and",	    AND;
 	"type",	    TYPE;
 	"nab",	    NA;
 	"fun",	    FUN;

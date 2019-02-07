@@ -21,19 +21,19 @@
 *)
   let n_type =
     let reserved = Hashtbl.create 5 in
-    
+
     List.iter (fun (s, k) -> Hashtbl.add reserved s k)
       [ "int", "int";
         "bool", "bool" ] ;
-    
+
     fun s ->
       try  Hashtbl.find reserved s
       with Not_found
         -> (*unik*) ("t_" ^ s)
-	    
+
   let n_constr s =
       (*unik*) ("c_" ^ s)
-      
+
   let n_val s =
       ("v_" ^ s)
 
@@ -47,7 +47,7 @@
     fun s ->
       try  Hashtbl.find h s
       with Not_found -> s
-      
+
 %}
 
 %token <int> CONST_INT
@@ -62,7 +62,7 @@
 %token BEGIN END
 %token LBRACK RBRACK
 %token IF THEN ELSE
-%token FUN 
+%token FUN
 %token MATCH WITH VBAR ARROW
 %token DSEMI
 %token DCOLON

@@ -36,7 +36,7 @@ typeof (if_then_else P Q R) A :-
 
 typeof (fix M) A :- pi x\ typeof x A => typeof (M x) A2,
        (A = A2, !; err_wrong_type (M x) A A2 (fix M), fail).
-       
+
 typeof (let M R) A :- typeof M B, pi x\ typeof x B => typeof (R x) A.
 
 typeof (new R) B :- pi x\ typeof x A_ => typeof (R x) B.
@@ -52,7 +52,7 @@ typeof (app M N) B :-
     typeof M (arr A B),
     typeof N A2,
        (A = A2, !; err_wrong_type N A A2 (app M N), fail).
-       
+
 typeof (arobase M N) A :-
     typeof M (bigarr B A),
     typeof N B2,
@@ -95,7 +95,7 @@ type_constr list_cons [A, (t_list A)] (t_list A).
 type_check [] [].
 type_check [E|TL] [Ty|TyL] :-
     typeof E Ty,
-    type_check TL TyL. 
+    type_check TL TyL.
 
 typeof (variant Constr Args) A :-
     type_constr Constr Typs A,
@@ -108,7 +108,7 @@ type_pat pany A_.
 type_pat (plit I) A :- typeof (lit I) A.
 type_pat (pvar T) A :- typeof T A.
 type_pat (pnom N) A :- typeof N A.
-type_pat (pbackslash R) (bigarr A B) :- 
+type_pat (pbackslash R) (bigarr A B) :-
     pi x\ typeof x A => type_pat (R x) B.
 
 type_pat (parobase P T) B :-
