@@ -1,11 +1,13 @@
 exception Query_failed
 exception No_kernel
 
+let version = "0.2.3"
+
 let kernel = ref None
-                 
+
 let escape s =
   Js.to_string (Js.escape (Js.string s))
-               
+
 let console ?pref:(p = "") (str : string) =
   ignore (Js.Unsafe.eval_string ("sendLog(unescape('" ^ (escape (p ^ str)) ^"'))"))
 
@@ -14,7 +16,7 @@ let consoleError ?pref:(p = "") (str : string) =
                                  ^ (escape ("<span style=\"color:red;\">"
                                             ^ p ^ str ^ "</span>"))
                                  ^ "'))"))
-                 
+
 let compile header code =
   try
     (* First mlts => lprolog *)
@@ -36,7 +38,7 @@ let compile header code =
 
     (* We return the lprolog code for reference *)
     Js.string (lpcode), Array.of_list defs, 0, 0, true
-    
+
   with Mlts_API.Error(s, line, char)
        -> (Js.string s, [||], line, char,  false)
   | e -> Js.string ("Unexpected error: " ^ (Printexc.to_string e)), [||], 0, 0, false
@@ -50,8 +52,8 @@ let q_type  = "Type"
 
 let handle_out res iter _f (out : Elpi_API.Execute.outcome) =
   match out with
-  | Success(data) -> 
-     
+  | Success(data) ->
+
      (* Elpi returns answers as a map from query variable names to terms *)
      (* We transform it into a map from names to strings *)
      let resp =
@@ -87,27 +89,25 @@ let query prog =
      Elpi_API.Execute.loop exec
                            ~more:(fun () -> true)
                            ~pp:(handle_out res iter);
-     
+
      flush_all ();
      "{ \"output\": [" ^ !res
-                          
+
 
 let run () = query Printf.(sprintf "run %s %s %s %s." q_name q_prog q_value q_type)
-                  
+
 let compile_and_run header code =
   let lpcode = compile header (Js.to_string code) in
   lpcode, query ("run_all N.")
 
-let version = "0.2.2"
 
-  
 let _ =
   (* Redirect output to console *)
   Sys_js.set_channel_flusher stdout (console);
   Sys_js.set_channel_flusher stderr (consoleError);
-  
+
   ignore (Js.Unsafe.eval_string ("sendVersion('" ^ (version) ^"')"));
-  
+
   (* Loading data folder in the pseudo-filesystem *)
   Data.load ();
 
@@ -117,15 +117,15 @@ let _ =
   Elpi_API.Setup.set_error (console ~pref:"[elpi]");
   Elpi_API.Setup.set_anomaly (console ~pref:"[elpi]");
   Elpi_API.Setup.set_type_error (console ~pref:"[elpi]");
-  
+
   let parsed =  Elpi_API.Parse.program ["core/run.elpi"] in
   kernel := Some(Elpi_API.Compile.program header [parsed]);
 
   (* JS API *)
   Js.export "compile" (fun jstr -> compile header (Js.to_string jstr)) ;
   Js.export "query"  (fun jstr -> query (Js.to_string jstr)) ;
-  Js.export "run" run                    
+  Js.export "run" run
 
-                                                    
-                                     
- 
+
+
+
