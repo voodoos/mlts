@@ -1,14 +1,14 @@
 type global_name = string
 type local_name = string * int
-type name = 
+type name =
 | Local of local_name
 | Global of global_name
 
-type ty = 
+type ty =
 | Name of global_name
 | Arrow of ty * ty
 
-type term = 
+type term =
 | Seq of term list
 | Abs of local_name * term
 | Hyp of term * term
@@ -25,10 +25,10 @@ and literal =
 
 and atom = name
 
-type decl = { 
-    sort: decl_sort; 
-    name: global_name; 
-    ty: ty; 
+type decl = {
+    sort: decl_sort;
+    name: global_name;
+    ty: ty;
 }
 and decl_sort = Kind | Type
 
@@ -80,7 +80,7 @@ let make_local n i =
   App(Local(n, i), [])
 
 let make_localp p = make_local (fst p) (snd p)
-  
+
 let make_spec s args =
   App(Global("special"),
       [make_global (infix_to_string s);
@@ -94,7 +94,7 @@ let make_let _a1 _a2 lvar inner =
   App(Global("let"),
       [Abs(lvar, inner)])
 
-    
+
 let make_appt ?(nom=false)  ?(pattern=false) f args =
   let app = match nom, pattern with
     | true, true   -> "parobase"
@@ -105,16 +105,16 @@ let make_appt ?(nom=false)  ?(pattern=false) f args =
   List.fold_left (fun tm arg ->
       make_app app ([tm;arg])
     ) f args
-    
+
 let make_nom_appt ?(pattern=false) f args =
   make_appt ~nom:true ~pattern f args
-  
+
 let make_dep name body =
   App(Global("get_prog"),
       [Lit(String(name));
        body])
-  
-let make_deps fvs = 
+
+let make_deps fvs =
   let make_dep name =
     make_dep name (make_global (String.capitalize_ascii name))
   in match fvs with

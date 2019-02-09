@@ -43,6 +43,8 @@ type env = {
     free_vars:  P.global_name list;
     pattern_vars: P.local_name list;
     local_noms: P.local_name list;
+    local_rows:
+    ((string * P.local_name * int) * int) list;
   }
 
 let flip f = (fun y x -> f x y)
@@ -57,18 +59,31 @@ let add_nom_to_env v env =
   | None -> (v, 0), { env with local_noms = (v, 0)::env.local_noms }
   | Some(i) -> (v, i + 1), { env with local_noms = (v, i + 1)::env.local_noms }
 
+let add_mutual_to_env v row n env =
+  let res = (v, row, n) in
+  match List.find_opt
+          (fun ((n, _, _), i) -> n = v)
+          env.local_rows
+  with
+  | None -> let res = (res, 0) in
+  res, { env with local_rows = res::env.local_rows }
+  | Some((_,i)) -> (res, i + 1),
+    { env with local_rows = (res, i + 1)::env.local_rows }
+
 let first_in_env v env =
   try List.assoc v env.pattern_vars with
     Not_found -> List.assoc v env.local_vars
 
 let string_of_env env =
   let string_of_var (v, i) = Printf.sprintf "(%s, %d)" v i in
+  let string_of_row ((v, r, n), i) = Printf.sprintf "((%s, %s, %d), %d)" v (string_of_var r) n i in
   let section name to_string li = [ name; ": " ] @ List.map to_string li @ [ "\n" ] in
   String.concat "" ([]
     @ section "local_vars" string_of_var env.local_vars
     @ section "free_vars" (fun s -> s) env.free_vars
     @ section "pattern_vars" string_of_var env.pattern_vars
     @ section "local_noms" string_of_var env.local_noms
+    @ section "local_rows" string_of_row env.local_rows
    )
 let print_env env = print_endline (string_of_env env)
 
@@ -126,7 +141,8 @@ let mlts_to_prolog p =
         local_vars = [];
         free_vars = [];
         pattern_vars = [];
-        local_noms = []
+        local_noms = [];
+        local_rows = []
       }
     in
     function
@@ -171,9 +187,24 @@ let mlts_to_prolog p =
 
     | DLetrec(mutuals) ->
         set_actual_def ctx "mutual function" pos;
-        let name = List.fold_left (
+
+        (* Row's name is made of all the mutual functions names *)
+        let row = List.fold_left (
           fun acc (LBVal(name, _, _)) -> acc ^ name
-          ) "m_" mutuals in
+          ) "row_" mutuals in
+
+        (* Adding row to env to get local name *)
+        let row_local_name, env = add_to_env row env in
+
+        (* Adding all mutually defined functions to env *)
+        let local_names, env, _ = List.fold_left
+          (fun (locals, env, i) (LBVal(name, _, _)) ->
+          let ln, env =
+            add_mutual_to_env name row_local_name i env
+          in
+          (ln::locals, env, i + 1))
+          ([], env, 0) mutuals in
+        print_env env;
         failwith "Mutual rec not implemented"
 
     | DType(name, decls) ->
@@ -241,7 +272,7 @@ let mlts_to_prolog p =
        (*let name = ((fst ln) ^ "_" ^ (string_of_int (snd ln))) in*)
        let ln, env = add_to_env name envIn in
        let letbody, env = make_lam env params e in
-       let body, env =t_expr env body in
+       let body, env = t_expr env body in
        P.make_letrecin ln letbody body, revert_locals envIn env
 
     | EMatch(e, rules) ->

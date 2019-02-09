@@ -89,28 +89,6 @@ type var =
 
 type env = (var * arity) list
 
-(*)
-let rec getDefName = function
-  | DLetrec(lb)
-  | DLet(lb)-> getLetBindingName lb
-  | DType(n, _) -> n
-and getLetBindingName = function
-  | LBVal(n, _, _) -> n
-
-let rec params_to_env env  = function
-    [] -> env
-  | p::pl -> params_to_env ((Param p)::env) pl
-
-let rec metaparams_to_env env  = function
-    [] -> env
-  | (p, a)::pl -> metaparams_to_env ((MetaParam(p, a))::env) pl
-
-let rec arityMP name = function
-  | [] -> -1
-  | MetaParam(n, a)::_ when n = name -> a
-  | _::tl -> arityMP name tl
-
-*)
 
 
 
