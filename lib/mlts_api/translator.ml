@@ -72,7 +72,7 @@ let add_mutual_to_env v row n env =
 
 let first_in_env v env =
   try List.assoc v env.pattern_vars with
-    Not_found -> List.assoc v env.local_vars
+    Not_found -> List.assoc v  env.local_vars
 
 let string_of_env env =
   let string_of_var (v, i) = Printf.sprintf "(%s, %d)" v i in
@@ -186,7 +186,7 @@ let mlts_to_prolog p =
        })]
 
     | DLetrec(mutuals) ->
-        set_actual_def ctx "mutual function" pos;
+        set_actual_def ctx "  mutual rec." pos;
 
         (* Row's name is made of all the mutual functions names *)
         let row = List.fold_left (
@@ -204,8 +204,24 @@ let mlts_to_prolog p =
           in
           (ln::locals, env, i + 1))
           ([], env, 0) mutuals in
-        print_env env;
-        failwith "Mutual rec not implemented"
+
+        (* debug *)print_env env;
+
+        (* A row is a list of lambda expressions and a matching sequence of projections *)
+        let lambdas, projs, env = List.fold_left
+          (fun (l, p, env) (LBVal(name, params, expr)) ->
+            let body, env = make_lam env params expr in
+            body::l, [](*todo*), env)
+          ([],[],env) mutuals in
+
+       [P.Definition({
+             name = "prog";
+             args = [List.hd(lambdas)];
+             body = P.make_deps (env.free_vars);
+       })]
+
+
+        (*failwith "Mutual rec not implemented"*)
 
     | DType(name, decls) ->
       set_actual_def ctx name pos;
@@ -307,17 +323,24 @@ let mlts_to_prolog p =
     | EVal(v) ->
        begin
          (* print_env envIn; *)
-         try P.make_local v (first_in_env v envIn), envIn
-         with Not_found -> (* Non-local must be global *)
-           if (List.mem v ctx.global_vars) then
-             let v2 = String.capitalize_ascii v in
-             let env = if List.mem v envIn.free_vars then envIn
-                       else { envIn with free_vars = v::envIn.free_vars }
-             in P.make_global v2, env
-           else raise (make_exception
-               ("Unbound value '" ^ v ^ "'.")
-               (List.hd ctx.actual_def)
-               None)
+        try P.make_local v (first_in_env v envIn), envIn
+        with Not_found -> try
+          let ((name, mutual, index), loc) = List.find
+            (fun ((name, _, _), _) -> name = v)
+            envIn.local_rows in
+          P.make_select name mutual index loc, envIn
+
+        with Not_found ->
+          (* Non-local must be global *)
+            if (List.mem v ctx.global_vars) then
+              let v2 = String.capitalize_ascii v in
+              let env = if List.mem v envIn.free_vars then envIn
+                        else { envIn with free_vars = v::envIn.free_vars }
+              in P.make_global v2, env
+            else raise (make_exception
+                ("Unbound value '" ^ v ^ "'.")
+                (List.hd ctx.actual_def)
+                None)
        end
     | EPair(e1, e2) ->
        t_expr envIn (EConstr("pair", [e1; e2]))

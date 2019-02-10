@@ -81,6 +81,10 @@ let make_local n i =
 
 let make_localp p = make_local (fst p) (snd p)
 
+let make_select name (mutual_name, mutual_n) index loc =
+  make_app "select"
+    [Lit (Int index); App(Local(mutual_name, mutual_n), [])]
+
 let make_spec s args =
   App(Global("special"),
       [make_global (infix_to_string s);
