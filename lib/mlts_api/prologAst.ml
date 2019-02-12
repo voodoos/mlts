@@ -122,6 +122,11 @@ let make_dep name body =
       [Lit(String(name));
        body])
 
+let make_dep_row name body =
+  App(Global("get_row"),
+      [Lit(String(name));
+       body])
+
 let make_deps fvs =
   let make_dep name =
     make_dep name (make_global (String.capitalize_ascii name))

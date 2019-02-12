@@ -5,6 +5,7 @@ accumulate builtins.
 accumulate progs.
 
 get_prog Name Value :- prog Name Prog, eval Prog Value.
+get_row Name Value :- prow Name Value.
 
 run Name Prog Value Type :-
 	prog Name P,

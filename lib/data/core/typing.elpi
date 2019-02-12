@@ -137,5 +137,4 @@ type_match_rule A (arr Pat Result) B :- type_pat Pat A, typeof Result B.
 type_match_rule A (nab   R) B :- pi x\ typeof x C_ => type_match_rule A (R x) B.
 type_match_rule A (all   R) B :- pi x\ typeof x C_ => type_match_rule A (R x) B.
 
-
-
+% Rows

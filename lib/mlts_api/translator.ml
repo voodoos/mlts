@@ -198,14 +198,17 @@ let mlts_to_prolog p =
 
         (* Adding row to env to get local name *)
         let row_local_name, env = add_to_env row_name env in
+        let cap_row_local_name =
+          (String.capitalize_ascii (fst row_local_name)),
+          snd row_local_name in
 
         (* Adding all mutually defined functions to env *)
         let local_names, selects, env, _ = List.fold_left
           (fun (locals, selects, env, i) (LBVal(name, _, _)) ->
           let ln, env = add_mutual_to_env name row_local_name i env in
-          let select = (*P.make_select name row_local_name*) i in
+          let select = P.make_select name cap_row_local_name i in
 
-          (ln::locals, (name, (row_name, select))::selects, env, i + 1))
+          (ln::locals, (name, row_name, select)::selects, env, i + 1))
           ([], [], env, 0) mutuals in
 
         (* A row is a list of lambda expressions and a matching sequence of projections *)
@@ -216,15 +219,27 @@ let mlts_to_prolog p =
           ([],[],env) mutuals in
 
 
-        List.iter (add_global_mutual) selects;
+        (*List.iter (add_global_mutual) selects;*)
+
+        (* Creating let-expressions for all mutual functions
+            and adding them to the global env *)
+        let lets = List.map (fun (name, row_name, select) ->
+          add_global name;
+          P.Definition({
+            name = "prog";
+            args = [P.Lit(P.String(name)); select];
+            body = Some(P.make_dep_row row_name
+                        (P.make_localp  cap_row_local_name));
+          })
+        ) selects in
 
         (* debug *)print_env env;
-       [P.Definition({
-             name = "prog";
+       (P.Definition({
+             name = "prow";
              args = [P.Lit(P.String(row_name));
                       P.make_row row_local_name (List.rev lambdas) projs ];
              body = P.make_deps (env.free_vars);
-       })]
+       }))::lets
 
 
         (*failwith "Mutual rec not implemented"*)
