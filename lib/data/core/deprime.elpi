@@ -82,7 +82,6 @@ type rowfix              (tmrow -> tmrow) -> tmrow.
 type letrow              tmrow -> (tmrow -> tm) -> tm.
 
 val (lam _).
-val (rowfix _).
 val (lit L) :- val_lit L.
 
 val N :- nom N.
