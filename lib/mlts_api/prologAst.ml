@@ -81,9 +81,13 @@ let make_local n i =
 
 let make_localp p = make_local (fst p) (snd p)
 
-let make_select name (mutual_name, mutual_n) index loc =
+let make_select name (mutual_name, mutual_n) index =
   make_app "select"
     [Lit (Int index); App(Local(mutual_name, mutual_n), [])]
+
+let make_select_g name mutual_name index =
+  make_app "select"
+    [Lit (Int index); App(Global(mutual_name), [])]
 
 let make_spec s args =
   App(Global("special"),
@@ -174,3 +178,6 @@ let make_constr ?(pattern=false) name tms =
     (if pattern then "pvariant" else "variant")
     [make_global name; List tms]
 
+let make_row name lambdas projs =
+    make_app "rowfix"
+      [Abs(name, make_app "row" [List(lambdas)])]

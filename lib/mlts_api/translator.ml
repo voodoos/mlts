@@ -32,6 +32,7 @@ type context = {
     mutable nb_expr: int;
     mutable global_vars : string list;
     mutable global_constrs : string list;
+    mutable global_mutuals : (string * (string * int)) list;
     mutable actual_def: def list;
     mutable wanabeeRigidNoms: P.local_name list;
   }
@@ -115,11 +116,13 @@ let mlts_to_prolog p =
   let ctx = { nb_expr = 0;
               global_vars = ["list_hd"; "list_tl"];
               global_constrs = ["pair"; "list_empty"; "list_cons"];
+              global_mutuals = [];
               actual_def = [];
               wanabeeRigidNoms = []
             }
   in
   let add_global v = ctx.global_vars <- v::ctx.global_vars in
+  let add_global_mutual v = ctx.global_mutuals <- v::ctx.global_mutuals in
   let add_constr c = ctx.global_constrs <- c::ctx.global_constrs in
   let set_actual_def ctx name pos =
     ctx.actual_def <- { name; pos } :: ctx.actual_def
@@ -189,23 +192,21 @@ let mlts_to_prolog p =
         set_actual_def ctx "  mutual rec." pos;
 
         (* Row's name is made of all the mutual functions names *)
-        let row = List.fold_left (
+        let row_name = List.fold_left (
           fun acc (LBVal(name, _, _)) -> acc ^ name
           ) "row_" mutuals in
 
         (* Adding row to env to get local name *)
-        let row_local_name, env = add_to_env row env in
+        let row_local_name, env = add_to_env row_name env in
 
         (* Adding all mutually defined functions to env *)
-        let local_names, env, _ = List.fold_left
-          (fun (locals, env, i) (LBVal(name, _, _)) ->
-          let ln, env =
-            add_mutual_to_env name row_local_name i env
-          in
-          (ln::locals, env, i + 1))
-          ([], env, 0) mutuals in
+        let local_names, selects, env, _ = List.fold_left
+          (fun (locals, selects, env, i) (LBVal(name, _, _)) ->
+          let ln, env = add_mutual_to_env name row_local_name i env in
+          let select = (*P.make_select name row_local_name*) i in
 
-        (* debug *)print_env env;
+          (ln::locals, (name, (row_name, select))::selects, env, i + 1))
+          ([], [], env, 0) mutuals in
 
         (* A row is a list of lambda expressions and a matching sequence of projections *)
         let lambdas, projs, env = List.fold_left
@@ -214,9 +215,14 @@ let mlts_to_prolog p =
             body::l, [](*todo*), env)
           ([],[],env) mutuals in
 
+
+        List.iter (add_global_mutual) selects;
+
+        (* debug *)print_env env;
        [P.Definition({
              name = "prog";
-             args = [List.hd(lambdas)];
+             args = [P.Lit(P.String(row_name));
+                      P.make_row row_local_name (List.rev lambdas) projs ];
              body = P.make_deps (env.free_vars);
        })]
 
@@ -325,10 +331,10 @@ let mlts_to_prolog p =
          (* print_env envIn; *)
         try P.make_local v (first_in_env v envIn), envIn
         with Not_found -> try
-          let ((name, mutual, index), loc) = List.find
+          let ((name, mutual, index), _loc) = List.find
             (fun ((name, _, _), _) -> name = v)
             envIn.local_rows in
-          P.make_select name mutual index loc, envIn
+          P.make_select name mutual index, envIn
 
         with Not_found ->
           (* Non-local must be global *)
@@ -337,7 +343,12 @@ let mlts_to_prolog p =
               let env = if List.mem v envIn.free_vars then envIn
                         else { envIn with free_vars = v::envIn.free_vars }
               in P.make_global v2, env
-            else raise (make_exception
+            else try
+              let row, i = List.assoc v ctx.global_mutuals in
+              let env = if List.mem row envIn.free_vars then envIn
+                        else { envIn with free_vars = row::envIn.free_vars } in
+              P.make_select_g v (String.capitalize_ascii row) i , env
+            with Not_found -> raise (make_exception
                 ("Unbound value '" ^ v ^ "'.")
                 (List.hd ctx.actual_def)
                 None)
