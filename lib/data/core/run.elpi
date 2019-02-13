@@ -4,6 +4,10 @@ accumulate deprime.
 accumulate builtins.
 accumulate progs.
 
+type prow 		string -> tmrow -> prop.
+type get_row 	string -> tmrow -> prop.
+type get_prog 	string -> tm -> prop.
+
 get_prog Name Value :- prog Name Prog, eval Prog Value.
 get_row Name Value :- prow Name Value.
 
