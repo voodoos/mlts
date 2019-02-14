@@ -1,7 +1,7 @@
 exception Query_failed
 exception No_kernel
 
-let version = "0.2.3"
+let version = "0.2.4"
 
 let kernel = ref None
 
