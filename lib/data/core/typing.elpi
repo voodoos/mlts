@@ -138,15 +138,21 @@ type_match_rule A (nab   R) B :- pi x\ typeof x C_ => type_match_rule A (R x) B.
 type_match_rule A (all   R) B :- pi x\ typeof x C_ => type_match_rule A (R x) B.
 
 % Rows
-typeof (select N (rowfix Row)) B :-
-    pi x\ typeof (select N x) B =>
-        typeof (select N (Row x)) B.
+nth 0 (HD::_) HD.
 
-
-typeof (select 0 (row (HD::_))) B :-
-    typeof HD B, print "repouet" B.
-
-typeof (select N (row (_::TL)))  B :-
+nth N (_::TL) B :-
     NM1 is N - 1,
-    typeof (select NM1 (row (TL))) B.
+    nth NM1 TL B.
 
+nth _N [] _B :- false.
+
+typeof (select N Row) B :-
+    type_row Row TR, nth N TR B.
+
+type_row (rowfix Row) TR :-
+    pi r \ type_row r TR => type_row (Row r) TR.
+
+type_row (row (HD::TL)) (THD::TTL) :-
+    typeof HD THD, type_row (row TL) TTL.
+
+type_row (row []) [].
