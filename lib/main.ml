@@ -1,3 +1,4 @@
+open Js_of_ocaml
 exception Query_failed
 exception No_kernel
 
@@ -26,22 +27,22 @@ let compile header code =
     (* updating the pseudo files *)
     Sys_js.update_file ~name:"core/progs.elpi" ~content:lpcode;
     (*Sys_js.update_file "core/datatypes.sig" typsig;
-    Sys_js.update_file "core/datatypes.mod" typmod;*)
+      Sys_js.update_file "core/datatypes.mod" typmod;*)
 
     (* recompiling lprolog code *)
     let parsed =
       Elpi_API.Parse.program
         [(*"core/datatypes.mod";*)
-         "core/progs.elpi";
-         "core/run.elpi";] in
+          "core/progs.elpi";
+          "core/run.elpi";] in
     kernel := Some(Elpi_API.Compile.program header [parsed]);
 
     (* We return the lprolog code for reference *)
     Js.string (lpcode), Array.of_list defs, 0, 0, true
 
   with Mlts_API.Error(s, line, char)
-       -> (Js.string s, [||], line, char,  false)
-  | e -> Js.string ("Unexpected error: " ^ (Printexc.to_string e)), [||], 0, 0, false
+    -> (Js.string s, [||], line, char,  false)
+     | e -> Js.string ("Unexpected error: " ^ (Printexc.to_string e)), [||], 0, 0, false
 
 
 (* Names used in the query *)
@@ -54,22 +55,22 @@ let handle_out res iter _f (out : Elpi_API.Execute.outcome) =
   match out with
   | Success(data) ->
 
-     (* Elpi returns answers as a map from query variable names to terms *)
-     (* We transform it into a map from names to strings *)
-     let resp =
-       Elpi_API.Data.StrMap.map (fun term ->
-         Elpi_API.Pp.term (Format.str_formatter) term;
-         let str = Format.flush_str_formatter () in
-         (* LP strings are surrounded by quotes, we remove them *)
-         let str = String.sub str 1 (String.length str - 2) in
-         escape str)
-       data.assignments in
-     let get name =
-       try Elpi_API.Data.StrMap.find name resp
-       with Not_found -> consoleError ("Assignment for " ^ name ^ " not found"); "error" in
-      console ("<br> Finished " ^ get q_name ^ ".");
-     flush_all ();
-     res :=  "{ \"name\": \"" ^ get q_name ^ "\""
+    (* Elpi returns answers as a map from query variable names to terms *)
+    (* We transform it into a map from names to strings *)
+    let resp =
+      Elpi_API.Data.StrMap.map (fun term ->
+          Elpi_API.Pp.term (Format.str_formatter) term;
+          let str = Format.flush_str_formatter () in
+          (* LP strings are surrounded by quotes, we remove them *)
+          let str = String.sub str 1 (String.length str - 2) in
+          escape str)
+        data.assignments in
+    let get name =
+      try Elpi_API.Data.StrMap.find name resp
+      with Not_found -> consoleError ("Assignment for " ^ name ^ " not found"); "error" in
+    console ("<br> Finished " ^ get q_name ^ ".");
+    flush_all ();
+    res :=  "{ \"name\": \"" ^ get q_name ^ "\""
             ^ ", \"code\": \"" ^ get q_prog ^ "\""
             ^ ", \"value\": \"" ^ get q_value ^ "\""
             ^ ", \"type\": \"" ^ get q_type ^ "\""
@@ -81,17 +82,17 @@ let query prog =
   match !kernel with
     None -> raise No_kernel
   | Some(k) ->
-     let goal = Elpi_API.Parse.goal prog in
-     let goalc = Elpi_API.Compile.query k goal in
-     let exec = Elpi_API.Compile.link goalc in
-     let res = ref "] }" in
-     let iter = ref 0 in
-     Elpi_API.Execute.loop exec
-                           ~more:(fun () -> true)
-                           ~pp:(handle_out res iter);
+    let goal = Elpi_API.Parse.goal prog in
+    let goalc = Elpi_API.Compile.query k goal in
+    let exec = Elpi_API.Compile.link goalc in
+    let res = ref "] }" in
+    let iter = ref 0 in
+    Elpi_API.Execute.loop exec
+      ~more:(fun () -> true)
+      ~pp:(handle_out res iter);
 
-     flush_all ();
-     "{ \"output\": [" ^ !res
+    flush_all ();
+    "{ \"output\": [" ^ !res
 
 
 let run () = query Printf.(sprintf "run %s %s %s %s." q_name q_prog q_value q_type)

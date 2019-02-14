@@ -16,11 +16,12 @@ pathlist = Path("").glob('**/*.*')
 for path in pathlist:
     # because path is object not string
     filename = str(path)
-    if not first: output += "; "
+    if not first:
+        output += "; "
     output += "{ name = \""
     output += filename
     output += "\"; text = \""
-        
+
     with open(bytes(path), 'r') as content_file:
         content = os.fsdecode(content_file.read())
     output += (base64.b64encode(content.encode())).decode()
@@ -28,5 +29,5 @@ for path in pathlist:
     first = False
 
 output += "]"
-output += "\n let load () = List.iter (fun f -> Sys_js.create_file ~name:f.name ~content:(B64.decode f.text)) files"
+output += "\n let load () = List.iter (fun f -> Js_of_ocaml.Sys_js.create_file ~name:f.name ~content:(Base64.decode_exn f.text)) files"
 print(output)
