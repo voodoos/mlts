@@ -75,7 +75,7 @@ let handle_out res iter _f (out : Elpi_API.Execute.outcome) =
             ^ ", \"value\": \"" ^ get q_value ^ "\""
             ^ ", \"type\": \"" ^ get q_type ^ "\""
             ^ "}" ^ (if !iter > 0 then "," else (iter := 1; "")) ^ !res
-  | _ -> ()
+  | _ -> flush_all ()
 
 let query prog =
   (* First we check that the program have been compiled *)
@@ -114,8 +114,8 @@ let _ =
 
   (* Initialize Elpi *)
   let header, _ = Elpi_API.Setup.init ~silent:true [] ~basedir:"" ~builtins:Elpi_builtin.std_builtins in
-  Elpi_API.Setup.set_warn (console ~pref:"[elpi]");
-  Elpi_API.Setup.set_error (console ~pref:"[elpi]");
+  Elpi_API.Setup.set_warn (consoleError ~pref:"[elpi]");
+  Elpi_API.Setup.set_error (consoleError ~pref:"[elpi]");
   Elpi_API.Setup.set_anomaly (console ~pref:"[elpi]");
   Elpi_API.Setup.set_type_error (console ~pref:"[elpi]");
 

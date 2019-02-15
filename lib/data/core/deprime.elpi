@@ -116,7 +116,8 @@ eval (let Def Body) V :-
     eval Def VDef,
     eval (Body VDef) V.
 
-eval (new R) V :- pin x \ eval (R x) V.
+eval (new R) V :- pin x \ (sigma U\ eval (R x) U,
+    (U = V, !;err_escaped x (new R), !)).
 
 eval (backslash R) (backslash VR):-
     pin x \ eval (R x) (VR x).

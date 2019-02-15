@@ -81,19 +81,19 @@ and pp_term_app ppf = function
        we print (foo bar baz X \ ...) instead of (foo bar baz (X \ ...)),
        following the usual lambdaProlog binder convention. *)
     begin match List.rev args with
-    | [] -> pp_atom ppf head
-    | (Abs (n, t)) :: rev_rest ->
-      let args_but_last = List.rev rev_rest in
-      fprintf ppf "%a %a%t%a"
-        pp_atom head
-        (pp_spaced_list pp_term_simple) args_but_last
-        (fun ppf -> if args_but_last = [] then ()
-          else fprintf ppf " ")
-        (pp_abs pp_term_app) (n, t)
-    | _ ->
-      fprintf ppf "@[%a@ %a@]"
-        pp_atom head
-        (pp_spaced_list pp_term_simple) args
+      | [] -> pp_atom ppf head
+      | (Abs (n, t)) :: rev_rest ->
+        let args_but_last = List.rev rev_rest in
+        fprintf ppf "%a %a%t%a"
+          pp_atom head
+          (pp_spaced_list pp_term_simple) args_but_last
+          (fun ppf -> if args_but_last = [] then ()
+            else fprintf ppf " ")
+          (pp_abs pp_term_app) (n, t)
+      | _ ->
+        fprintf ppf "@[%a@ %a@]"
+          pp_atom head
+          (pp_spaced_list pp_term_simple) args
     end
   | below ->
     pp_term_simple ppf below
