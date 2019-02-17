@@ -5,6 +5,8 @@ accumulate errors.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 kind ty                type.
 type int, bool, string ty.
+type tunit ty.
+
 %type sum               ty -> ty -> ty.  % Sum types '*'
 type lst               ty -> ty.        % Lists
 type arr               ty -> ty -> ty.  % Functional arrow type
@@ -18,7 +20,7 @@ type type_match        ty -> list clause -> ty -> prop.
 type type_match_rule   ty -> clause      -> ty -> prop.
 
 % Literals
-
+typeof (lit unit) tunit.
 typeof (lit (i _I)) int.
 typeof (lit (b _B)) bool.
 typeof (lit (s _S)) string.
@@ -41,6 +43,7 @@ typeof (let M R) A :- typeof M B, pi x\ typeof x B => typeof (R x) A.
 
 typeof (new R) B :- pi x\ typeof x A_ => typeof (R x) B.
 
+typeof (tprint _T) tunit.
 
 % Abstractions and applications
 

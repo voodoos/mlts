@@ -34,8 +34,13 @@
   let n_constr s =
       (*unik*) ("c_" ^ s)
 
-  let n_val s =
-      ("v_" ^ s)
+  let n_val =
+    let h = Hashtbl.create 17 in
+    List.iter (fun (s, k) -> Hashtbl.add h s k)
+      [ "print",     "print"] ;
+    fun s ->
+      try  Hashtbl.find h s
+      with Not_found -> ("v_" ^ s)
 
 
   let builtin =
@@ -51,6 +56,7 @@
 %}
 
 %token <int> CONST_INT
+%token UNIT
 %token PLUS MINUS STAR
 %token <bool> CONST_BOOL
 %token MUTUAL
@@ -269,8 +275,9 @@ trivial_pattern:
 
 constant:
 | CONST_INT				{ Int($1) }
-| CONST_BOOL				{ Bool($1) }
-| STRING				{ String($1) }
+| CONST_BOOL			{ Bool($1) }
+| STRING				  { String($1) }
+| UNIT				    { Unit }
 ;
 
 argument:

@@ -27,6 +27,7 @@
 	"begin",    BEGIN;
 	"end", 	    END;
 	"list",	    LIST;
+	"()",	    UNIT;
       ] ;
     fun s ->
       try  Hashtbl.find h s
@@ -72,6 +73,7 @@ rule token = parse
       { UPIDENT (lexeme lexbuf) }
   | '"'
       { STRING (string (B.create 100) lexbuf) }
+  | "()" { UNIT }
   | "("
       { BEGIN }
   | ")"

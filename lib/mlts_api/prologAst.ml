@@ -1,22 +1,22 @@
 type global_name = string
 type local_name = string * int
 type name =
-| Local of local_name
-| Global of global_name
+  | Local of local_name
+  | Global of global_name
 
 type ty =
-| Name of global_name
-| Arrow of ty * ty
+  | Name of global_name
+  | Arrow of ty * ty
 
 type term =
-| Seq of term list
-| Abs of local_name * term
-| Hyp of term * term
-| Eq of term * term
-| App of atom * term list
-| Cons of term * term
-| List of term list
-| Lit of literal
+  | Seq of term list
+  | Abs of local_name * term
+  | Hyp of term * term
+  | Eq of term * term
+  | App of atom * term list
+  | Cons of term * term
+  | List of term list
+  | Lit of literal
 
 and literal =
   | Int of int
@@ -26,21 +26,21 @@ and literal =
 and atom = name
 
 type decl = {
-    sort: decl_sort;
-    name: global_name;
-    ty: ty;
+  sort: decl_sort;
+  name: global_name;
+  ty: ty;
 }
 and decl_sort = Kind | Type
 
 type def = {
-    name: global_name;
-    args: term list;
-    body: term option;
+  name: global_name;
+  args: term list;
+  body: term option;
 }
 
 type clause =
-| Declaration of decl
-| Definition of def
+  | Declaration of decl
+  | Definition of def
 
 type prog = clause list
 
@@ -73,6 +73,9 @@ let make_bool ?(is_pat = false) b =
 let make_string ?(is_pat = false) s =
   make_lit is_pat (make_app "s" [Lit (String s)])
 
+let make_unit ?(is_pat = false) i =
+  make_lit is_pat (make_app "unit" [])
+
 let make_global n =
   make_app n []
 
@@ -92,7 +95,7 @@ let make_select_g name mutual_name index =
 let make_spec s args =
   App(Global("special"),
       [make_global (infix_to_string s);
-      List(args)])
+       List(args)])
 
 let make_lam lvar inner =
   App(Global("lam"),
@@ -101,7 +104,6 @@ let make_lam lvar inner =
 let make_let _a1 _a2 lvar inner =
   App(Global("let"),
       [Abs(lvar, inner)])
-
 
 let make_appt ?(nom=false)  ?(pattern=false) f args =
   let app = match nom, pattern with
@@ -131,8 +133,8 @@ let make_deps fvs =
   let make_dep name =
     make_dep name (make_global (String.capitalize_ascii name))
   in match fvs with
-     | [] -> None
-     | _ -> Some(Seq (List.map make_dep fvs))
+  | [] -> None
+  | _ -> Some(Seq (List.map make_dep fvs))
 
 let rec make_rule nabs vars pat body =
   match nabs, vars with
@@ -148,9 +150,9 @@ let make_pvar name id =
 
 let make_nom ?(pattern=false) name id =
   if pattern then
-  make_app
-    "pnom"
-    [make_local name id]
+    make_app
+      "pnom"
+      [make_local name id]
   else make_local name id
 
 let make_ite tm1 tm2 tm3 =
@@ -184,5 +186,5 @@ let make_constr ?(pattern=false) name tms =
     [make_global name; List tms]
 
 let make_row name lambdas projs =
-    make_app "rowfix"
-      [Abs(name, make_app "row" [List(lambdas)])]
+  make_app "rowfix"
+    [Abs(name, make_app "row" [List(lambdas)])]

@@ -63,6 +63,7 @@ and constant =
   | Int of int
   | Bool of bool
   | String of string
+  | Unit
   | EmptyList
 
 and infix_op =
@@ -81,11 +82,11 @@ and value_path = value_name
 and nominal = value_name
 
 type var =
-  Global of value_name
-| Local of value_name
-| Param of value_name
-| Nominal of nominal
-| MetaParam of value_name * int
+    Global of value_name
+  | Local of value_name
+  | Param of value_name
+  | Nominal of nominal
+  | MetaParam of value_name * int
 
 type env = (var * arity) list
 

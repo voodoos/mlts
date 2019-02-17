@@ -9,6 +9,7 @@ type bfalse              bool.
 
 
 kind literal             type.
+type unit                literal.
 type i                   int -> literal.
 type b                   bool -> literal.
 type s                   string -> literal.
@@ -28,6 +29,7 @@ type let                 tm -> (tm -> tm) -> tm.
 type backslash           (tm -> tm) -> tm.
 type arobase             tm -> tm -> tm.
 type new                 (tm -> tm) -> tm.
+type tprint              tm -> tm.
 
 type lit                 literal -> tm.
 type special             spec -> list tm -> tm.
@@ -87,6 +89,7 @@ val (lit L) :- val_lit L.
 val N :- nom N.
 val A :- abstract_value A.
 
+val_lit unit.
 val_lit (i _). % TODO: ?
 val_lit (s _). % TODO: ?
 val_lit (b btrue).
@@ -207,6 +210,8 @@ eval_select N (_::Vs) V :-
 eval (letrow RowDef Body) V :-
     eval_row RowDef VR,
     eval (Body VR) V.
+
+eval (tprint T) (lit unit) :- print T.
 
 eval (match T Cls) V :-
     eval T VT,
