@@ -10,5 +10,6 @@ prog "list_tl" (lam (v_l_0 \
 	   arr ( pvariant list_cons [ pvar v_h_0, pvar v_tl_0]) v_tl_0))
      ])).
 
-
 prog "print" (lam (v_l_0 \ tprint v_l_0)).
+
+prog "failwith" (lam (v_l_0 \ failwith v_l_0)).

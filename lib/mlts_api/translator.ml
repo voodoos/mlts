@@ -114,7 +114,7 @@ type tdef = { kind: k;  name: string; body: P.term; env: env }
 (* PROGRAM TRANSLATION *)
 let mlts_to_prolog p =
   let ctx = { nb_expr = 0;
-              global_vars = ["list_hd"; "list_tl"; "print"];
+              global_vars = ["list_hd"; "list_tl"; "print"; "failwith"];
               global_constrs = ["pair"; "list_empty"; "list_cons"];
               global_mutuals = [];
               actual_def = [];

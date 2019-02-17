@@ -44,6 +44,7 @@ typeof (let M R) A :- typeof M B, pi x\ typeof x B => typeof (R x) A.
 typeof (new R) B :- pi x\ typeof x A_ => typeof (R x) B.
 
 typeof (tprint _T) tunit.
+typeof (failwith T) A_ :- typeof T string.
 
 % Abstractions and applications
 

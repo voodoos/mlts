@@ -37,7 +37,8 @@
   let n_val =
     let h = Hashtbl.create 17 in
     List.iter (fun (s, k) -> Hashtbl.add h s k)
-      [ "print",     "print"] ;
+      [ "print",     "print";
+        "failwith",  "failwith"] ;
     fun s ->
       try  Hashtbl.find h s
       with Not_found -> ("v_" ^ s)

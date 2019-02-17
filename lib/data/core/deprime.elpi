@@ -30,6 +30,7 @@ type backslash           (tm -> tm) -> tm.
 type arobase             tm -> tm -> tm.
 type new                 (tm -> tm) -> tm.
 type tprint              tm -> tm.
+type failwith            tm -> tm.
 
 type lit                 literal -> tm.
 type special             spec -> list tm -> tm.
@@ -218,6 +219,8 @@ eval (letrow RowDef Body) V :-
     eval (Body VR) V.
 
 eval (tprint T) (lit unit) :- print T.
+eval (failwith T) _V :- print T, fail.
+
 
 eval (match T Cls) V :-
     eval T VT,
@@ -314,6 +317,7 @@ copy (backslash R1) (backslash R2) :- undern copy R1 R2.
 copy (arobase M1 X1) (arobase M2 X2) :- copy M1 M2, copy_nom X1 X2.
 
 copy (tprint X1) (tprint X2) :- copy X1 X2.
+copy (failwith X1) (failwith X2) :- copy X1 X2.
 
 copy (new R1) (new R2) :- undern copy R1 R2.
 copy (special Sp T1s) (special Sp T2s) :- foreach2 copy T1s T2s.

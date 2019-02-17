@@ -23,6 +23,7 @@ let rec assoc x l =
     match l with
     | ((y, a)::l) -> if x = y then a
         else assoc x l
+    | _ -> failwith "not found"
 ;;
 
 let rec reify ctx s =
@@ -45,7 +46,7 @@ let rec evals ctx env term =
         evals ctx env Y
     | (env, Abs(t)) ->
 
-        L (fun v -> new X in new Y in evals ((X, Y)::ctx) ((X,v)::env) (t @ X))
+        L (fun v -> new X in new Y in evals ((Y, X)::ctx) ((X,v)::env) (t @ X))
     | (env, App(t1, t2)) ->
         (match evals ctx env t1 with
         | L f -> f (fun i -> evals ctx env t2)
