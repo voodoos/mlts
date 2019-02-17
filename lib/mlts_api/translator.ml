@@ -414,6 +414,7 @@ let mlts_to_prolog p =
   and t_constant ?(is_pat = false) = function
     | Int(i) -> P.make_int ~is_pat i
     | Bool(b) -> P.make_bool b
+    | String(s) -> P.make_string s
     | Unit -> P.make_unit ()
     | EmptyList -> failwith "Should not happen anymore (emptylist)"
 

@@ -69,7 +69,7 @@ and constant =
 and infix_op =
   | Add | Minus | Mult | Neq
   | Equal | Lt | Le | And | Or
-  | ListCons
+  | ListCons | Seq
 
 and arity = int
 and param = value_name

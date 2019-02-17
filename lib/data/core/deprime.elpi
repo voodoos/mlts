@@ -144,6 +144,7 @@ type sub   spec.
 type mul   spec.
 type and   spec.
 type or    spec.
+type seq    spec.
 
 is_int (lit (i N)) N.
 is_bool (lit (b B)) B.
@@ -183,6 +184,11 @@ eval_spec and [E1, E2] V3 :-
     if (V1 = (lit (b btrue)))
        (eval E2 V3)
        (V3 is lit (b bfalse)).
+
+
+eval_spec seq [E1, E2] V3 :-
+    eval E1 _V1,
+    eval E2 V3.
 
 if P Q _R :- P, !, Q.
 if _P _Q R :- R.

@@ -1,1 +1,0 @@
-prog "val_0" (app Print (lit (i 3))) :- get_prog "print" Print.

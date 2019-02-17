@@ -57,6 +57,7 @@ let infix_to_string =
   | Add -> "add" | Minus -> "sub"
   | Equal -> "equal"
   | ListCons -> "cons"
+  | Seq -> "seq"
 
 let make_app name tms =
   App(Global name, tms)

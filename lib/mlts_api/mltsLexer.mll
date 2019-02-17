@@ -84,6 +84,8 @@ rule token = parse
       { RBRACK }
   | ";;"
       { DSEMI }
+  | ";"
+      { SEMI }
   | "::"
       { DCOLON }
   | "."

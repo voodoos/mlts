@@ -71,7 +71,7 @@
 %token IF THEN ELSE
 %token FUN
 %token MATCH WITH VBAR ARROW
-%token DSEMI
+%token DSEMI SEMI
 %token DCOLON
 %token DOT BACKSLASH COMMA
 %token TYPE OF DARROW LIST
@@ -88,6 +88,8 @@
 %right ARROW
 %right DARROW
 %right BACKSLASH
+
+%right SEMI
 
 %right OR
 %right AND
@@ -325,4 +327,5 @@ typeconstr_name:
 | LE     { Le   }
 | AND    { And  }
 | OR     { Or   }
+| SEMI   { Seq   }
 ;
