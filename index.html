@@ -46,8 +46,7 @@
 						<div class="btn-group">
 							<button type="button" class="btn
 			       my-2 my-md-0 my-sm-0
-			       btn-outline-info dropdown-toggle"
-							 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			       btn-outline-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 								<span class="oi oi-folder"></span>
 							</button>
 							<div class="dropdown-menu file-menu">
@@ -60,7 +59,8 @@
 									<a class="dropdown-item" href="#vacuous" onClick="load('vacuous');">Vacuous</a>
 									<a class="dropdown-item" href="#deb" onClick="load('deb');">De Bruijn</a>
 									<a class="dropdown-item" href="#beta2" onClick="load('beta2');">Beta-reduction</a>
-									<a class="dropdown-item" href="#mirror_terms" onClick="load('mirror_terms');">Mirror terms</a>
+									<a class="dropdown-item" href="#mirror_terms" onClick="load('mirror_terms');">Mirror
+										terms</a>
 									<a class="dropdown-item" href="#pic" onClick="load('pic');">π-calculus</a>
 									<a class="dropdown-item" href="#mapvar" onClick="load('mapvar');">Mapping</a>
 									<!--a class="dropdown-item" href="#nbe"
@@ -78,7 +78,9 @@
 									<a class="dropdown-item" href="#lists" onClick="load('lists');">Lists</a>
 									<!--a class="dropdown-item" href="#freevars" onClick="load('freevars');">Free vars</a-->
 									<a class="dropdown-item" href="#ski" onClick="load('ski');">SKI Combinators</a>
-									<a class="dropdown-item" href="#ski" onClick="load('unification');">Unification(slow)</a>
+									<a class="dropdown-item" href="#ski"
+										onClick="load('unification');">Unification(slow)</a>
+									<a class="dropdown-item" href="#ski" onClick="load('nbe');">Norm. By Evaluation</a>
 									<!--a class="dropdown-item" href="#cbv"
 		     onClick="load('cbv');">Call by value</a-->
 								</div>
@@ -93,19 +95,17 @@
 		  </button-->
 						<button class="btn
 				 my-2 my-md-0 my-sm-0
-				 btn-outline-info" onClick="restart();" data-toggle="tooltip"
-						 data-placement="bottom" title="Restart kernel">
+				 btn-outline-info" onClick="restart();" data-toggle="tooltip" data-placement="bottom" title="Restart kernel">
 							<span class="oi oi-loop-square"></span>
 						</button>
 						<button class="btn
 				 my-2 my-md-0 my-sm-0
-				 btn-outline-info" onClick="save();" data-toggle="tooltip"
-						 data-placement="bottom" title="Save file to disk">
+				 btn-outline-info" onClick="save();" data-toggle="tooltip" data-placement="bottom" title="Save file to disk">
 							<span class="oi oi-data-transfer-download"></span>
 						</button>
 						<button class="btn btn-outline-success
-				 my-2 my-md-0 my-sm-0 disabled" disabled id="run_btn" onClick="run();"
-						 data-toggle="tooltip" data-placement="bottom" title="Ctrl + b / Cmd + b">
+				 my-2 my-md-0 my-sm-0 disabled" disabled id="run_btn" onClick="run();" data-toggle="tooltip"
+							data-placement="bottom" title="Ctrl + b / Cmd + b">
 							<span class="exec_btn_text
 				 d-none d-lg-inline">Starting kernel</span>
 							<span class="oi oi-loop-circular gear"></span>
@@ -167,18 +167,20 @@ odd 4;;
 			<div class="right col-sm-6">
 				<ul class="nav nav-tabs justify-content-center " id="myTab" role="tablist">
 					<li class="nav-item">
-						<a class="nav-link active" id="readme-tab" data-toggle="tab" href="#readme" role="tab" aria-controls="readme"
-						 aria-selected="true">Readme</a>
+						<a class="nav-link active" id="readme-tab" data-toggle="tab" href="#readme" role="tab"
+							aria-controls="readme" aria-selected="true">Readme</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" id="lpl-tab" data-toggle="tab" href="#lpl" role="tab" aria-controls="lpl" aria-selected="false">λProlog</a>
+						<a class="nav-link" id="lpl-tab" data-toggle="tab" href="#lpl" role="tab" aria-controls="lpl"
+							aria-selected="false">λProlog</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" id="log-tab" data-toggle="tab" href="#log" role="tab" aria-controls="log" aria-selected="false">Log</a>
+						<a class="nav-link" id="log-tab" data-toggle="tab" href="#log" role="tab" aria-controls="log"
+							aria-selected="false">Log</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" id="values-tab" data-toggle="tab" href="#values" role="tab" aria-controls="values"
-						 aria-selected="false">Values</a>
+						<a class="nav-link" id="values-tab" data-toggle="tab" href="#values" role="tab"
+							aria-controls="values" aria-selected="false">Values</a>
 					</li>
 				</ul>
 				<div class="tab-content" id="myTabContent">
@@ -189,7 +191,8 @@ odd 4;;
 					<pre class="tab-pane" id="log" role="tabpanel" aria-labelledby="log-tab">
 					</pre>
 					<div class="tab-pane" id="values" role="tabpanel" aria-labelledby="values-tab">
-						<div class="values_disclaimer">The pretty printer is quite rought for now, and values will show in the λProlog's
+						<div class="values_disclaimer">The pretty printer is quite rought for now, and values will show
+							in the λProlog's
 							interpreter syntax. When type or
 							evaluation errors happen, you may find more detailed error messages under the Log tab.</div>
 						<table class="table table-striped">
