@@ -1,4 +1,8 @@
-(* -*- mode: tuareg -*- *)
+(* 
+    Adapted from 
+
+    https://www.cl.cam.ac.uk/~amp12/papers/frepbm/frepbm.pdf
+*)
 
 type tm =
   | Abs of tm => tm
@@ -6,6 +10,7 @@ type tm =
 ;;
 
 type sem =
+  | New of tm => sem
   (* function (should be unit but not yet supported) *)
   | L of (int -> sem) -> sem
   (* neutral *)
@@ -13,73 +18,45 @@ type sem =
 ;;
 
 type neu =
-  (* variables are nominals *)
+  | V of tm
   (* neutral appn *)
   | A of neu * sem
 ;;
 
-(* reify sem -> tm *)
-let rec assoc x l =
-    match l with
-    | ((y, a)::l) -> if x = y then a
-        else assoc x l
-    | _ -> failwith "not found"
-;;
-
-let rec reify ctx s =
+let rec reify s =
     match s with
-    | L f ->
-        print "RL"; Abs(X\
-        new Y in reify ((Y, X)::ctx) (f (fun i -> N Y)))
-    | N n -> print "RN"; reifyn ctx n
-and reifyn ctx n =
+    | New r -> new Z in reify (r @ Z)
+    | L f   -> Abs(X\ reify (f (fun i -> N (V X))))
+    | N n   -> reifyn n
+and reifyn n =
     match n with
-    | nab Y in Y -> print "RY"; assoc Y ctx
-    | A (n, s) -> print "RA"; App (reifyn ctx n, reify ctx s)
+    | nab Y in V Y -> Y
+    | A (n, s)     -> App (reifyn n, reify s)
   ;;
 
-let rec evals ctx env term =
-    match (env, term) with
-    | nab X in ([], X) -> N (assoc X ctx)
-    | nab X in ((X, v)::env, X) -> v 0 (* diff *) (* need unit *)
-    | nab X Y in ((X, v)::env, Y) ->
-        evals ctx env Y
-    | (env, Abs(t)) ->
-
-        L (fun v -> new X in new Y in evals ((Y, X)::ctx) ((X,v)::env) (t @ X))
-    | (env, App(t1, t2)) ->
-        (match evals ctx env t1 with
-        | L f -> f (fun i -> evals ctx env t2)
-        | N n -> N (A (n, evals ctx env t2)))
+let rec evals env term =
+    match term with
+    | nab X in X  -> 
+        begin match env with
+        | []                    -> N (V X)
+        | (X, v)::env           -> v 0
+        | nab Y in (Y, v)::env  -> evals env X
+        end
+    | Abs t       ->
+        L (fun v -> New (Z\ evals ((Z,v)::env) (t @ Z)) )
+    | App(t1, t2) ->
+        let rec apply s = match s with
+            | New r -> New (Z\ apply (r @ Z))
+            | L f   -> f (fun i -> evals env t2) 
+            | N n   -> N (A (n, evals env t2)) 
+        in
+        apply (evals env t1)
 ;;
 
-let eval t = evals [] [] t;;
+let eval t = evals [] t;;
+let norm t = reify (eval t);;
 
-let norm t = reify [] (eval t);;
-
-reify [] (L (fun v -> L(fun v2 -> v 0)));;
-
-let e = eval (Abs(X\Abs(Y\X)));;
-reify [] e;;
-(*norm (App(Abs(X\X), Abs(X\X)));;*)
-
-
-
-(*norm (Abs(X\X));;*)
-(*)
-reify [] (L (fun v -> v 0));;
-reify [] (L (fun v -> L (fun v -> v 0)));;
-Abs(X\ new Y in reify ((Y, X)::[]) (L (fun v -> L (fun v -> (N (A (Y, L (fun v -> v 0))))))));;
-Abs(X\ new Y in reify ((Y, X)::[])
-                      (N (A (Y, L (fun v -> v 0)))));;
-
-
-norm (Abs(X\X));;
-eval (Abs(X\Abs(Y\ Y)));;
-norm (Abs(X\Abs(Y\ Y)));;
-norm (App(Abs(X\X), Abs(X\X)));;
-norm (Abs(Y\ App(Abs(X\ App(X, X)), Y)));;
-norm (Abs(Y\ App(Abs(X\ App(X, Abs(Z\ Z))), Y)));;
-eval (App(App(Abs(X\Abs(Y\Abs(Z\App(App(X,Z),App(Y,Z))))),
+norm (App(Abs(X\ Abs(Y\X)), Abs(X\ X)));;
+norm (App(App(Abs(X\Abs(Y\Abs(Z\App(App(X,Z),App(Y,Z))))),
               Abs(X\Abs(Y\X))),
-          Abs(X\Abs(Y\X))));;*)
+          Abs(X\Abs(Y\X))));;
