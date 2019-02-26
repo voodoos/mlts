@@ -9,6 +9,8 @@ type def = { name: string; pos: Lexing.position }
 
 let strip name = String.sub name 2 (String.length name - 2)
 
+let fail_param () = failwith "Unsupported: patterns as parameters."
+
 let make_exception message def pos =
   TranslatorError("In \"" ^ (strip def.name) ^ "\" (line "
                   ^ (string_of_int def.pos.pos_lnum)
@@ -165,7 +167,7 @@ let mlts_to_prolog p =
 
   and t_def env pos =
     function
-    | DLet(LBVal(name, params, e)) ->
+    | DLet(LBVal(PParam(name), params, e)) ->
       set_actual_def ctx name pos;
       let body, env = make_lam env params e in
       add_global name;
@@ -175,7 +177,7 @@ let mlts_to_prolog p =
            body = P.make_deps (env.free_vars);
          })]
 
-    | DLetrec([LBVal(name, params, e)]) ->
+    | DLetrec([LBVal(PParam(name), params, e)]) ->
       set_actual_def ctx name pos;
       let ln, env = add_to_env name env in
       let body, env = make_lam env params e in
@@ -192,7 +194,10 @@ let mlts_to_prolog p =
 
       (* Row's name is made of all the mutual functions names *)
       let row_name = List.fold_left (
-          fun acc (LBVal(name, _, _)) -> acc ^ name
+          fun acc (LBVal(p, _, _)) ->
+            match p with
+            | PParam(name) -> acc ^ name
+            | _ -> fail_param ()
         ) "row_" mutuals in
 
       (* Adding row to env to get local name *)
@@ -203,18 +208,24 @@ let mlts_to_prolog p =
 
       (* Adding all mutually defined functions to env *)
       let local_names, selects, env, _ = List.fold_left
-          (fun (locals, selects, env, i) (LBVal(name, _, _)) ->
-             let ln, env = add_mutual_to_env name row_local_name i env in
-             let select = P.make_select name cap_row_local_name i in
+          (fun (locals, selects, env, i) (LBVal(p, _, _)) ->
+             match p with
+             | PParam(name) ->
+               let ln, env = add_mutual_to_env name row_local_name i env in
+               let select = P.make_select name cap_row_local_name i in
 
-             (ln::locals, (name, row_name, select)::selects, env, i + 1))
+               (ln::locals, (name, row_name, select)::selects, env, i + 1)
+             | _ -> fail_param ())
           ([], [], env, 0) mutuals in
 
       (* A row is a list of lambda expressions and a matching sequence of projections *)
       let lambdas, projs, env = List.fold_left
-          (fun (l, p, env) (LBVal(name, params, expr)) ->
-             let body, env = make_lam env params expr in
-             body::l, [](*todo*), env)
+          (fun (l, p, env) (LBVal(p, params, expr)) ->
+             match p with
+             | PParam(name) ->
+               let body, env = make_lam env params expr in
+               body::l, [](*todo*), env
+             | _ -> fail_param ())
           ([],[],env) mutuals in
 
 
@@ -287,14 +298,18 @@ let mlts_to_prolog p =
         ) decls in
       type_decl::(List.flatten constructors)
 
+    | _ -> fail_param ()
 
 
   and t_expr envIn = function
-    | ELetin(LBVal(name, params, expr), body) ->
+    | ELetin(LBVal(PParam(name), params, expr), body) ->
       (* let f x y = x + y in f 2 3;; *)
       (* Add params to env for expr *)
       let _params, env =
-        map_with_env (flip add_to_env) envIn params in
+        map_with_env (fun env p -> (match p with
+            | PParam(pa) -> (flip add_to_env) env pa
+            | _ ->  fail_param ()))
+          envIn params in
       let exprtm, env = t_expr env expr in
       (* Removing params from env (but keeping freevars) *)
       let env = revert_locals envIn env in
@@ -304,12 +319,15 @@ let mlts_to_prolog p =
       (* Removing it *)
       P.make_letin lname exprtm bodytm, revert_locals envIn env
 
-    | ELetRecin(LBVal(name, params, e), body) ->
+    | ELetRecin(LBVal(PParam(name), params, e), body) ->
       (*let name = ((fst ln) ^ "_" ^ (string_of_int (snd ln))) in*)
       let ln, env = add_to_env name envIn in
       let letbody, env = make_lam env params e in
       let body, env = t_expr env body in
       P.make_letrecin ln letbody body, revert_locals envIn env
+
+    | ELetin(LBVal(_,_,_), _) ->  fail_param ()
+    | ELetRecin(LBVal(_,_,_), _) ->  fail_param ()
 
     | EMatch(e, rules) ->
       let e, env = t_expr envIn e in
@@ -507,10 +525,14 @@ let mlts_to_prolog p =
     let rec aux env params e =
       match params with
       | [] -> t_expr env e
-      | p::ptl ->
+      | (PParam p)::ptl ->
         let lvar, env = add_to_env p env in
         let inner, env = aux env ptl e in
-        P.make_lam lvar inner, env
+        P.make_lam (Some lvar) inner, env
+      | PUnit::ptl ->
+        let inner, env = aux env ptl e in
+        P.make_lam None inner, env
+
     in
     let tm, env = aux envInitial params e in
     tm, revert_locals envInitial env

@@ -139,7 +139,7 @@ constr_decl:
 ;
 
 let_binding:
-| v = value_name; p = list(value_name); EQUAL; e = expr	{ LBVal(v, p, e) }
+| v = parameter; p = list(parameter); EQUAL; e = expr	{ LBVal(v, p, e) }
 ;
 
 constr_expr:
@@ -178,7 +178,7 @@ expr:
       	   	      	   	       	{ EIf(e1, e2, e3) }
 | MATCH; e = expr; WITH; pm = match_arms
   	     	   	      		{ EMatch(e, pm) }
-| FUN; i = nonempty_list(value_name); ARROW; e = expr
+| FUN; i = nonempty_list(parameter); ARROW; e = expr
 	%prec ARROW			{ EFun(i, e) }
 | NEW; i = constr_name; IN; e = expr
 	%prec IN			{ ENew(i, e) }
@@ -197,6 +197,11 @@ expr:
 
 | c = constr_path;
   args = constr_expr_args               { EConstr(c, args) }
+;
+
+parameter:
+| v = value_name  { PParam(v) }
+| UNIT            { PUnit }
 ;
 
 constr_expr_args:

@@ -14,7 +14,7 @@ and constr_decl =
   | Of of constr_path * typexpr
 
 and let_binding =
-  | LBVal of value_name * param list * expr
+  | LBVal of parameter * parameter list * expr
 
 and expr =
   | ELetin of let_binding * expr
@@ -30,9 +30,11 @@ and expr =
   | EConstr of  constr_path * (expr list)
   | EPattern of pattern
   | EBind of nominal * expr
-  | EFun of (value_name list) * expr
+  | EFun of (parameter list) * expr
   | ENew of nominal * expr
-
+and parameter =
+  | PParam of value_name
+  | PUnit
 
 and typexpr =
   | Cons of constr_path

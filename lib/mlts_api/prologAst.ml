@@ -100,7 +100,9 @@ let make_spec s args =
 
 let make_lam lvar inner =
   App(Global("lam"),
-      [Abs(lvar, inner)])
+      [Abs((match lvar with
+           | Some v -> v
+           | None -> "unit", 0), inner)])
 
 let make_let _a1 _a2 lvar inner =
   App(Global("let"),
