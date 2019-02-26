@@ -11,22 +11,19 @@ type tm =
 
 type sem =
   | New of tm => sem
-  (* function (should be unit but not yet supported) *)
-  | L of (int -> sem) -> sem
-  (* neutral *)
+  | L of (unit -> sem) -> sem
   | N of neu
 ;;
 
 type neu =
-  | V of tm
-  (* neutral appn *)
+  | V of tm 
   | A of neu * sem
 ;;
 
 let rec reify s =
     match s with
     | New r -> new Z in reify (r @ Z)
-    | L f   -> Abs(X\ reify (f (fun i -> N (V X))))
+    | L f   -> Abs(X\ reify (f (fun () -> N (V X))))
     | N n   -> reifyn n
 and reifyn n =
     match n with
@@ -39,7 +36,7 @@ let rec evals env term =
     | nab X in X  -> 
         begin match env with
         | []                    -> N (V X)
-        | (X, v)::env           -> v 0
+        | (X, v)::env           -> v ()
         | nab Y in (Y, v)::env  -> evals env X
         end
     | Abs t       ->
@@ -47,7 +44,7 @@ let rec evals env term =
     | App(t1, t2) ->
         let rec apply s = match s with
             | New r -> New (Z\ apply (r @ Z))
-            | L f   -> f (fun i -> evals env t2) 
+            | L f   -> f (fun () -> evals env t2) 
             | N n   -> N (A (n, evals env t2)) 
         in
         apply (evals env t1)
