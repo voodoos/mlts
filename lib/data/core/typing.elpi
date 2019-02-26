@@ -5,7 +5,7 @@ accumulate errors.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 kind ty                type.
 type int, bool, string ty.
-type tunit ty.
+type t_unit ty.
 
 %type sum               ty -> ty -> ty.  % Sum types '*'
 type lst               ty -> ty.        % Lists
@@ -20,7 +20,7 @@ type type_match        ty -> list clause -> ty -> prop.
 type type_match_rule   ty -> clause      -> ty -> prop.
 
 % Literals
-typeof (lit unit) tunit.
+typeof (lit unit) t_unit.
 typeof (lit (i _I)) int.
 typeof (lit (b _B)) bool.
 typeof (lit (s _S)) string.
@@ -43,14 +43,14 @@ typeof (let M R) A :- typeof M B, pi x\ typeof x B => typeof (R x) A.
 
 typeof (new R) B :- pi x\ typeof x A_ => typeof (R x) B.
 
-typeof (tprint _T) tunit.
+typeof (tprint _T) t_unit.
 typeof (failwith T) A_ :- typeof T string.
 
 % Abstractions and applications
 
 typeof (lam R) (arr A B)  :- pi x\ typeof x A => typeof (R x) B.
 
-typeof (ulam R) (arr tunit B)  :- pi x\ typeof x tunit => typeof (R x) B.
+typeof (ulam R) (arr t_unit B)  :- pi x\ typeof x t_unit => typeof (R x) B.
 
 typeof (backslash R) (bigarr A B) :- pi x\ typeof x A => typeof (R x) B.
 
@@ -75,7 +75,7 @@ type_spec equal (arr A (arr A bool)).
 type_spec and (arr bool (arr bool bool)).
 type_spec or (arr bool (arr bool bool)).
 
-type_spec seq (arr tunit (arr A A)).
+type_spec seq (arr t_unit (arr A A)).
 
 type_args B [] B.
 type_args (arr A B) [E|TL] C :-
