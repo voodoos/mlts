@@ -23,6 +23,7 @@ type nom                 tm -> prop.
 type abstract_value      tm -> prop.
 
 type lam                 (tm -> tm) -> tm.
+type ulam                (tm -> tm) -> tm.
 type app                 tm -> tm -> tm.
 type let                 tm -> (tm -> tm) -> tm.
 
@@ -84,6 +85,7 @@ type select              int -> tmrow -> tm.
 type rowfix              (tmrow -> tmrow) -> tmrow.
 type letrow              tmrow -> (tmrow -> tm) -> tm.
 
+val (ulam _).
 val (lam _).
 val (lit L) :- val_lit L.
 
@@ -105,6 +107,7 @@ piv G :- pi x \ abstract_value x => G x.
 % This is merely an optimization, and it makes debug traces easier to read.
 eval V V :- val V, !.
 
+eval (ulam R) (ulam R).
 eval (lam R) (lam R).
 eval (lit L) (lit L) :- val_lit L.
 
@@ -113,6 +116,11 @@ eval A A :- abstract_value A.
 
 eval (app T U) V :-
     eval T (lam R),
+    eval U VU,
+    eval (R VU) V.
+
+eval (app T U) V :-
+    eval T (ulam R),
     eval U VU,
     eval (R VU) V.
 
@@ -311,6 +319,7 @@ undern Copy R1 R2 :- pin x \ copy_nom x x => Copy (R1 x) (R2 x).
 
 
 copy (lam R1) (lam R2) :- underv copy R1 R2.
+copy (ulam R1) (ulam R2) :-underv copy R1 R2.
 copy (app M1 N1) (app M2 N2) :- copy M1 M2, copy N1 N2.
 copy (let M1 R1) (let M2 R2) :- copy M1 M2, underv copy R1 R2.
 copy (backslash R1) (backslash R2) :- undern copy R1 R2.

@@ -50,6 +50,8 @@ typeof (failwith T) A_ :- typeof T string.
 
 typeof (lam R) (arr A B)  :- pi x\ typeof x A => typeof (R x) B.
 
+typeof (ulam R) (arr tunit B)  :- pi x\ typeof x tunit => typeof (R x) B.
+
 typeof (backslash R) (bigarr A B) :- pi x\ typeof x A => typeof (R x) B.
 
 typeof (app M N) B :-
