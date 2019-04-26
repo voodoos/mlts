@@ -32,19 +32,20 @@ test_variant :-
       (variant succ [variant zero []]).
 
 test_matches_lit :-
-    matches [] (lit (i 0)) (plit (i 0)).
+    matches (lit (i 0)) (plit (i 0)) [] [].
 
 test_matches_data :-
-    matches []
+    matches
       (variant succ [variant zero []])
-      (pvariant succ [pvariant zero []]).
+      (pvariant succ [pvariant zero []])
+      [] [].
 
 test_matches_nom :-
     pin xout \
     pin xin \
-    sigma Subst \
-    matches Subst xout (pnom xin),
-    subst Subst xout xin.
+    sigma NomSubst \
+    matches xout (pnom xin) [] NomSubst,
+    subst NomSubst xin xout.
 
 test_match_lit :-
     eval
@@ -234,6 +235,9 @@ test_vacp3 :-
        (variant Abs [backslash X \ variant Abs [backslash Y \ Y]]))
       (lit (b btrue)).
 
+% (X \ r @ X) ~ r
+% (X \ r @ X Y) ~ (Y X \ r X Y) @ Y
+
 type c_Abs constructor.
 test_id_eta_expanded :-
     V_id =
@@ -244,6 +248,14 @@ test_id_eta_expanded :-
     eval
       (app V_id (variant c_Abs [backslash X \ X]))
       (variant c_Abs [backslash X \ X]).
+
+test_parobase_annoying :-
+    eval (backslash X \
+      match (variant test_pair [X, X])
+        [all r \ nab X \ arr (pvariant test_pair [pnom X, parobase (pvar r) X]) r])
+    R,
+    print R,
+    R = (backslash X \ backslash Y \ Y).
 
 type c_Unit constructor.
 test_dale_unit :-
@@ -307,6 +319,7 @@ main :-
     test_lookup, !,
     test_vacp3, !,
     test_id_eta_expanded, !,
+    %% debug => test_parobase_annoying, !,
     test_dale_unit, !,
     test_dale_escape, !,
     test_notbeta, !,

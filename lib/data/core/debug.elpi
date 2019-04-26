@@ -22,7 +22,8 @@ copy T1 T2 :-
     debug,
     not (seen-by-copy T1), !,
     print "copy" T1 T2,
-    seen-by-copy T1 => copy T1 T2.
+    (seen-by-copy T1 => copy T1 T2),
+    print "copy out" T1 T2.
 
 copy_clause Cl1 Cl2 :-
     debug,
@@ -30,8 +31,9 @@ copy_clause Cl1 Cl2 :-
     print "copy_clause" Cl1 Cl2,
     seen-by-copy_clause Cl1 => copy_clause Cl1 Cl2.
 
-matches Subst Vout Pin :-
+matches Vout Pin TmSubst NomSubst :-
    debug,
    not (seen-by-matches Vout Pin), !,
-   print "matches" Subst Vout Pin,
-   seen-by-matches Vout Pin => matches Subst Vout Pin.
+   print "matches" Vout Pin TmSubst NomSubst,
+   (seen-by-matches Vout Pin => matches Vout Pin TmSubst NomSubst),
+   print "matches out" Vout Pin TmSubst NomSubst.

@@ -21,6 +21,7 @@ kind tm                  type.
 
 type nom                 tm -> prop.
 type abstract_value      tm -> prop.
+type pattern_variable    tm -> prop.
 
 type lam                 (tm -> tm) -> tm.
 type app                 tm -> tm -> tm.
@@ -62,8 +63,6 @@ type eval_spec           spec -> list tm -> tm -> prop.
 
 kind binding             type.
 type bind                tm -> tm -> binding.
-
-type matches             list binding -> tm -> pat -> prop.
 
 type fix                 (tm -> tm) -> tm.
 
@@ -233,50 +232,45 @@ eval_clauses VL (Cl::Cls) VR :-
       (true)
       (eval_clauses VL Cls VR).
 
-type eval_clause tm -> list binding -> clause -> tm -> prop.
-eval_clause L Subst (all RCl) R :-
-  sigma X \ eval_clause L Subst (RCl X) R.
-eval_clause L Subst (nab RCl) R :-
-  pin x \ sigma Y \ eval_clause L (bind x Y :: Subst) (RCl x) R.
-eval_clause Lout Subst (arr Pin Rin) Vout :-
-    matches Subst Lout Pin,
-    %if debug (print "eval_clause matches" Subst Lout Pin) true,
-    injective Subst,
-    %if debug (print "eval_clause before-subst" Subst Rin) true,
-    localize Subst _ \
-    %if debug (print "eval_clause localize" Subst) true,
-    subst Subst Rin Rout,
-    %if debug (print "eval_clause subst" Subst Rin Rout) true,
-    eval Rout Vout,
-    %if debug (print "eval_clause eval" Rout Vout) true,
-    true.
+type eval_clause tm -> list tm -> clause -> tm -> prop.
+eval_clause L Nabs (all RCl) R :-
+  pi x \ pattern_variable x => eval_clause L Nabs (RCl x) R.
+eval_clause L Nabs (nab RCl) R :-
+  pin x \ eval_clause L (x :: Nabs) (RCl x) R.
+eval_clause Lout Nabs (arr Pin Rin) Vout :-
+  matches Lout Pin TmSubst NomSubst,
+  %if debug (print "eval_clause matches" Lout Pin DelayedTmSubst NomSubst) true,
+  injection Nabs NomSubst,
+  %if debug (print "eval_clause injection" Nabs NomSubst),
+  concat_bindings TmSubst NomSubst Subst,
+  %if debug (print "eval_clause before-subst" Subst Rin) true,
+  subst Subst Rin Rout,
+  %if debug (print "eval_clause subst" Subst Rin Rout) true,
+  eval Rout Vout,
+  %if debug (print "eval_clause eval" Rout Vout) true,
+  true.
 
-% localize is a non-logical hack to ensure that even under-determined
-% nabla-introduced variables are unified with a locally-scoped name,
-% to ensure that they do not escape in the result of the clause
-% right-hand-side.
-type localize list binding -> (unit -> prop) -> prop.
-localize ((bind X Y) :: Subst) K :-
-  if (X = Y) true true,
-  localize Subst K.
+injection _Nabs [].
+injection Nabs (bind X Y :: Subst) :-
+    in_support Nabs X,
+    not (in_support Nabs Y),
+    injection_binding X Y Subst,
+    injection Nabs Subst.
 
-localize [] K :- K unit.
+in_support (X :: Subst) Y :-
+    if (X = Y)
+      true
+      (in_support Subst Y).
 
-injective [].
-injective (bind _X Y :: Subst) :-
-    not_in Subst Y,
-    injective Subst.
+injection_binding _X _Y [].
+injection_binding X1 Y1 (bind X2 Y2 :: Subst) :-
+    not (X1 = X2),
+    not (Y1 = Y2),
+    injection_binding X1 Y1 Subst.
 
-binds [] X1 Y1 :- X1 = Y1.
-binds (bind X1 Y1 :: Subst) X2 Y2 :-
-    if (X1 = X2)
-       (Y1 = Y2)
-       (binds Subst X2 Y2).
-
-not_in [] _Z.
-not_in (bind _X Y :: Subst) Z :-
-    not (Y = Z),
-    not_in Subst Z.
+concat_bindings [] Subst2 Subst2.
+concat_bindings (bind X Y :: Subst1) Subst2 (bind X Y :: Subst3) :-
+    concat_bindings Subst1 Subst2 Subst3.
 
 subst Subst Tin Tout :-
     if (current_subst _)
@@ -288,12 +282,19 @@ copy_nom N1 N2 :-
     current_subst Subst,
     binds Subst N1 N2.
 
+binds [] X1 Y1 :- X1 = Y1.
+binds (bind X1 Y1 :: Subst) X2 Y2 :-
+    if (X1 = X2)
+       (Y1 = Y2)
+       (binds Subst X2 Y2).
+
 type current_subst list binding -> prop.
 type copy         tm -> tm -> prop.
 type copy_nom     tm -> tm -> prop.
 type copy_clause  clause -> clause -> prop.
 type copy_pat     pat -> pat -> prop.
 type copy_row     tmrow -> tmrow -> prop.
+
 
 type underv    (A -> A -> prop) -> ((tm -> A) -> (tm -> A) -> prop).
 type undern    (A -> A -> prop) -> ((tm -> A) -> (tm -> A) -> prop).
@@ -304,6 +305,10 @@ copy V V :- abstract_value V.
 copy N1 N2 :-
     nom N1,
     copy_nom N1 N2.
+copy V T :-
+    pattern_variable V,
+    current_subst Subst,
+    binds Subst V T.
 
 underv Copy R1 R2 :- piv x \ Copy (R1 x) (R2 x).
 undern Copy R1 R2 :- pin x \ copy_nom x x => Copy (R1 x) (R2 x).
@@ -350,26 +355,38 @@ copy_row (rowfix F1) (rowfix F2) :- under_row copy_row F1 F2.
 copy (letrow R1 B1) (letrow R2 B2) :-
     copy_row R1 R2, under_row copy B1 B2.
 
+% on paper: (v matches p as σ under ρ)
+type matches    tm -> pat -> list binding -> list binding -> prop.
 
-matches _Subst (lit L) (plit L).
+matches _ pany [] [].
 
-matches _Subst _X pany.
+matches (lit L) (plit L) [] [].
 
-matches Subst X (pvar Y) :- subst Subst Y X.
+matches X (pvar Y) [bind Y X] [] :- pattern_variable Y.
 
-matches Subst Xout (pnom Xin) :-
+matches Xout (pnom Xin) [] NomSubst :-
     nom Xin, nom Xout,
-    binds Subst Xin Xout.
+    if (Xin = Xout)
+      (NomSubst = [])
+      (NomSubst = [bind Xin Xout]).
 
-matches Subst (variant C Ts) (pvariant C Ps) :-
-    foreach2 (matches Subst) Ts Ps.
+matches (variant C Vs) (pvariant C Ps) TmSubst NomSubst :-
+    matches_all Vs Ps TmSubst NomSubst.
 
-matches Subst (backslash T) (pbackslash P) :-
-    pin x \ matches Subst (T x) (P x).
+matches_all [] [] [] [].
+matches_all (V :: Vs) (P :: Ps) TmSubst_all NomSubst_all :-
+    matches V P TmSubst NomSubst,
+    matches_all Vs Ps TmSubst_rest NomSubst_rest,
+    concat_bindings TmSubst TmSubst_rest TmSubst_all,
+    concat_bindings NomSubst NomSubst_rest NomSubst_all.
 
-matches Subst T (parobase P X) :-
-    (pin x \ subst [bind X x] T (ToverX x)),
-    matches Subst (backslash ToverX) P.
+matches (backslash V) (pbackslash P) TmSubst NomSubst :-
+    pin x \ matches (V x) (P x) TmSubst NomSubst.
+
+matches V (parobase P X) TmSubst NomSubst :-
+    pin x \
+    subst [bind X x] V (Vx x),
+    matches (backslash (Y \ Vx Y)) P TmSubst NomSubst.
 
 eval (fix F) V :- eval (F (fix F)) V.
 eval_row (rowfix F) VR :- eval_row (F (rowfix F)) VR.
@@ -382,4 +399,3 @@ type foreach2 (A -> B -> prop) -> list A -> list B -> prop.
 foreach2 _P [] [].
 foreach2 P (X::Xs) (Y::Ys) :-
     P X Y, foreach2 P Xs Ys.
-
