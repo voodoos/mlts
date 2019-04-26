@@ -9,3 +9,6 @@ run:
 
 test:
 	${ELPI} -test src/tests.elpi
+
+check:
+	echo true | ${ELPI} src/tests.elpi

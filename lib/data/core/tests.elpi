@@ -254,7 +254,7 @@ test_parobase_annoying :-
       match (variant test_pair [X, X])
         [all r \ nab X \ arr (pvariant test_pair [pnom X, parobase (pvar r) X]) r])
     R,
-    print R,
+    not ((R = backslash X \ backslash Y \ X), print R),
     R = (backslash X \ backslash Y \ Y).
 
 type c_Unit constructor.
@@ -319,8 +319,8 @@ main :-
     test_lookup, !,
     test_vacp3, !,
     test_id_eta_expanded, !,
-    %% debug => test_parobase_annoying, !,
-    test_dale_unit, !,
+    test_parobase_annoying, !,
+    %% test_dale_unit, !,
     test_dale_escape, !,
     test_notbeta, !,
     true

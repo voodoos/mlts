@@ -23,7 +23,8 @@ copy T1 T2 :-
     not (seen-by-copy T1), !,
     print "copy" T1 T2,
     (seen-by-copy T1 => copy T1 T2),
-    print "copy out" T1 T2.
+    print "copy out" T1 T2,
+    true.
 
 copy_clause Cl1 Cl2 :-
     debug,
@@ -36,4 +37,12 @@ matches Vout Pin TmSubst NomSubst :-
    not (seen-by-matches Vout Pin), !,
    print "matches" Vout Pin TmSubst NomSubst,
    (seen-by-matches Vout Pin => matches Vout Pin TmSubst NomSubst),
-   print "matches out" Vout Pin TmSubst NomSubst.
+   print "matches out" Vout Pin TmSubst NomSubst,
+   true.
+
+type seen-by-locate-rigid tm -> tm -> tm -> pat -> prop.
+locate_rigid Xin Xout V P :-
+   debug,
+   not (seen-by-locate-rigid Xin Xout V P),
+   print "locate_rigid" Xin V P,
+   (seen-by-locate-rigid Xin Xout V P => locate_rigid Xin Xout V P).

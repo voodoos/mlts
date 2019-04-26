@@ -119,8 +119,8 @@ eval (let Def Body) V :-
     eval Def VDef,
     eval (Body VDef) V.
 
-eval (new R) V :- pin x \ (sigma U\ eval (R x) U,
-    (U = V, !;err_escaped x (new), !)).
+eval (new R) V :- sigma W \ pin x \ (sigma U\ eval (R x) U,
+    (U = W, !; err_escaped x (new), !, false)), W = V.
 
 eval (backslash R) (backslash VR):-
     pin x \ eval (R x) (VR x).
@@ -232,16 +232,19 @@ eval_clauses VL (Cl::Cls) VR :-
       (true)
       (eval_clauses VL Cls VR).
 
-type eval_clause tm -> list tm -> clause -> tm -> prop.
-eval_clause L Nabs (all RCl) R :-
-  pi x \ pattern_variable x => eval_clause L Nabs (RCl x) R.
-eval_clause L Nabs (nab RCl) R :-
-  pin x \ eval_clause L (x :: Nabs) (RCl x) R.
-eval_clause Lout Nabs (arr Pin Rin) Vout :-
+type eval_clause tm -> list binding -> clause -> tm -> prop.
+eval_clause L NomSubst (all RCl) R :-
+  pi x \ pattern_variable x => eval_clause L NomSubst (RCl x) R.
+
+eval_clause L NomSubst (nab RCl) R :-
+  pin x \
+  locate_rigid_clause x Y L (RCl x), !,
+  extend_nomsubst x Y NomSubst (NomSubst2 x),
+  eval_clause L (NomSubst2 x) (RCl x) R.
+
+eval_clause Lout NomSubst (arr Pin Rin) Vout :-
   matches Lout Pin TmSubst NomSubst,
   %if debug (print "eval_clause matches" Lout Pin DelayedTmSubst NomSubst) true,
-  injection Nabs NomSubst,
-  %if debug (print "eval_clause injection" Nabs NomSubst),
   concat_bindings TmSubst NomSubst Subst,
   %if debug (print "eval_clause before-subst" Subst Rin) true,
   subst Subst Rin Rout,
@@ -250,23 +253,20 @@ eval_clause Lout Nabs (arr Pin Rin) Vout :-
   %if debug (print "eval_clause eval" Rout Vout) true,
   true.
 
-injection _Nabs [].
-injection Nabs (bind X Y :: Subst) :-
-    in_support Nabs X,
-    not (in_support Nabs Y),
-    injection_binding X Y Subst,
-    injection Nabs Subst.
+extend_nomsubst X Y NomSubst (bind X Z :: NomSubst) :-
+  normalize Y NomSubst Z,
+  check_injection NomSubst Z.
 
-in_support (X :: Subst) Y :-
-    if (X = Y)
-      true
-      (in_support Subst Y).
+check_injection NomSubst Z :-
+    not_in NomSubst Z.
 
-injection_binding _X _Y [].
-injection_binding X1 Y1 (bind X2 Y2 :: Subst) :-
-    not (X1 = X2),
-    not (Y1 = Y2),
-    injection_binding X1 Y1 Subst.
+normalize Y NomSubst Z :-
+  (binds NomSubst Y Z, !; Z = Y).
+
+not_in [] _Z.
+not_in (bind _X Y :: Subst) Z :-
+    not (Y = Z),
+    not_in Subst Z.
 
 concat_bindings [] Subst2 Subst2.
 concat_bindings (bind X Y :: Subst1) Subst2 (bind X Y :: Subst3) :-
@@ -288,6 +288,26 @@ binds (bind X1 Y1 :: Subst) X2 Y2 :-
        (Y1 = Y2)
        (binds Subst X2 Y2).
 
+type locate_rigid_clause   tm -> tm -> tm -> clause -> prop.
+type locate_rigid   tm -> tm -> tm -> pat -> prop.
+
+locate_rigid_clause Xin Xout V (arr P _) :-
+    locate_rigid Xin Xout V P.
+locate_rigid_clause Xin Xout V (all C) :-
+    piv x \ locate_rigid_clause Xin Xout V (C x).
+locate_rigid_clause Xin Xout V (nab C) :-
+    pin x \ locate_rigid_clause Xin Xout V (C x).
+
+locate_rigid _Xin _Xout _V pany :- !, false.
+locate_rigid _Xin _Xout _V (pvar _) :- !, false.
+locate_rigid Xin Xout Xout (pnom Xin) :- nom Xout.
+locate_rigid Xin Xout (variant C Vs) (pvariant C Ps) :-
+    any2 (locate_rigid Xin Xout) Vs Ps.
+locate_rigid Xin Xout V (parobase P _X) :-
+    locate_rigid Xin Xout V P.
+locate_rigid Xin Xout (backslash Vx) (pbackslash Px) :-
+    undern (locate_rigid Xin Xout) Vx Px.
+
 type current_subst list binding -> prop.
 type copy         tm -> tm -> prop.
 type copy_nom     tm -> tm -> prop.
@@ -296,9 +316,9 @@ type copy_pat     pat -> pat -> prop.
 type copy_row     tmrow -> tmrow -> prop.
 
 
-type underv    (A -> A -> prop) -> ((tm -> A) -> (tm -> A) -> prop).
-type undern    (A -> A -> prop) -> ((tm -> A) -> (tm -> A) -> prop).
-type under_row (A -> A -> prop) -> ((tmrow -> A) -> (tmrow -> A) -> prop).
+type underv    (A -> B -> prop) -> ((tm -> A) -> (tm -> B) -> prop).
+type undern    (A -> B -> prop) -> ((tm -> A) -> (tm -> B) -> prop).
+type under_row (A -> B -> prop) -> ((tmrow -> A) -> (tmrow -> B) -> prop).
 
 copy (lit L1) (lit L2) :- L1 = L2.
 copy V V :- abstract_value V.
@@ -358,34 +378,34 @@ copy (letrow R1 B1) (letrow R2 B2) :-
 % on paper: (v matches p as σ under ρ)
 type matches    tm -> pat -> list binding -> list binding -> prop.
 
-matches _ pany [] [].
+matches _ pany [] _NomSubst.
 
-matches (lit L) (plit L) [] [].
+matches (lit L) (plit L) [] _NomSubst.
 
-matches X (pvar Y) [bind Y X] [] :- pattern_variable Y.
+matches X (pvar Y) [bind Y X] _NomSubst :-
+    pattern_variable Y.
 
 matches Xout (pnom Xin) [] NomSubst :-
     nom Xin, nom Xout,
-    if (Xin = Xout)
-      (NomSubst = [])
-      (NomSubst = [bind Xin Xout]).
+    (Xout = Xin; binds NomSubst Xin Xout).
 
 matches (variant C Vs) (pvariant C Ps) TmSubst NomSubst :-
     matches_all Vs Ps TmSubst NomSubst.
 
-matches_all [] [] [] [].
-matches_all (V :: Vs) (P :: Ps) TmSubst_all NomSubst_all :-
+matches_all [] [] [] _NomSubst.
+matches_all (V :: Vs) (P :: Ps) TmSubst_all NomSubst :-
     matches V P TmSubst NomSubst,
-    matches_all Vs Ps TmSubst_rest NomSubst_rest,
-    concat_bindings TmSubst TmSubst_rest TmSubst_all,
-    concat_bindings NomSubst NomSubst_rest NomSubst_all.
+    matches_all Vs Ps TmSubst_rest NomSubst,
+    concat_bindings TmSubst TmSubst_rest TmSubst_all.
 
 matches (backslash V) (pbackslash P) TmSubst NomSubst :-
     pin x \ matches (V x) (P x) TmSubst NomSubst.
 
 matches V (parobase P X) TmSubst NomSubst :-
+    nom X,
+    normalize X NomSubst Y,
     pin x \
-    subst [bind X x] V (Vx x),
+    subst [bind Y x] V (Vx x),
     matches (backslash (Y \ Vx Y)) P TmSubst NomSubst.
 
 eval (fix F) V :- eval (F (fix F)) V.
@@ -399,3 +419,8 @@ type foreach2 (A -> B -> prop) -> list A -> list B -> prop.
 foreach2 _P [] [].
 foreach2 P (X::Xs) (Y::Ys) :-
     P X Y, foreach2 P Xs Ys.
+
+type any2 (A -> B -> prop) -> list A -> list B -> prop.
+any2 _P [] [] :- !, false.
+any2 P (X::Xs) (Y::Ys) :-
+    P X Y; any2 P Xs Ys.
