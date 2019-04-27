@@ -291,8 +291,16 @@ binds (bind X1 Y1 :: Subst) X2 Y2 :-
 type locate_rigid_clause   tm -> tm -> tm -> clause -> prop.
 type locate_rigid   tm -> tm -> tm -> pat -> prop.
 
+type silence-rigid-occurrence-constraint prop.
 locate_rigid_clause Xin Xout V (arr P _) :-
-    locate_rigid Xin Xout V P.
+    (locate_rigid Xin Xout V P;
+     not silence-rigid-occurrence-constraint, !,
+     term_to_string Xin XinStr,
+     term_to_string P PStr,
+     ErrMsg is "Nominal " ^ XinStr ^ " has no rigid occurrence in " ^ PStr,
+     eval_error ErrMsg,
+     false).
+
 locate_rigid_clause Xin Xout V (all C) :-
     piv x \ locate_rigid_clause Xin Xout V (C x).
 locate_rigid_clause Xin Xout V (nab C) :-
@@ -300,7 +308,7 @@ locate_rigid_clause Xin Xout V (nab C) :-
 
 locate_rigid _Xin _Xout _V pany :- !, false.
 locate_rigid _Xin _Xout _V (pvar _) :- !, false.
-locate_rigid Xin Xout Xout (pnom Xin) :- nom Xout.
+locate_rigid Xin Xout Xout (pnom Xin).
 locate_rigid Xin Xout (variant C Vs) (pvariant C Ps) :-
     any2 (locate_rigid Xin Xout) Vs Ps.
 locate_rigid Xin Xout V (parobase P _X) :-
@@ -421,6 +429,5 @@ foreach2 P (X::Xs) (Y::Ys) :-
     P X Y, foreach2 P Xs Ys.
 
 type any2 (A -> B -> prop) -> list A -> list B -> prop.
-any2 _P [] [] :- !, false.
 any2 P (X::Xs) (Y::Ys) :-
     P X Y; any2 P Xs Ys.

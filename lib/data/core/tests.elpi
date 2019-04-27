@@ -260,10 +260,16 @@ test_parobase_annoying :-
 type c_Unit constructor.
 test_dale_unit :-
     eval
-      (match (variant c_Unit [])
-       [all r \ nab X \ arr (parobase (pvar r) X) (arobase r X)])
+      (new Y \ match (variant test_pair [Y, variant c_Unit []])
+       [all r \ nab X \
+        arr
+          (pvariant test_pair [pnom X, parobase (pvar r) X])
+          (arobase r X)])
       (variant c_Unit []).
 test_dale_escape :-
+    % we know that this test fails due to the absence of a rigid occurrence;
+    % if it did not, it would be equivalent to "new"
+    silence-rigid-occurrence-constraint =>
     not
       (eval
        (match (variant c_Unit [])
@@ -320,7 +326,7 @@ main :-
     test_vacp3, !,
     test_id_eta_expanded, !,
     test_parobase_annoying, !,
-    %% test_dale_unit, !,
+    test_dale_unit, !,
     test_dale_escape, !,
     test_notbeta, !,
     true

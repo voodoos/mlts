@@ -43,6 +43,13 @@ matches Vout Pin TmSubst NomSubst :-
 type seen-by-locate-rigid tm -> tm -> tm -> pat -> prop.
 locate_rigid Xin Xout V P :-
    debug,
-   not (seen-by-locate-rigid Xin Xout V P),
+   not (seen-by-locate-rigid Xin Xout V P), !,
    print "locate_rigid" Xin V P,
    (seen-by-locate-rigid Xin Xout V P => locate_rigid Xin Xout V P).
+
+type seen-by-locate-rigid-clause tm -> tm -> tm -> clause -> prop.
+locate_rigid_clause Xin Xout V Cl :-
+   debug,
+   not (seen-by-locate-rigid-clause Xin Xout V Cl), !,
+   print "locate_rigid_clause" Xin V Cl,
+   (seen-by-locate-rigid-clause Xin Xout V Cl => locate_rigid_clause Xin Xout V Cl).
