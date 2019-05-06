@@ -288,33 +288,62 @@ binds (bind X1 Y1 :: Subst) X2 Y2 :-
        (Y1 = Y2)
        (binds Subst X2 Y2).
 
+kind list_path type.
+type now       list_path.
+type next      list_path -> list_path.
+
+type in_list  A -> list_path -> list A -> prop.
+in_list X now      (Y :: _Ys) :- X = Y.
+in_list X (next P) (_Y :: Ys) :- in_list X P Ys.
+
+kind value_path         type.
+type here               value_path.
+type under_cons         constructor -> list_path -> value_path -> value_path.
+type under_backslash    (tm -> value_path) -> value_path.
+type under_arobase      value_path -> tm -> value_path.
+
+type rigid_in_clause    tm -> value_path -> clause -> prop.
+rigid_in_clause X Path (all Cl) :-
+    piv x \ rigid_in_clause X Path (Cl x).
+rigid_in_clause X Path (nab Cl) :-
+    pin x \ rigid_in_clause X Path (Cl x).
+rigid_in_clause X Path (arr P _) :-
+    rigid_in_pat X Path P.
+
+type rigid_in_pat       tm -> value_path -> pat -> prop.
+rigid_in_pat X here (pnom X) :- nom X.
+rigid_in_pat X (under_cons C N Path) (pvariant C Ps) :-
+    in_list P N Ps,
+    rigid_in_pat X Path P.
+rigid_in_pat X (under_backslash Pathx) (pbackslash Px) :-
+    pin x \ (rigid_in_pat X) (Pathx x) (Px x).
+rigid_in_pat X (under_arobase Path Y) (parobase P Y) :-
+    not (X = Y),
+    rigid_in_pat X Path P.
+
+type rigid_in_val      tm -> value_path -> tm -> prop.
+rigid_in_val X here X :- nom X.
+rigid_in_val X (under_cons C N Path) (variant C Vs) :-
+    in_list V N Vs,
+    rigid_in_val X Path V.
+rigid_in_val X (under_backslash Pathx) (backslash R) :-
+    pin x \ rigid_in_val X (Pathx x) (R x).
+rigid_in_val X (under_arobase Path Y) (arobase V Y) :-
+    rigid_in_val X Path V.
+
 type locate_rigid_clause   tm -> tm -> tm -> clause -> prop.
 type locate_rigid   tm -> tm -> tm -> pat -> prop.
 
 type silence-rigid-occurrence-constraint prop.
-locate_rigid_clause Xin Xout V (arr P _) :-
-    (locate_rigid Xin Xout V P;
+locate_rigid_clause Xin Xout V Cl :-
+    (rigid_in_clause Xin Path Cl, !;
      not silence-rigid-occurrence-constraint, !,
      term_to_string Xin XinStr,
-     term_to_string P PStr,
+     term_to_string Cl PStr,
      ErrMsg is "Nominal " ^ XinStr ^ " has no rigid occurrence in " ^ PStr,
      eval_error ErrMsg,
-     false).
-
-locate_rigid_clause Xin Xout V (all C) :-
-    piv x \ locate_rigid_clause Xin Xout V (C x).
-locate_rigid_clause Xin Xout V (nab C) :-
-    pin x \ locate_rigid_clause Xin Xout V (C x).
-
-locate_rigid _Xin _Xout _V pany :- !, false.
-locate_rigid _Xin _Xout _V (pvar _) :- !, false.
-locate_rigid Xin Xout Xout (pnom Xin).
-locate_rigid Xin Xout (variant C Vs) (pvariant C Ps) :-
-    any2 (locate_rigid Xin Xout) Vs Ps.
-locate_rigid Xin Xout V (parobase P _X) :-
-    locate_rigid Xin Xout V P.
-locate_rigid Xin Xout (backslash Vx) (pbackslash Px) :-
-    undern (locate_rigid Xin Xout) Vx Px.
+     false),
+    rigid_in_val Xout Path V.
 
 type current_subst list binding -> prop.
 type copy         tm -> tm -> prop.
@@ -395,7 +424,7 @@ matches X (pvar Y) [bind Y X] _NomSubst :-
 
 matches Xout (pnom Xin) [] NomSubst :-
     nom Xin, nom Xout,
-    (Xout = Xin; binds NomSubst Xin Xout).
+    (Xout = Xin, !; binds NomSubst Xin Xout).
 
 matches (variant C Vs) (pvariant C Ps) TmSubst NomSubst :-
     matches_all Vs Ps TmSubst NomSubst.
