@@ -32,12 +32,12 @@ copy_clause Cl1 Cl2 :-
     print "copy_clause" Cl1 Cl2,
     seen-by-copy_clause Cl1 => copy_clause Cl1 Cl2.
 
-matches Vout Pin TmSubst NomSubst :-
+matches Vout Pin TmSubst :-
    debug,
    not (seen-by-matches Vout Pin), !,
-   print "matches" Vout Pin TmSubst NomSubst,
-   (seen-by-matches Vout Pin => matches Vout Pin TmSubst NomSubst),
-   print "matches out" Vout Pin TmSubst NomSubst,
+   print "matches" Vout Pin TmSubst,
+   (seen-by-matches Vout Pin => matches Vout Pin TmSubst),
+   print "matches out" Vout Pin TmSubst,
    true.
 
 type seen-by-rigid_in_clause tm -> clause -> prop.

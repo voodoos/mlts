@@ -243,11 +243,12 @@ eval_clause L NomSubst (nab RCl) R :-
   eval_clause L (NomSubst2 x) (RCl x) R.
 
 eval_clause Lout NomSubst (arr Pin Rin) Vout :-
-  matches Lout Pin TmSubst NomSubst,
+  subst copy_pat NomSubst Pin Pout,
+  matches Lout Pout TmSubst,
   %if debug (print "eval_clause matches" Lout Pin DelayedTmSubst NomSubst) true,
-  concat_bindings TmSubst NomSubst Subst,
+  concat_bindings NomSubst TmSubst Subst,
   %if debug (print "eval_clause before-subst" Subst Rin) true,
-  subst Subst Rin Rout,
+  subst copy Subst Rin Rout,
   %if debug (print "eval_clause subst" Subst Rin Rout) true,
   eval Rout Vout,
   %if debug (print "eval_clause eval" Rout Vout) true,
@@ -272,10 +273,11 @@ concat_bindings [] Subst2 Subst2.
 concat_bindings (bind X Y :: Subst1) Subst2 (bind X Y :: Subst3) :-
     concat_bindings Subst1 Subst2 Subst3.
 
-subst Subst Tin Tout :-
+type subst   (A -> A -> prop) -> list binding -> A -> A -> prop.
+subst Copy Subst Tin Tout :-
     if (current_subst _)
       (print "assert failure in subst", !, false)
-      (current_subst Subst => copy Tin Tout).
+      (current_subst Subst => Copy Tin Tout).
 
 copy_nom N1 N2 :-
     nom N1,
@@ -412,38 +414,36 @@ copy_row (rowfix F1) (rowfix F2) :- under_row copy_row F1 F2.
 copy (letrow R1 B1) (letrow R2 B2) :-
     copy_row R1 R2, under_row copy B1 B2.
 
-% on paper: (v matches p as σ under ρ)
-type matches    tm -> pat -> list binding -> list binding -> prop.
+% on paper: (v matches p as σ)
+type matches    tm -> pat -> list binding -> prop.
 
-matches _ pany [] _NomSubst.
+matches _ pany [].
 
-matches (lit L) (plit L) [] _NomSubst.
+matches (lit L) (plit L) [].
 
-matches X (pvar Y) [bind Y X] _NomSubst :-
+matches X (pvar Y) [bind Y X] :-
     pattern_variable Y.
 
-matches Xout (pnom Xin) [] NomSubst :-
-    nom Xin, nom Xout,
-    (Xout = Xin, !; binds NomSubst Xin Xout).
+matches X (pnom X) [].
 
-matches (variant C Vs) (pvariant C Ps) TmSubst NomSubst :-
-    matches_all Vs Ps TmSubst NomSubst.
+matches (variant C Vs) (pvariant C Ps) TmSubst :-
+    matches_all Vs Ps TmSubst.
 
-matches_all [] [] [] _NomSubst.
-matches_all (V :: Vs) (P :: Ps) TmSubst_all NomSubst :-
-    matches V P TmSubst NomSubst,
-    matches_all Vs Ps TmSubst_rest NomSubst,
+matches_all [] [] [].
+matches_all (V :: Vs) (P :: Ps) TmSubst_all :-
+    matches V P TmSubst,
+    matches_all Vs Ps TmSubst_rest,
     concat_bindings TmSubst TmSubst_rest TmSubst_all.
 
-matches (backslash V) (pbackslash P) TmSubst NomSubst :-
-    pin x \ matches (V x) (P x) TmSubst NomSubst.
+matches (backslash V) (pbackslash P) TmSubst :-
+    pin x \ matches (V x) (P x) TmSubst.
 
-matches V (parobase P X) TmSubst NomSubst :-
+matches V (parobase P X) TmSubst :-
     nom X,
-    normalize X NomSubst Y,
+    sigma Vx \
     pin x \
-    subst [bind Y x] V (Vx x),
-    matches (backslash (Y \ Vx Y)) P TmSubst NomSubst.
+    subst copy [bind X x] V (Vx x),
+    matches (backslash (x \ Vx x)) P TmSubst.
 
 eval (fix F) V :- eval (F (fix F)) V.
 eval_row (rowfix F) VR :- eval_row (F (rowfix F)) VR.
