@@ -243,6 +243,12 @@ eval_clause L NomSubst (nab RCl) R :-
   eval_clause L (NomSubst2 x) (RCl x) R.
 
 eval_clause Lout NomSubst (arr Pin Rin) Vout :-
+  % To match the nominal-abstractio nsemantics,
+  % we should check that the nominals in the codomain of NomSubst
+  % (the global nominals bound to nabla-bound nominals)
+  % do not occur in Pin and Rin.
+  %
+  % FIXME? this check is not currently implemented.
   subst copy_pat NomSubst Pin Pout,
   matches Lout Pout TmSubst,
   %if debug (print "eval_clause matches" Lout Pin DelayedTmSubst NomSubst) true,
