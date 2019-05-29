@@ -73,7 +73,7 @@ type fix                 (tm -> tm) -> tm.
 % t3], which is a *single term* containing several subterms. Rows
 % belong to a different syntactic category.
 %
-% (select row) is a term-former to extract an element from a row.
+% (select i row) is a term-former which extracts the i-th term from a row.
 %
 % Rows are useful to definite mutual fixpoints, as a fixpoint on
 % a row.
