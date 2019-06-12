@@ -336,8 +336,8 @@ rigid_in_val X (under_cons C N Path) (variant C Vs) :-
     rigid_in_val X Path V.
 rigid_in_val X (under_backslash Pathx) (backslash R) :-
     pin x \ rigid_in_val X (Pathx x) (R x).
-rigid_in_val X (under_arobase Path Y) (arobase V Y) :-
-    rigid_in_val X Path V.
+rigid_in_val X (under_arobase Path Y) (Vx Y) :-
+    rigid_in_val X Path (backslash (x \ Vx x)).
 
 type locate_rigid_clause   tm -> tm -> tm -> clause -> prop.
 type locate_rigid   tm -> tm -> tm -> pat -> prop.
