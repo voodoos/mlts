@@ -53,7 +53,7 @@ test_match_easydata :-
 test_eval_clause :-
     eval_clause
       (lit (i 0))
-      [] (arr (plit (i 0)) (lit (i 3)))
+      (arr (plit (i 0)) (lit (i 3))) []
       (lit (i 3)).
 
 test_match_data :-
@@ -176,7 +176,7 @@ test_quantifier_alternation_ok :-
           [nab Y \ all y \ arr (pvariant test_pair [pnom Y, pvar y]) y])
       (backslash X \ X).
 
-test_quantifier_alternation_no :-
+test_quantifier_alternation_now_ok :-
     % not (forall y. nabla Y. (y, Y) = (X, X))
     not (eval
       (backslash X \
@@ -310,7 +310,7 @@ main :-
     test_rowfix, !,
     test_ulysse, !,
     test_quantifier_alternation_ok, !,
-    %% test_quantifier_alternation_no, !,
+    test_quantifier_alternation_now_ok, !,
     test_size_regression, !,
     test_bad_eval1, !,
     test_bad_eval2, !,

@@ -1,7 +1,7 @@
 
 type debug prop.
 type seen-by-eval tm -> prop.
-type seen-by-eval_clause clause -> prop.
+type seen-by-eval_clause tm -> clause -> prop.
 type seen-by-copy tm -> prop.
 type seen-by-copy_clause clause -> prop.
 type seen-by-matches tm -> pat -> prop.
@@ -12,11 +12,13 @@ eval V R :-
     print "eval" V,
     seen-by-eval V => eval V R.
 
-eval_clause L Subst Cl R :-
+eval_clause L Cl Subst R :-
     debug,
-    not (seen-by-eval_clause Cl), !,
-    print "eval_clause" L Subst Cl R,
-    seen-by-eval_clause Cl => eval_clause L Subst Cl R.
+    not (seen-by-eval_clause L Cl), !,
+    print "eval_clause" L Cl Subst R,
+    (seen-by-eval_clause L Cl => eval_clause L Cl Subst R),
+    print "eval_clause out" L Cl Subst R,
+    true.
 
 copy T1 T2 :-
     debug,

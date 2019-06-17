@@ -220,7 +220,6 @@ eval (letrow RowDef Body) V :-
 eval (tprint T) (lit unit) :- print T.
 eval (failwith T) _V :- print T, fail.
 
-
 eval (match T Cls) V :-
     eval T VT,
     eval_clauses VT Cls V.
@@ -228,53 +227,32 @@ eval (match T Cls) V :-
 type eval_clauses tm -> list clause -> tm -> prop.
 eval_clauses _VL [] _VR :- false.
 eval_clauses VL (Cl::Cls) VR :-
-    if (eval_clause VL [] Cl VR)
-      (true)
-      (eval_clauses VL Cls VR).
+    if (eval_clause VL Cl [] R)
+      (eval R VR)
+      (!, eval_clauses VL Cls VR).
 
-type eval_clause tm -> list binding -> clause -> tm -> prop.
-eval_clause L NomSubst (all RCl) R :-
-  pi x \ pattern_variable x => eval_clause L NomSubst (RCl x) R.
+type eval_clause tm -> clause -> list binding -> tm -> prop.
+eval_clause L (all RCl) Sigma (R Vx) :-
+  pi x \ pattern_variable x =>
+  eval_clause L (RCl x) (Sigma_in x) (R x),
+  extract (Sigma_in x) x Vx Sigma.
 
-eval_clause L NomSubst (nab RCl) R :-
+eval_clause L (nab RCl) Sigma (R Y) :-
   pin x \
   locate_rigid_clause x Y L (RCl x), !,
-  extend_nomsubst x Y NomSubst (NomSubst2 x),
-  eval_clause L (NomSubst2 x) (RCl x) R.
+  subst copy [bind Y x] L (Lx x),
+  eval_clause (Lx x) (RCl x) Sigma (R x).
 
-eval_clause Lout NomSubst (arr Pin Rin) Vout :-
-  % To match the nominal-abstractio nsemantics,
-  % we should check that the nominals in the codomain of NomSubst
-  % (the global nominals bound to nabla-bound nominals)
-  % do not occur in Pin and Rin.
-  %
-  % FIXME? this check is not currently implemented.
-  subst copy_pat NomSubst Pin Pout,
-  matches Lout Pout TmSubst,
-  %if debug (print "eval_clause matches" Lout Pin DelayedTmSubst NomSubst) true,
-  concat_bindings NomSubst TmSubst Subst,
-  %if debug (print "eval_clause before-subst" Subst Rin) true,
-  subst copy Subst Rin Rout,
-  %if debug (print "eval_clause subst" Subst Rin Rout) true,
-  eval Rout Vout,
-  %if debug (print "eval_clause eval" Rout Vout) true,
-  true.
+eval_clause L (arr P R) Sigma R :-
+  matches L P Sigma.
 
-extend_nomsubst X Y NomSubst (bind X Z :: NomSubst) :-
-  normalize Y NomSubst Z,
-  check_injection NomSubst Z.
+type extract   list binding -> tm -> tm -> list binding -> prop.
+extract (bind X Y :: Sigma) X Y Sigma :- !.
+extract (bind X1 Y1 :: Sigma1) X2 Y2 (bind X1 Y1 :: Sigma2) :-
+    not (X1 = X2), !,
+    extract Sigma1 X2 Y2 Sigma2.
 
-check_injection NomSubst Z :-
-    not_in NomSubst Z.
-
-normalize Y NomSubst Z :-
-  (binds NomSubst Y Z, !; Z = Y).
-
-not_in [] _Z.
-not_in (bind _X Y :: Subst) Z :-
-    not (Y = Z),
-    not_in Subst Z.
-
+type concat_bindings  list binding -> list binding -> list binding -> prop.
 concat_bindings [] Subst2 Subst2.
 concat_bindings (bind X Y :: Subst1) Subst2 (bind X Y :: Subst3) :-
     concat_bindings Subst1 Subst2 Subst3.
@@ -319,7 +297,8 @@ rigid_in_clause X Path (arr P _) :-
     rigid_in_pat X Path P.
 
 type rigid_in_pat       tm -> value_path -> pat -> prop.
-rigid_in_pat X here (pnom X) :- nom X.
+rigid_in_pat X here (pnom X).
+rigid_in_pat X here (pvar X).
 rigid_in_pat X (under_cons C N Path) (pvariant C Ps) :-
     in_list P N Ps,
     rigid_in_pat X Path P.
@@ -330,7 +309,7 @@ rigid_in_pat X (under_arobase Path Y) (parobase P Y) :-
     rigid_in_pat X Path P.
 
 type rigid_in_val      tm -> value_path -> tm -> prop.
-rigid_in_val X here X :- nom X.
+rigid_in_val X here X.
 rigid_in_val X (under_cons C N Path) (variant C Vs) :-
     in_list V N Vs,
     rigid_in_val X Path V.
