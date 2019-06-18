@@ -1,0 +1,132 @@
+(* -*- mode: tuareg -*- *)
+
+type tm =
+  | Abs of tm => tm
+  | App of tm * tm
+;;
+
+type sem =
+  (* function (should be unit but not yet supported) *)
+  | L of (int -> sem) -> (tm => (neu => sem))
+  (* neutral *)
+  | N of neu
+;;
+
+type neu =
+  (* variables are nominals *)
+  (* neutral appn *)
+  | A of neu * sem
+;;
+
+L (fun v -> X\ Y\ N Y);;
+
+(* reify sem -> tm *)
+let rec assoc x l =
+    match l with
+    | ((y, a)::l) -> if x = y then a
+        else assoc x l
+    | _ -> failwith "not found"
+;;
+
+let rec reify ctx s =
+    match s with
+    | L f ->
+        print "RL"; Abs(X\
+        new Y in reify ((Y, X)::ctx) ((f (fun i -> N Y)) @ X Y))
+    | N n -> print "RN"; reifyn ctx n
+and reifyn ctx n =
+    match n with
+    | nab Y in Y -> print "RY"; assoc Y ctx
+    | A (n, s) -> print "RA"; App (reifyn ctx n, reify ctx s)
+  ;;
+
+let rec evals ctx env term =
+    match (env, term) with
+    | nab X in ([], X)              -> 
+        print "E[]X"; N (assoc X ctx)
+    | nab X in ((X, v)::env, X)     -> 
+        print "EX";v 0 (* diff *) (* need unit *)
+    | nab X Y in ((X, v)::env, Y)   -> print "EXY"; evals ctx env Y
+    | (env, Abs(t))                 ->
+        print "EAbs";
+        L (fun v ->  X\ Y\ print "inL"; 
+        let tmp =  t @ X in
+        let tmp1 = (X, Y)::ctx in 
+        let tmp2 = (X,v)::env in 
+        print "inLAfterTmp";
+        evals tmp1 tmp2 tmp)
+    | (env, App(t1, t2))            ->
+        print "EApp";
+        (match evals ctx env t1 with
+        | L f -> 
+        print "EAppL";
+        new X in new Y in  
+        let t = evals ctx env t2 in
+        print "EAppLAfterLet";
+        let ftmp = f (fun i -> t) in
+        print "EAppLAfterLetFtmp";
+        (ftmp) @ X Y
+        | N n -> 
+        print "EAppN";N (A (n, evals ctx env t2)))
+    | _ -> print "matchFailure"; failwith ""
+;;
+
+let eval t = evals [] [] t;;
+let norm t = reify [] (eval t);;
+
+norm (Abs(X\Abs(Y\App(Y, X))));;
+norm (Abs(X\Abs(Y\App(Abs(X\ X), Y))));;
+eval (App(Abs(X\ Abs(Y\X)), Abs(X\ X)));;
+(*norm (App(Abs(Z\ App(Z, Z)), Abs(X\X)));;*)
+
+(*)
+norm  (App(App(Abs(X\Abs(Y\Abs(Z\App(App(X,Z),App(Y,Z))))),
+              Abs(X\Abs(Y\X))),
+          Abs(X\Abs(Y\X))));;*)
+(*)
+
+reify [] (L(fun v ->new X in new Y in L(fun v2 ->  new X2 in new Y2 in v 0)));;
+
+let test =L ( fun v -> print "inL";  new X in new Y in
+    L (fun v2 -> print "inL2";  new X2 in new Y2 in
+    evals ((X2, Y2)::(X, Y)::[]) ((X,v)::[]) X));;
+    
+let test2 =L ( fun v -> new X in new Y in
+    L (fun v2 -> new X2 in new Y2 in
+    evals ((X2, Y2)::(X, Y)::[]) ((X2, v2)::(X,v)::[]) X));;
+
+reify [] test;;
+
+*)
+
+
+
+(*reify [] (L(fun v -> new X in new Y in 
+  L(fun v2 ->  evals ([]) ((X,v)::[]) (X))));; *)
+(*reify [] (L(fun v -> new X in new Y in 
+  L(fun v2 ->  new X2 in new Y2 in evals ((X2,Y2)::(X, Y)::[]) ((X2,v2)::(X,v)::[]) (X))));;*)
+(*ok reify [] (L (fun v -> L(fun v2 -> v 0)));;*)
+(*)
+reify [] ( L (fun v -> new X in new Y in evals ((Y, X)::[]) ((X,v)::[]) (X)));;*)
+(*norm (App(Abs(X\X), Abs(X\X)));;*)
+
+
+
+(*norm (Abs(X\X));;*)
+(*)
+reify [] (L (fun v -> v 0));;
+reify [] (L (fun v -> L (fun v -> v 0)));;
+Abs(X\ new Y in reify ((Y, X)::[]) (L (fun v -> L (fun v -> (N (A (Y, L (fun v -> v 0))))))));;
+Abs(X\ new Y in reify ((Y, X)::[])
+                      (N (A (Y, L (fun v -> v 0)))));;
+
+
+norm (Abs(X\X));;
+eval (Abs(X\Abs(Y\ Y)));;
+norm (Abs(X\Abs(Y\ Y)));;
+norm (App(Abs(X\X), Abs(X\X)));;
+norm (Abs(Y\ App(Abs(X\ App(X, X)), Y)));;
+norm (Abs(Y\ App(Abs(X\ App(X, Abs(Z\ Z))), Y)));;
+eval (App(App(Abs(X\Abs(Y\Abs(Z\App(App(X,Z),App(Y,Z))))),
+              Abs(X\Abs(Y\X))),
+          Abs(X\Abs(Y\X))));;*)

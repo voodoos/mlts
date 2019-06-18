@@ -11,7 +11,7 @@ let rec forsome args = match args with
     | (pred,[])     -> false
     | (pred,(x::l)) -> if (pred x) then true else (forsome(pred,l));;
 
-(* Specific first-order terms  *)
+(* First-order terms to unify  *)
 type folterm =
     | A
     | B
@@ -28,10 +28,10 @@ let rec subst x t s = match (x, s) with
      | (x, G(u,v))       -> G (subst x t u, subst x t v);;
 
 (* Unification problems
-    are a list of "disagrement pairs"
+    are lists of "disagreement pairs"
 
     unif =
-        Coerce(disagrementPairs, substitutions)
+        Coerce(disagreementPairs, substitutions)
       | Some(X\ unif @ X)
 *)
 type unif =
@@ -55,8 +55,8 @@ type result =
 ;;
 
 (* The simpl function simplifies a list
-  of disagrement pairs by removing not
-  desagreing pairs or not disagreing heads *)
+  of disagreement pairs by removing not
+  disagreeing pairs or not disagreeing heads *)
 let rec simpl dpairs = match dpairs with
     | [] -> []
     | nab X in (X, X)::(l @ X) -> simpl (l @ X)
@@ -77,7 +77,7 @@ let rigidp term = match term with
            | y          -> true;;
 
 (* occursp (nominal, term) checks if the
-   nominal appears in theterm.
+   nominal appears in the term.
    it's needed by the "variable elimination" phase *)
 let rec occursp p = match p with
   | nab X in (X,X) -> true
@@ -87,7 +87,7 @@ let rec occursp p = match p with
   | nab X in (X,G((t @ X),(s @ X))) -> occursp (X,t @ X) || occursp (X,s @ X)
   | x -> false;;
 
-(* a SIMPLIFIED list of disagrement pairs is failing
+(* a SIMPLIFIED list of disagreement pairs is failing
    if one of the pairs contains two rigid terms
    or if t appears in s or vice versa. *)
 let rec failuredp dpairs = match dpairs with
@@ -109,8 +109,8 @@ let rec endp unif = match unif with
       | d -> false;;
 
 let rec varElimFirst uni =
-    (* This auxilliary replace a var by a term
-        in all disagrement pairs *)
+    (* This auxillary replace a var by a term
+        in all disagreement pairs *)
     let rec aux_subst x t dpairs =
         match dpairs with
         | [] -> []

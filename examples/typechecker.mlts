@@ -1,0 +1,30 @@
+type ty =
+    | Tbase of int
+    | Tarr of ty * ty
+    | Tapp of ty * ty
+;;
+
+type tm = 
+    | Abs of ty * (tm => tm)
+    | App of tm * tm
+;;
+
+let rec assoc n env = match env with
+    | [] -> failwith "unknown var"
+    | nab Y in  (Y, t)::env -> if n = Y then t 
+                                else assoc n env
+;;
+
+let rec typing t env = match t with
+    | nab X in X -> assoc X env
+    | Abs(tX, body) -> new X in 
+                    Tarr(tX, typing (body @ X) ((X, tX)::env))
+    | App(l, r) -> let tl = typing l env in
+                    let tr = typing r env in
+        match tl with
+            | Tarr(tl2, tr2) -> if tl2 = tr then tr2 else failwith "bad app"
+            | _ -> failwith "bad app"
+                            
+;;
+
+typing (Abs(Tbase 0, X\ Abs(Tarr(Tbase 0, Tbase 1), Y\ App(Y, X)))) [];;
