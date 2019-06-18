@@ -1,12 +1,12 @@
 {
   "name": "mlts",
-  "version": "0.1.6",
+  "version": "5.0.4",
   "description": "A simple application to experiment with the MLTS programming language.",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=icon.icns --prune=true --out=release-builds",
-    "package-win": "electron-packager . mlts --overwrite --asar --platform=win32 --arch=ia32 --icon=icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"MLTS\"",
+    "package-win": "electron-packager . mlts --overwrite --asar=true --platform=win32 --arch=ia32 --icon=icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"MLTS\"",
     "package-linux": "electron-packager . mlts --overwrite --asar --platform=linux --arch=x64 --icon=icon.png --prune=true --out=release-builds"
   },
   "repository": {
@@ -29,7 +29,10 @@
   },
   "homepage": "https://github.com/VooDooS/mlts#readme",
   "devDependencies": {
-    "electron": "^2.0.0-beta.3",
-    "electron-packager": "^11.1.0"
+    "electron": "^5.0.4",
+    "electron-packager": "^13.1.1"
+  },
+  "resolutions": {
+    "sshpk": "1.16.1"
   }
 }
