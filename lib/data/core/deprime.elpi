@@ -73,7 +73,7 @@ type fix                 (tm -> tm) -> tm.
 % t3], which is a *single term* containing several subterms. Rows
 % belong to a different syntactic category.
 %
-% (select row) is a term-former to extract an element from a row.
+% (select i row) is a term-former which extracts the i-th term from a row.
 %
 % Rows are useful to definite mutual fixpoints, as a fixpoint on
 % a row.
@@ -220,7 +220,6 @@ eval (letrow RowDef Body) V :-
 eval (tprint T) (lit unit) :- print T.
 eval (failwith T) _V :- print T, fail.
 
-
 eval (match T Cls) V :-
     eval T VT,
     eval_clauses VT Cls V.
@@ -228,54 +227,41 @@ eval (match T Cls) V :-
 type eval_clauses tm -> list clause -> tm -> prop.
 eval_clauses _VL [] _VR :- false.
 eval_clauses VL (Cl::Cls) VR :-
-    if (eval_clause VL [] Cl VR)
-      (true)
-      (eval_clauses VL Cls VR).
+    if (eval_clause VL Cl [] R)
+      (eval R VR)
+      (!, eval_clauses VL Cls VR).
 
-type eval_clause tm -> list binding -> clause -> tm -> prop.
-eval_clause L NomSubst (all RCl) R :-
-  pi x \ pattern_variable x => eval_clause L NomSubst (RCl x) R.
+type eval_clause tm -> clause -> list binding -> tm -> prop.
+eval_clause L (all RCl) Sigma (R Vx) :-
+  pi x \ pattern_variable x =>
+  eval_clause L (RCl x) (Sigma_in x) (R x),
+  extract (Sigma_in x) x Vx Sigma.
 
-eval_clause L NomSubst (nab RCl) R :-
+eval_clause L (nab RCl) Sigma (R Y) :-
   pin x \
   locate_rigid_clause x Y L (RCl x), !,
-  extend_nomsubst x Y NomSubst (NomSubst2 x),
-  eval_clause L (NomSubst2 x) (RCl x) R.
+  subst copy [bind Y x] L (Lx x),
+  eval_clause (Lx x) (RCl x) Sigma (R x).
 
-eval_clause Lout NomSubst (arr Pin Rin) Vout :-
-  matches Lout Pin TmSubst NomSubst,
-  %if debug (print "eval_clause matches" Lout Pin DelayedTmSubst NomSubst) true,
-  concat_bindings TmSubst NomSubst Subst,
-  %if debug (print "eval_clause before-subst" Subst Rin) true,
-  subst Subst Rin Rout,
-  %if debug (print "eval_clause subst" Subst Rin Rout) true,
-  eval Rout Vout,
-  %if debug (print "eval_clause eval" Rout Vout) true,
-  true.
+eval_clause L (arr P R) Sigma R :-
+  matches L P Sigma.
 
-extend_nomsubst X Y NomSubst (bind X Z :: NomSubst) :-
-  normalize Y NomSubst Z,
-  check_injection NomSubst Z.
+type extract   list binding -> tm -> tm -> list binding -> prop.
+extract (bind X Y :: Sigma) X Y Sigma :- !.
+extract (bind X1 Y1 :: Sigma1) X2 Y2 (bind X1 Y1 :: Sigma2) :-
+    not (X1 = X2), !,
+    extract Sigma1 X2 Y2 Sigma2.
 
-check_injection NomSubst Z :-
-    not_in NomSubst Z.
-
-normalize Y NomSubst Z :-
-  (binds NomSubst Y Z, !; Z = Y).
-
-not_in [] _Z.
-not_in (bind _X Y :: Subst) Z :-
-    not (Y = Z),
-    not_in Subst Z.
-
+type concat_bindings  list binding -> list binding -> list binding -> prop.
 concat_bindings [] Subst2 Subst2.
 concat_bindings (bind X Y :: Subst1) Subst2 (bind X Y :: Subst3) :-
     concat_bindings Subst1 Subst2 Subst3.
 
-subst Subst Tin Tout :-
+type subst   (A -> A -> prop) -> list binding -> A -> A -> prop.
+subst Copy Subst Tin Tout :-
     if (current_subst _)
       (print "assert failure in subst", !, false)
-      (current_subst Subst => copy Tin Tout).
+      (current_subst Subst => Copy Tin Tout).
 
 copy_nom N1 N2 :-
     nom N1,
@@ -288,33 +274,63 @@ binds (bind X1 Y1 :: Subst) X2 Y2 :-
        (Y1 = Y2)
        (binds Subst X2 Y2).
 
+kind list_path type.
+type now       list_path.
+type next      list_path -> list_path.
+
+type in_list  A -> list_path -> list A -> prop.
+in_list X now      (Y :: _Ys) :- X = Y.
+in_list X (next P) (_Y :: Ys) :- in_list X P Ys.
+
+kind value_path         type.
+type here               value_path.
+type under_cons         constructor -> list_path -> value_path -> value_path.
+type under_backslash    (tm -> value_path) -> value_path.
+type under_arobase      value_path -> tm -> value_path.
+
+type rigid_in_clause    tm -> value_path -> clause -> prop.
+rigid_in_clause X Path (all Cl) :-
+    piv x \ rigid_in_clause X Path (Cl x).
+rigid_in_clause X Path (nab Cl) :-
+    pin x \ rigid_in_clause X Path (Cl x).
+rigid_in_clause X Path (arr P _) :-
+    rigid_in_pat X Path P.
+
+type rigid_in_pat       tm -> value_path -> pat -> prop.
+rigid_in_pat X here (pnom X).
+rigid_in_pat X here (pvar X).
+rigid_in_pat X (under_cons C N Path) (pvariant C Ps) :-
+    in_list P N Ps,
+    rigid_in_pat X Path P.
+rigid_in_pat X (under_backslash Pathx) (pbackslash Px) :-
+    pin x \ (rigid_in_pat X) (Pathx x) (Px x).
+rigid_in_pat X (under_arobase Path Y) (parobase P Y) :-
+    not (X = Y),
+    rigid_in_pat X Path P.
+
+type rigid_in_val      tm -> value_path -> tm -> prop.
+rigid_in_val X here X.
+rigid_in_val X (under_cons C N Path) (variant C Vs) :-
+    in_list V N Vs,
+    rigid_in_val X Path V.
+rigid_in_val X (under_backslash Pathx) (backslash R) :-
+    pin x \ rigid_in_val X (Pathx x) (R x).
+rigid_in_val X (under_arobase Path Y) (Vx Y) :-
+    rigid_in_val X Path (backslash (x \ Vx x)).
+
 type locate_rigid_clause   tm -> tm -> tm -> clause -> prop.
 type locate_rigid   tm -> tm -> tm -> pat -> prop.
 
 type silence-rigid-occurrence-constraint prop.
-locate_rigid_clause Xin Xout V (arr P _) :-
-    (locate_rigid Xin Xout V P;
+locate_rigid_clause Xin Xout V Cl :-
+    (rigid_in_clause Xin Path Cl, !;
      not silence-rigid-occurrence-constraint, !,
      term_to_string Xin XinStr,
-     term_to_string P PStr,
+     term_to_string Cl PStr,
      ErrMsg is "Nominal " ^ XinStr ^ " has no rigid occurrence in " ^ PStr,
      eval_error ErrMsg,
-     false).
-
-locate_rigid_clause Xin Xout V (all C) :-
-    piv x \ locate_rigid_clause Xin Xout V (C x).
-locate_rigid_clause Xin Xout V (nab C) :-
-    pin x \ locate_rigid_clause Xin Xout V (C x).
-
-locate_rigid _Xin _Xout _V pany :- !, false.
-locate_rigid _Xin _Xout _V (pvar _) :- !, false.
-locate_rigid Xin Xout Xout (pnom Xin).
-locate_rigid Xin Xout (variant C Vs) (pvariant C Ps) :-
-    any2 (locate_rigid Xin Xout) Vs Ps.
-locate_rigid Xin Xout V (parobase P _X) :-
-    locate_rigid Xin Xout V P.
-locate_rigid Xin Xout (backslash Vx) (pbackslash Px) :-
-    undern (locate_rigid Xin Xout) Vx Px.
+     false),
+    rigid_in_val Xout Path V.
 
 type current_subst list binding -> prop.
 type copy         tm -> tm -> prop.
@@ -383,38 +399,36 @@ copy_row (rowfix F1) (rowfix F2) :- under_row copy_row F1 F2.
 copy (letrow R1 B1) (letrow R2 B2) :-
     copy_row R1 R2, under_row copy B1 B2.
 
-% on paper: (v matches p as σ under ρ)
-type matches    tm -> pat -> list binding -> list binding -> prop.
+% on paper: (v matches p as σ)
+type matches    tm -> pat -> list binding -> prop.
 
-matches _ pany [] _NomSubst.
+matches _ pany [].
 
-matches (lit L) (plit L) [] _NomSubst.
+matches (lit L) (plit L) [].
 
-matches X (pvar Y) [bind Y X] _NomSubst :-
+matches X (pvar Y) [bind Y X] :-
     pattern_variable Y.
 
-matches Xout (pnom Xin) [] NomSubst :-
-    nom Xin, nom Xout,
-    (Xout = Xin; binds NomSubst Xin Xout).
+matches X (pnom X) [].
 
-matches (variant C Vs) (pvariant C Ps) TmSubst NomSubst :-
-    matches_all Vs Ps TmSubst NomSubst.
+matches (variant C Vs) (pvariant C Ps) TmSubst :-
+    matches_all Vs Ps TmSubst.
 
-matches_all [] [] [] _NomSubst.
-matches_all (V :: Vs) (P :: Ps) TmSubst_all NomSubst :-
-    matches V P TmSubst NomSubst,
-    matches_all Vs Ps TmSubst_rest NomSubst,
+matches_all [] [] [].
+matches_all (V :: Vs) (P :: Ps) TmSubst_all :-
+    matches V P TmSubst,
+    matches_all Vs Ps TmSubst_rest,
     concat_bindings TmSubst TmSubst_rest TmSubst_all.
 
-matches (backslash V) (pbackslash P) TmSubst NomSubst :-
-    pin x \ matches (V x) (P x) TmSubst NomSubst.
+matches (backslash V) (pbackslash P) TmSubst :-
+    pin x \ matches (V x) (P x) TmSubst.
 
-matches V (parobase P X) TmSubst NomSubst :-
+matches V (parobase P X) TmSubst :-
     nom X,
-    normalize X NomSubst Y,
+    sigma Vx \
     pin x \
-    subst [bind Y x] V (Vx x),
-    matches (backslash (Y \ Vx Y)) P TmSubst NomSubst.
+    subst copy [bind X x] V (Vx x),
+    matches (backslash (x \ Vx x)) P TmSubst.
 
 eval (fix F) V :- eval (F (fix F)) V.
 eval_row (rowfix F) VR :- eval_row (F (rowfix F)) VR.

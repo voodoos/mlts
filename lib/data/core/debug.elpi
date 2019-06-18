@@ -1,7 +1,7 @@
 
 type debug prop.
 type seen-by-eval tm -> prop.
-type seen-by-eval_clause clause -> prop.
+type seen-by-eval_clause tm -> clause -> prop.
 type seen-by-copy tm -> prop.
 type seen-by-copy_clause clause -> prop.
 type seen-by-matches tm -> pat -> prop.
@@ -12,11 +12,13 @@ eval V R :-
     print "eval" V,
     seen-by-eval V => eval V R.
 
-eval_clause L Subst Cl R :-
+eval_clause L Cl Subst R :-
     debug,
-    not (seen-by-eval_clause Cl), !,
-    print "eval_clause" L Subst Cl R,
-    seen-by-eval_clause Cl => eval_clause L Subst Cl R.
+    not (seen-by-eval_clause L Cl), !,
+    print "eval_clause" L Cl Subst R,
+    (seen-by-eval_clause L Cl => eval_clause L Cl Subst R),
+    print "eval_clause out" L Cl Subst R,
+    true.
 
 copy T1 T2 :-
     debug,
@@ -32,24 +34,32 @@ copy_clause Cl1 Cl2 :-
     print "copy_clause" Cl1 Cl2,
     seen-by-copy_clause Cl1 => copy_clause Cl1 Cl2.
 
-matches Vout Pin TmSubst NomSubst :-
+matches Vout Pin TmSubst :-
    debug,
    not (seen-by-matches Vout Pin), !,
-   print "matches" Vout Pin TmSubst NomSubst,
-   (seen-by-matches Vout Pin => matches Vout Pin TmSubst NomSubst),
-   print "matches out" Vout Pin TmSubst NomSubst,
+   print "matches" Vout Pin TmSubst,
+   (seen-by-matches Vout Pin => matches Vout Pin TmSubst),
+   print "matches out" Vout Pin TmSubst,
    true.
 
-type seen-by-locate-rigid tm -> tm -> tm -> pat -> prop.
-locate_rigid Xin Xout V P :-
-   debug,
-   not (seen-by-locate-rigid Xin Xout V P), !,
-   print "locate_rigid" Xin V P,
-   (seen-by-locate-rigid Xin Xout V P => locate_rigid Xin Xout V P).
+type seen-by-rigid_in_clause tm -> clause -> prop.
+rigid_in_clause X Path Cl :-
+    debug,
+    not (seen-by-rigid_in_clause X Cl), !,
+    print "rigid_in_clause" X Path Cl,
+    (seen-by-rigid_in_clause X Cl => rigid_in_clause X Path Cl).
 
-type seen-by-locate-rigid-clause tm -> tm -> tm -> clause -> prop.
-locate_rigid_clause Xin Xout V Cl :-
-   debug,
-   not (seen-by-locate-rigid-clause Xin Xout V Cl), !,
-   print "locate_rigid_clause" Xin V Cl,
-   (seen-by-locate-rigid-clause Xin Xout V Cl => locate_rigid_clause Xin Xout V Cl).
+type seen-by-rigid_in_pat tm -> pat -> prop.
+rigid_in_pat X Path P :-
+    debug,
+    not (seen-by-rigid_in_pat X P), !,
+    print "rigid_in_pat" X Path P,
+    (seen-by-rigid_in_pat X P => rigid_in_pat X Path P).
+
+type seen-by-rigid_in_val tm -> tm -> prop.
+rigid_in_val X Path V :-
+    debug,
+    not (seen-by-rigid_in_val X V), !,
+    print "rigid_in_val" X Path V,
+    (seen-by-rigid_in_val X V => rigid_in_val X Path V),
+    print "rigid_in_val out" X Path V.
