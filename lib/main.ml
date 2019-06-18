@@ -2,7 +2,7 @@ open Js_of_ocaml
 exception Query_failed
 exception No_kernel
 
-let version = "0.3"
+let version = "0.4"
 
 let kernel = ref None
 
@@ -17,6 +17,9 @@ let consoleError ?pref:(p = "") (str : string) =
                                  ^ (escape ("<span style=\"color:red;\">"
                                             ^ p ^ str ^ "</span>"))
                                  ^ "'))"))
+
+let wrapConsole ?pref:(p = "") ?loc str = console str
+let wrapConsoleErr ?pref:(p = "") ?loc str = consoleError str
 
 let compile header code =
   try
@@ -35,7 +38,7 @@ let compile header code =
         [(*"core/datatypes.mod";*)
           "core/progs.elpi";
           "core/run.elpi";] in
-    kernel := Some(Elpi_API.Compile.program header [parsed]);
+    kernel := Some(Elpi_API.Compile.program Elpi_API.Compile.default_flags header [parsed]);
 
     (* We return the lprolog code for reference *)
     Js.string (lpcode), Array.of_list defs, 0, 0, true
@@ -51,7 +54,7 @@ let q_prog  = "Prog"
 let q_value = "Value"
 let q_type  = "Type"
 
-let handle_out res iter _f (out : Elpi_API.Execute.outcome) =
+let handle_out res iter _f (out : unit Elpi_API.Execute.outcome) =
   match out with
   | Success(data) ->
 
@@ -61,13 +64,13 @@ let handle_out res iter _f (out : Elpi_API.Execute.outcome) =
       Elpi_API.Data.StrMap.map (fun term ->
           Elpi_API.Pp.term (Format.str_formatter) term;
           let str = Format.flush_str_formatter () in
-          (* LP strings are surrounded by quotes, we remove them *)
-          let str = String.sub str 1 (String.length str - 2) in
           escape str)
-        data.assignments in
+        data.assignments
+    in
     let get name =
       try Elpi_API.Data.StrMap.find name resp
-      with Not_found -> consoleError ("Assignment for " ^ name ^ " not found"); "error" in
+      with Not_found -> consoleError ("Assignment for " ^ name ^ " not found"); "error"
+    in
     console ("<br> Finished " ^ get q_name ^ ".");
     flush_all ();
     res :=  "{ \"name\": \"" ^ get q_name ^ "\""
@@ -82,7 +85,7 @@ let query prog =
   match !kernel with
     None -> raise No_kernel
   | Some(k) ->
-    let goal = Elpi_API.Parse.goal prog in
+    let goal = Elpi_API.Parse.goal (Elpi_API.Ast.Loc.initial "mlts") prog in
     let goalc = Elpi_API.Compile.query k goal in
     let exec = Elpi_API.Compile.link goalc in
     let res = ref "] }" in
@@ -113,14 +116,14 @@ let _ =
   Data.load ();
 
   (* Initialize Elpi *)
-  let header, _ = Elpi_API.Setup.init ~silent:true [] ~basedir:"" ~builtins:Elpi_builtin.std_builtins in
-  Elpi_API.Setup.set_warn (consoleError ~pref:"[elpi]");
-  Elpi_API.Setup.set_error (consoleError ~pref:"[elpi]");
-  Elpi_API.Setup.set_anomaly (console ~pref:"[elpi]");
-  Elpi_API.Setup.set_type_error (console ~pref:"[elpi]");
+  let header, _ = Elpi_API.Setup.init [] ~basedir:"" ~builtins:Elpi_builtin.std_builtins in
+  Elpi_API.Setup.set_warn (wrapConsoleErr ~pref:"[elpi]");
+  Elpi_API.Setup.set_error (wrapConsoleErr ~pref:"[elpi]");
+  Elpi_API.Setup.set_anomaly (wrapConsole ~pref:"[elpi]");
+  Elpi_API.Setup.set_type_error (wrapConsole ~pref:"[elpi]");
 
   let parsed =  Elpi_API.Parse.program ["core/run.elpi"] in
-  kernel := Some(Elpi_API.Compile.program header [parsed]);
+  kernel := Some(Elpi_API.Compile.program Elpi_API.Compile.default_flags header [parsed]);
 
   (* JS API *)
   Js.export "compile" (fun jstr -> compile header (Js.to_string jstr)) ;

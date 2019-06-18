@@ -9,10 +9,10 @@
 </ul>
 <h2 id="basic-usage">Basic usage</h2>
 <p>You can write code in the left panel and have it evaluated by clicking the <code>Run</code> button or the key combination <code>ctrl+b</code> while the focus is on the editor. If something goes wrong you can stop the execution by clicking <code>Restart kernel</code>.</p>
-<p>When running your code will first be translated to the λProlog abstract syntax. Some static checking happen during this phase. The translation's result (be it an actual translation or an error) will quickly appear on the right, under the <code>λProlog</code> tab.</p>
+<p>When running your code will first be translated to the λProlog abstract syntax. Some static checking happen during this phase. The translation’s result (be it an actual translation or an error) will quickly appear on the right, under the <code>λProlog</code> tab.</p>
 <p>Then the evaluation will start. Result will be shown in the result tab only at the very end of the process. You can witness progress and errors in the <code>Log</code> tab. When results are shown you can click them to quickly locate their position in the source code.</p>
 <h2 id="concrete-syntax">Concrete syntax</h2>
-<p>MLTS' concrete syntax is based on the on of OCaml. A program written in MLTS not using the new constructs <code>nab in</code>, <code>new in</code>, <code>\</code> and <code>=&gt;</code> should compile with the <code>ocamlc</code> compiler.</p>
+<p>MLTS’ concrete syntax is based on the on of OCaml. A program written in MLTS not using the new constructs <code>nab in</code>, <code>new in</code>, <code>\</code> and <code>=&gt;</code> should compile with the <code>ocamlc</code> compiler.</p>
 <ul>
 <li><p>Datatypes can be extended to contain new <em>nominal</em> constants and the <code>new X in body</code> program phrase provides a binding that declares that the nominal <code>X</code> is new within the lexical scope given by <code>body</code>.</p></li>
 <li><p>A new typing constructor <code>=&gt;</code> is used to type bindings within term structures. This constructor is an addition to the already familiar constructor <code>-&gt;</code> used to type functional expressions.</p></li>
@@ -29,10 +29,10 @@
 <li>There is no syntactic sugar for non-empty lists. Use <code>a::b::c::[]</code> instead of <code>[a;b;c]</code>.</li>
 </ul>
 <h2 id="how-it-works">How it works</h2>
-<p>Our prototype interpreter for MLTS is written in λProlog. When you press the &quot;Run&quot; button the MLTS concrete syntax is transpilled to it's λProlog counterpart and <a href="https://github.com/LPCIC/elpi">Elpi</a>, an embeddable λProlog interpreter written in OCaml, runs it.</p>
+<p>Our prototype interpreter for MLTS is written in λProlog. When you press the “Run” button the MLTS concrete syntax is transpilled to it’s λProlog counterpart and <a href="https://github.com/LPCIC/elpi">Elpi</a>, an embeddable λProlog interpreter written in OCaml, runs it.</p>
 <p>All this happens locally in your browser thanks to the js_of_ocaml <a href="https://github.com/ocsigen/js_of_ocaml">js_of_ocaml</a>.</p>
 <h2 id="build-dependencies">Build dependencies</h2>
 <p>Ocaml modules dependency(install them via <code>opam</code>) : <code>menhir elpi js_of_ocaml js_of_ocaml-ppx base64</code></p>
 <h2 id="credits">Credits</h2>
-<p>The &quot;backend&quot; is powered by OCaml, λProlog, Elpi and js_of_ocaml.</p>
+<p>The “backend” is powered by OCaml, λProlog, Elpi and js_of_ocaml.</p>
 <p>The frontend uses a standard mix of Bootsrap and Jquery but also the Ace code editor, highlight-js for additional syntactic coloring and open-iconic for icons.</p>
