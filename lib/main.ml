@@ -34,11 +34,11 @@ let compile header code =
 
     (* recompiling lprolog code *)
     let parsed =
-      Elpi_API.Parse.program
+      Elpi.API.Parse.program
         [(*"core/datatypes.mod";*)
           "core/progs.elpi";
           "core/run.elpi";] in
-    kernel := Some(Elpi_API.Compile.program Elpi_API.Compile.default_flags header [parsed]);
+    kernel := Some(Elpi.API.Compile.program Elpi.API.Compile.default_flags header [parsed]);
 
     (* We return the lprolog code for reference *)
     Js.string (lpcode), Array.of_list defs, 0, 0, true
@@ -54,21 +54,21 @@ let q_prog  = "Prog"
 let q_value = "Value"
 let q_type  = "Type"
 
-let handle_out res iter _f (out : unit Elpi_API.Execute.outcome) =
+let handle_out res iter _f (out : unit Elpi.API.Execute.outcome) =
   match out with
   | Success(data) ->
 
     (* Elpi returns answers as a map from query variable names to terms *)
     (* We transform it into a map from names to strings *)
     let resp =
-      Elpi_API.Data.StrMap.map (fun term ->
-          Elpi_API.Pp.term (Format.str_formatter) term;
+      Elpi.API.Data.StrMap.map (fun term ->
+          Elpi.API.Pp.term (data.pp_ctx) (Format.str_formatter) term;
           let str = Format.flush_str_formatter () in
           escape str)
         data.assignments
     in
     let get name =
-      try Elpi_API.Data.StrMap.find name resp
+      try Elpi.API.Data.StrMap.find name resp
       with Not_found -> consoleError ("Assignment for " ^ name ^ " not found"); "error"
     in
     console ("<br> Finished " ^ get q_name ^ ".");
@@ -85,12 +85,12 @@ let query prog =
   match !kernel with
     None -> raise No_kernel
   | Some(k) ->
-    let goal = Elpi_API.Parse.goal (Elpi_API.Ast.Loc.initial "mlts") prog in
-    let goalc = Elpi_API.Compile.query k goal in
-    let exec = Elpi_API.Compile.link goalc in
+    let goal = Elpi.API.Parse.goal (Elpi.API.Ast.Loc.initial "mlts") prog in
+    let goalc = Elpi.API.Compile.query k goal in
+    let exec = Elpi.API.Compile.link goalc in
     let res = ref "] }" in
     let iter = ref 0 in
-    Elpi_API.Execute.loop exec
+    Elpi.API.Execute.loop exec
       ~more:(fun () -> true)
       ~pp:(handle_out res iter);
 
@@ -116,14 +116,14 @@ let _ =
   Data.load ();
 
   (* Initialize Elpi *)
-  let header, _ = Elpi_API.Setup.init [] ~basedir:"" ~builtins:Elpi_builtin.std_builtins in
-  Elpi_API.Setup.set_warn (wrapConsoleErr ~pref:"[elpi]");
-  Elpi_API.Setup.set_error (wrapConsoleErr ~pref:"[elpi]");
-  Elpi_API.Setup.set_anomaly (wrapConsole ~pref:"[elpi]");
-  Elpi_API.Setup.set_type_error (wrapConsole ~pref:"[elpi]");
+  let header, _ = Elpi.API.Setup.init [] ~basedir:"" ~builtins:Elpi.Builtin.std_builtins in
+  Elpi.API.Setup.set_warn (wrapConsoleErr ~pref:"[elpi]");
+  Elpi.API.Setup.set_error (wrapConsoleErr ~pref:"[elpi]");
+  Elpi.API.Setup.set_anomaly (wrapConsole ~pref:"[elpi]");
+  Elpi.API.Setup.set_type_error (wrapConsole ~pref:"[elpi]");
 
-  let parsed =  Elpi_API.Parse.program ["core/run.elpi"] in
-  kernel := Some(Elpi_API.Compile.program Elpi_API.Compile.default_flags header [parsed]);
+  let parsed =  Elpi.API.Parse.program ["core/run.elpi"] in
+  kernel := Some(Elpi.API.Compile.program Elpi.API.Compile.default_flags header [parsed]);
 
   (* JS API *)
   Js.export "compile" (fun jstr -> compile header (Js.to_string jstr)) ;
