@@ -4,5 +4,6 @@ val parse_and_translate : string ->
 
 val pp_prog : Format.formatter -> PrologAst.clause list -> unit
 
+(* Parses, translates and print the resulting AST *)
 val prologify : string -> ( string * (string * int) list)
  

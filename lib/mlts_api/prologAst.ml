@@ -1,3 +1,6 @@
+(* This module contians function taht builds
+correct prolog asts *)
+
 type global_name = string
 type local_name = string * int
 type name =
@@ -74,7 +77,7 @@ let make_bool ?(is_pat = false) b =
 let make_string ?(is_pat = false) s =
   make_lit is_pat (make_app "s" [Lit (String s)])
 
-let make_unit ?(is_pat = false) i =
+let make_unit ?(is_pat = false) _i =
   make_lit is_pat (make_app "unit" [])
 
 let make_global n =
@@ -85,11 +88,11 @@ let make_local n i =
 
 let make_localp p = make_local (fst p) (snd p)
 
-let make_select name (mutual_name, mutual_n) index =
+let make_select _name (mutual_name, mutual_n) index =
   make_app "select"
     [Lit (Int index); App(Local(mutual_name, mutual_n), [])]
 
-let make_select_g name mutual_name index =
+let make_select_g _name mutual_name index =
   make_app "select"
     [Lit (Int index); App(Global(mutual_name), [])]
 
@@ -186,6 +189,6 @@ let make_constr ?(pattern=false) name tms =
     (if pattern then "pvariant" else "variant")
     [make_global name; List tms]
 
-let make_row name lambdas projs =
+let make_row name lambdas _projs =
   make_app "rowfix"
     [Abs(name, make_app "row" [List(lambdas)])]

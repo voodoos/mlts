@@ -2,10 +2,13 @@ open Js_of_ocaml
 exception Query_failed
 exception No_kernel
 
+(* TryMLTS version *)
 let version = "0.4"
 
+(* Reference to the Elpi kernel *)
 let kernel = ref None
 
+(* Tools for printing to the browser console *)
 let escape s =
   Js.to_string (Js.escape (Js.string s))
 
@@ -21,6 +24,7 @@ let consoleError ?pref:(p = "") (str : string) =
 let wrapConsole ?pref:(p = "") ?loc str = console str
 let wrapConsoleErr ?pref:(p = "") ?loc str = consoleError str
 
+(* Translate and compile MLTS code *)
 let compile header code =
   try
     (* First mlts => lprolog *)
@@ -29,15 +33,14 @@ let compile header code =
 
     (* updating the pseudo files *)
     Sys_js.update_file ~name:"core/progs.elpi" ~content:lpcode;
-    (*Sys_js.update_file "core/datatypes.sig" typsig;
-      Sys_js.update_file "core/datatypes.mod" typmod;*)
 
     (* recompiling lprolog code *)
     let parsed =
       Elpi.API.Parse.program
-        [(*"core/datatypes.mod";*)
+        [
           "core/progs.elpi";
-          "core/run.elpi";] in
+          "core/run.elpi";
+        ] in
     kernel := Some(Elpi.API.Compile.program Elpi.API.Compile.default_flags header [parsed]);
 
     (* We return the lprolog code for reference *)
@@ -54,6 +57,7 @@ let q_prog  = "Prog"
 let q_value = "Value"
 let q_type  = "Type"
 
+(* Handler for Elpi output *)
 let handle_out res iter _f (out : unit Elpi.API.Execute.outcome) =
   match out with
   | Success(data) ->
@@ -112,7 +116,7 @@ let _ =
 
   ignore (Js.Unsafe.eval_string ("sendVersion('" ^ (version) ^"')"));
 
-  (* Loading data folder in the pseudo-filesystem *)
+  (* Load data folder in the pseudo-filesystem *)
   Data.load ();
 
   (* Initialize Elpi *)

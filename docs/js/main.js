@@ -39,9 +39,6 @@ $(function () {
 $(document).ready(function(){ 
   $.get("readme.html", function(data) {
       $("#readme").html(data);
-      /*$('#readme pre').each(function(i, block) {
-	    hljs.highlightBlock(block);
-	});*/
   });
     
     load(window.location.hash.substring(1));
@@ -104,14 +101,6 @@ function useFile(corr, instr, name) {
     else {
 	res = "(* Failed to load file "  + name + "*)";
     }
-    /*$.ajax({
-      url: name,//"examples/" + name + ".mlts",
-      success: function (result) {
-      if (result.isOk == false) res = (result.message);
-      else res = ("(* unknown file " + name + " *)");
-      },
-      async: false
-      });*/
     console.log(res);
     return res
 }
@@ -153,11 +142,7 @@ function onMessageCB(event) {
 	unlock();
     }
     else if(event.data.type == 'log') {
-	$('#log')
-	    //.append("[")
-	    //.append((new Date()).toLocaleTimeString())
-	    //.append("]")
-	    .append((event.data.text).replace(/arobase/g, '@'));
+	$('#log').append((event.data.text).replace(/arobase/g, '@'));
     }
     else if (event.data.type == 'error') {
 	unlock();
@@ -207,7 +192,6 @@ function run() {
     lock('Running');
     var mltsCode = editor.getValue();
     mltsCode = mltsCode.replace(/(use "(.*)";;)/g, useFile);
-    //console.log(mltsCode);
     elpi.postMessage(mltsCode);
 }
 

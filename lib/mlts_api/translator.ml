@@ -1,11 +1,12 @@
 open MltsAst
 
-module P = PrologAst
-
-exception TranslatorError of string * (Lexing.position option)
-exception StaticCheckError of string * (Lexing.position option)
+module P = PrologAst 
 
 type def = { name: string; pos: Lexing.position }
+
+(* Exceptions *)
+exception TranslatorError of string * (Lexing.position option)
+exception StaticCheckError of string * (Lexing.position option)
 
 let strip name = String.sub name 2 (String.length name - 2)
 
@@ -33,12 +34,12 @@ type context = {
   mutable global_vars : string list;
   mutable global_constrs : string list;
   mutable global_mutuals : (string * (string * int)) list;
-  mutable actual_def: def list;
+  mutable actual_def: def list; (* Used to track error position *)
   mutable wanabeeRigidNoms: P.local_name list;
 }
 let incr_expr c = c.nb_expr <- c.nb_expr + 1
 
-(* (local) Environments *)
+(* (local) Environments and tools *)
 type env = {
   local_vars: P.local_name list;
   free_vars:  P.global_name list;
@@ -63,7 +64,7 @@ let add_nom_to_env v env =
 let add_mutual_to_env v row n env =
   let res = (v, row, n) in
   match List.find_opt
-          (fun ((n, _, _), i) -> n = v)
+          (fun ((n, _, _), _i) -> n = v)
           env.local_rows
   with
   | None -> let res = (res, 0) in
@@ -88,9 +89,15 @@ let string_of_env env =
                    )
 let print_env env = print_endline (string_of_env env)
 
-(* env are used to pass is used to carry different kind of information. Some, such as local variables should be erased when leaving scope, some like the list of "free variables" needed by an expr should not.
+(* env are used used to carry different kind of information. Some, such as local
+variables should be erased when leaving scope, some like the list of "free
+variables" needed by an expr should not.
 
-   This may be bad design (todo ?) but for now the revert_locals function can be use to strip newly declared locals using an "Original" environement without the new locals and the  "deeper" env with maybe new locals and infos *)
+This may be bad design (todo split envs in two ?) but for now the revert_locals
+function can be use to strip newly declared locals using an "Original"
+environement without the new locals and the  "deeper" env with maybe new locals
+and informations *)
+
 let revert_locals envBefore envAfter = {
   envAfter with local_vars = envBefore.local_vars
 }
@@ -113,13 +120,15 @@ type tdef = { kind: k;  name: string; body: P.term; env: env }
 
 (* PROGRAM TRANSLATION *)
 let mlts_to_prolog p =
-  let ctx = { nb_expr = 0;
-              global_vars = ["list_hd"; "list_tl"; "print"; "failwith"];
-              global_constrs = ["pair"; "list_empty"; "list_cons"];
-              global_mutuals = [];
-              actual_def = [];
-              wanabeeRigidNoms = []
-            }
+  let ctx = { 
+    nb_expr = 0;
+    (* Builtin functions *)
+    global_vars = ["list_hd"; "list_tl"; "print"; "failwith"];
+    global_constrs = ["pair"; "list_empty"; "list_cons"];
+    global_mutuals = [];
+    actual_def = [];
+    wanabeeRigidNoms = []
+  }
   in
   let add_global v = ctx.global_vars <- v::ctx.global_vars in
   let add_constr c = ctx.global_constrs <- c::ctx.global_constrs in
@@ -202,7 +211,7 @@ let mlts_to_prolog p =
         snd row_local_name in
 
       (* Adding all mutually defined functions to env *)
-      let local_names, selects, env, _ = List.fold_left
+      let _local_names, selects, env, _ = List.fold_left
           (fun (locals, selects, env, i) (LBVal(name, _, _)) ->
              let ln, env = add_mutual_to_env name row_local_name i env in
              let select = P.make_select name cap_row_local_name i in
@@ -212,7 +221,7 @@ let mlts_to_prolog p =
 
       (* A row is a list of lambda expressions and a matching sequence of projections *)
       let lambdas, projs, env = List.fold_left
-          (fun (l, p, env) (LBVal(name, params, expr)) ->
+          (fun (l, _p, env) (LBVal(_name, params, expr)) ->
              let body, env = make_lam env params expr in
              body::l, [](*todo*), env)
           ([],[],env) mutuals in
@@ -222,7 +231,7 @@ let mlts_to_prolog p =
 
       (* Creating let-expressions for all mutual functions
           and adding them to the global env *)
-      let lets = List.map (fun (name, row_name, select) ->
+      let tlets = List.map (fun (name, row_name, select) ->
           add_global name;
           P.Definition({
               name = "prog";
@@ -238,10 +247,7 @@ let mlts_to_prolog p =
            args = [P.Lit(P.String(row_name));
                    P.make_row row_local_name (List.rev lambdas) projs ];
            body = P.make_deps (env.free_vars);
-         }))::lets
-
-
-    (*failwith "Mutual rec not implemented"*)
+         }))::tlets
 
     | DType(name, decls) ->
       set_actual_def ctx name pos;
@@ -252,7 +258,7 @@ let mlts_to_prolog p =
           | Sum(_, _) as s -> P.List (List.rev (list_of_sum s))
           | Arrow(ty1, ty2) -> P.make_app "arr" [t_typ ty1; t_typ ty2]
           | Bind(ty1, ty2) -> P.make_app "bigarr" [t_typ ty1; t_typ ty2]
-          | List(ty) -> P.make_app "t_list" [t_typ ty](*failwith "List (type) not implemented"*)
+          | List(ty) -> P.make_app "t_list" [t_typ ty]
         in
         match ty with
         | Sum(ty1, ty2) -> (t_typ ty2)::(list_of_sum ty1)
@@ -307,9 +313,9 @@ let mlts_to_prolog p =
     | ELetRecin(LBVal(name, params, e), body) ->
       (*let name = ((fst ln) ^ "_" ^ (string_of_int (snd ln))) in*)
       let ln, env = add_to_env name envIn in
-      let letbody, env = make_lam env params e in
+      let tletbody, env = make_lam env params e in
       let body, env = t_expr env body in
-      P.make_letrecin ln letbody body, revert_locals envIn env
+      P.make_letrecin ln tletbody body, revert_locals envIn env
 
     | EMatch(e, rules) ->
       let e, env = t_expr envIn e in
@@ -515,6 +521,7 @@ let mlts_to_prolog p =
     let tm, env = aux envInitial params e in
     tm, revert_locals envInitial env
   in
+  
   let make_death_list (l : def list) : (string * int) list =
     List.map (fun (d : def) -> (d.name, d.pos.pos_lnum)) l
   in

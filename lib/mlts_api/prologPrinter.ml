@@ -1,5 +1,6 @@
-open Format
 
+(* Pretty printer for the prolog AST *)
+open Format
 open PrologAst
 
 let pp_global_name ppf s = fprintf ppf "%s" s

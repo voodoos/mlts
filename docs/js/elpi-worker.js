@@ -1,7 +1,10 @@
-
+/**
+ * Code for the Elpi Worker
+ * - works in separate thread
+ * - load mlts.js to work with elpi
+ */
 
 console.log('[Elpi-worker] ' + "Starting Elpi...");
-//importScripts('mlts.runtime.js');
 importScripts('mlts.js');
 console.log('[Elpi-worker] ' + "Elpi started");
 
