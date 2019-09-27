@@ -1,3 +1,8 @@
+(* 
+Based on the official OCaml syntax:
+https://caml.inria.fr/pub/docs/manual-ocaml/language.html
+*)
+
 type prog = module_item list
 
 and module_item =

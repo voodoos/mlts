@@ -1,5 +1,10 @@
 open MltsAst
 
+(* Translator from the concrete syntax AST
+       (see mltsAST.ml)
+to the lProlog abstract syntax AST 
+        (see prologAst.ml) *)
+
 module P = PrologAst 
 
 type def = { name: string; pos: Lexing.position }

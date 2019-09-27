@@ -1,5 +1,7 @@
 open PrologAst
 
+(* AST for MLTS programs written
+uising the lProlog abstract syntax *)
 let local_name = ("toto", 2)
 let global_name = "tata"
 

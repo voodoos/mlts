@@ -8,7 +8,7 @@ let version = "0.4"
 (* Reference to the Elpi kernel *)
 let kernel = ref None
 
-(* Tools for printing to the browser console *)
+(* Tools for printing to the browser's console *)
 let escape s =
   Js.to_string (Js.escape (Js.string s))
 
