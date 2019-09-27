@@ -3,7 +3,7 @@ exception Query_failed
 exception No_kernel
 
 (* TryMLTS version *)
-let version = "0.4"
+let version = "0.5"
 
 (* Reference to the Elpi kernel *)
 let kernel = ref None
