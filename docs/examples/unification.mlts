@@ -178,4 +178,3 @@ let res3 = unify unif3;;
 let res4 = unify unif4;;
 let res5 = unify unif5;;
 let res6 = unify unif6;;
-let res7 = unify unif7;;
